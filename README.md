@@ -10,10 +10,10 @@ Contributors / Licensing
 
 Authors:
     
-* Firstname Lastname
-* Firstname Lastname
-* Firstname Lastname
-* Firstname Lastname
-* Firstname Lastnmae
+* Huey Gonzales
+* Daniel Guo
+* Mark Maligalig
+* Andrew Rosario
+* Jingtong Yang
 
-Generally everything is LICENSE'D under the ______________.
+Generally everything is LICENSE'D under the Apache License 2.0.
