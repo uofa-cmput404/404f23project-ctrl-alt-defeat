@@ -14,6 +14,5 @@ def init_mongo():
         print("Connection successful")
     except Exception as e:
         print(e)
-    
-    # app.mongo = client.socialdist
+
     return client

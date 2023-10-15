@@ -1,7 +1,5 @@
-from flask import render_template
 from app.posts import bp
 from bson.json_util import dumps, loads 
-from flask import jsonify
 from app.db import init_mongo
 
 @bp.route('/')
