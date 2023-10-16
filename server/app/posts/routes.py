@@ -1,33 +1,23 @@
 from app.posts import bp
-from bson.json_util import dumps, loads 
-from app.db import init_mongo
+import json
+from app.db import get_db_connection
 
 @bp.route('/')
 def index():
     data = ""
     try:
-        client = init_mongo()
-
-        # Ask for the socialdist database
-        db = client['socialdist']
+        conn = get_db_connection()
         
-        # Get the "posts" collection
-        collection = db['post']
+        posts = conn.execute('SELECT * FROM posts').fetchall()                        
 
-        # Grab all posts from the database
-        cursor = collection.find()
-        list_cur = list(cursor) 
+        conn.commit()
+        conn.close()
 
-        # Converting to the JSON 
-        json_data = dumps(list_cur, indent = 2)  
-        
-        cursor.close() # Close cursor when done
-        client.close() # Close client when done
-
-        data = json_data
+        data = json.dumps([dict(i) for i in posts])
     
     except Exception as e:
-        data = e
+        print(e)
+        data = str(e)
 
     return data # data
 

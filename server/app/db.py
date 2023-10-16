@@ -1,18 +1,6 @@
-from pymongo import MongoClient
-import os
-from dotenv import load_dotenv
-import os
+import sqlite3
 
-load_dotenv()
-
-def init_mongo():
-
-    uri = os.environ.get('URI')
-
-    try:
-        client = MongoClient(uri)
-        print("Connection successful")
-    except Exception as e:
-        print(e)
-
-    return client
+def get_db_connection():
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    return conn

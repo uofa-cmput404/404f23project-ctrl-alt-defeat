@@ -1,6 +1,4 @@
-from pymongo import MongoClient
 from flask import Flask
-from app.db import init_mongo
 
 def create_app():
     app = Flask(__name__)
@@ -16,14 +14,6 @@ def create_app():
 
     from app.sample import bp as sample_bp
     app.register_blueprint(sample_bp, url_prefix='/sample') 
-
-    try: 
-        client = init_mongo()        
-        client.admin.command('ping')
-        print("Successfully connected to MongoDB")
-        client.close()
-    except Exception as e:
-        print(e)
 
     @app.route('/test/')
     def test():
