@@ -3,7 +3,8 @@ DROP TABLE IF EXISTS authors;
 DROP TABLE IF EXISTS requestors;
 DROP TABLE IF EXISTS admins;
 DROP TABLE IF EXISTS image_post;
-DROP TABLE IF EXISTS friendship;
+DROP TABLE IF EXISTS friends;
+DROP TABLE IF EXISTS friend_requests;
 DROP TABLE IF EXISTS likes;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS shares;
@@ -15,9 +16,9 @@ CREATE TABLE posts (
     title TEXT NOT NULL,
     content_type TEXT NOT NULL DEFAULT "text/plain",
     content TEXT NOT NULL,
-    image_id TEXT,
+    img_id TEXT,
     visibility TEXT NOT NULL DEFAULT "public",
-    FOREIGN KEY (image_id) REFERENCES image_post(image_id)
+    FOREIGN KEY (img_id) REFERENCES image_post(img_id) ON DELETE SET NULL -- Allow NULL values
 );
 
 
@@ -48,7 +49,6 @@ CREATE TABLE image_post (
     FOREIGN KEY (author_id) REFERENCES authors(author_id)
 );
 
--- if both AB, BA in friends, AB are true friends
 CREATE TABLE friends (
     author_followee TEXT NOT NULL,
     author_following TEXT NOT NULL,
@@ -56,12 +56,11 @@ CREATE TABLE friends (
     FOREIGN KEY (author_following) REFERENCES authors(author_id)
 );
 
--- if accepted, delete from friend_requests, add to friends
 CREATE TABLE friend_requests (
     author_send TEXT NOT NULL,
     author_receive TEXT NOT NULL,
     FOREIGN KEY (author_send) REFERENCES authors(author_id)
-    FOREIGN KEY (author_receive) REFERENCES authors(author_id),
+    FOREIGN KEY (author_receive) REFERENCES authors(author_id)
 );
 
 
