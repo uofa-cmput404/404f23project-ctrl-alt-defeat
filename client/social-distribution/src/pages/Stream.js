@@ -8,7 +8,7 @@ const postsUrl = 'http://127.0.0.1:5000/posts/'
 export default function Stream() {
 
     // const username = "philiponions" // temporary username
-
+    const navigate = useNavigate();
 
     const [postsLists, setPostsLists] = useState([])
     const fetchData = async () => {
@@ -43,7 +43,9 @@ export default function Stream() {
         <h1>Streams</h1>
         <button onClick={goToManagePosts}>Manage my posts</button>
         <div>
-            <PostsList postsLists={postsLists}/>
+            {
+                postsLists.length !== 0 ? <PostsList postsLists={postsLists}/> : <div>There are no posts</div>
+            }
         </div>
     </div>
   )

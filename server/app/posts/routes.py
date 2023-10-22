@@ -4,6 +4,33 @@ from app.db import get_db_connection
 from flask import request
 from random import randrange
 
+
+@bp.route("/visibility", methods=["POST"])
+def change_visibility():
+    request_data = request.get_json()
+    post_id = request_data['post_id']
+    visibility = request_data['visibility']
+    
+    data = ""
+
+    try:
+        # print(post_id, privacy)
+        conn = get_db_connection()
+        query = "UPDATE posts " \
+                "SET visibility = ? " \
+                "WHERE post_id = ? "
+        conn.execute(query, (visibility, post_id))
+        
+        conn.commit()
+        conn.close()
+        
+    except Exception as e:
+        print("Something went wrong")
+        print(e)
+        data = str(e)
+
+    return data # data
+
 @bp.route("/delete", methods=["POST"])
 def delete_post():
     request_data = request.get_json()
@@ -13,8 +40,8 @@ def delete_post():
     try:
         conn = get_db_connection()
         query = f"DELETE FROM posts " \
-                f"WHERE post_id = '{post_id}'"
-        conn.execute(query)
+                f"WHERE post_id = ? "
+        conn.execute(query, (post_id, ))
         
         conn.commit()
         conn.close()
@@ -38,11 +65,11 @@ def get_my_posts():
         conn = get_db_connection()
         
         # Get all the posts from people who I'm following + posts who are public
-        query = f"SELECT * FROM posts " \
-                f"WHERE posts.author_id = '{author_id}' " \
-                f"ORDER by date_posted DESC"
+        query = "SELECT * FROM posts " \
+                "WHERE posts.author_id = ? " \
+                "ORDER by date_posted DESC"
         
-        posts = conn.execute(query).fetchall()                                
+        posts = conn.execute(query, (author_id, )).fetchall()                                
         print(posts)
         conn.commit()
         conn.close()
@@ -67,15 +94,20 @@ def index():
                 
         conn = get_db_connection()
         
-        # Get all the posts from people who I'm following + posts who are public
-        query = "SELECT username, post_id, date_posted, title, content_type, content, img_id, visibility FROM posts " \
+        # Get all the posts from people who I'm following + posts who are public + posts that are mine
+        # Do not include posts that I'm restricted from
+        query = "SELECT username, posts.post_id, date_posted, title, content_type, content, img_id, visibility " \
+                "FROM posts " \
                 "INNER JOIN authors ON posts.author_id = authors.author_id " \
-                "WHERE posts.author_id in " \
-                "(SELECT author_following FROM friends WHERE author_followee = ?) " \
-                "OR visibility = 'public' " \
-                "ORDER by date_posted DESC"
+                "LEFT JOIN post_restrictions pr ON posts.post_id = pr.post_id " \
+                "WHERE " \
+                    "(posts.author_id IN (SELECT author_following FROM friends WHERE author_followee = 1) " \
+                    "OR posts.visibility = 'public' " \
+                    "OR posts.author_id = ?) " \
+                    "AND (pr.post_id IS NULL OR pr.restricted_author_id != ?) " \
+                "ORDER BY date_posted DESC; " 
         
-        posts = conn.execute(query, (author_id, )).fetchall()                                
+        posts = conn.execute(query, (author_id, author_id)).fetchall()                                
         conn.commit()
         conn.close()
 
