@@ -3,7 +3,51 @@ import json
 from app.db import get_db_connection
 from flask import request
 from random import randrange
+import sqlite3
 
+@bp.route("/restrict", methods=["POST"])
+def restrict_user():
+    request_data = request.get_json()
+    post_id = request_data['post_id']
+    username = request_data['username']
+    
+    data = ""
+
+    try:
+        # print(post_id, privacy)
+        conn = get_db_connection()        
+        
+        # Grab the username first
+        query = "SELECT author_id FROM authors WHERE username = ?"
+
+        # Use a parameterized query to insert values safely
+        result = conn.execute(query,
+                    (username, ))
+
+        author_id = [dict(i) for i in result][0]['author_id']
+        
+        query = "INSERT INTO post_restrictions (post_id, restricted_author_id) " \
+                    "VALUES (?, ?)"
+        
+        # # Use a parameterized query to insert values safely
+        conn.execute(query,
+                    (post_id, author_id))
+
+        conn.commit()
+        conn.close()
+
+        data = "success"
+    except sqlite3.IntegrityError as e:
+        # Handle the UNIQUE constraint failure
+        print(f"UNIQUE constraint failed: {e}")
+        data = "duplicate"
+        # You can log the error, notify the user, or take other appropriate actions
+        
+    except Exception as e:        
+        print(e)
+        data = "error"
+
+    return data # data
 
 @bp.route("/visibility", methods=["POST"])
 def change_visibility():

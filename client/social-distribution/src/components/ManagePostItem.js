@@ -29,10 +29,16 @@ function ManagePostItem(props) {
         }
     }
 
-    function selectPost() {
+    function selectVisibility() {
         props.setOpenVisibilityDialog(true);
         props.setPostSelected(props.item.post_id);
-        console.log(props.item.post_id);
+        // console.log(props.item.post_id);
+    }
+
+    function selectRestriction() {
+        props.setRestrictionsDialog(true);
+        props.setPostSelected(props.item.post_id);
+        // console.log(props.item.post_id);
     }
 
     return (
@@ -41,7 +47,8 @@ function ManagePostItem(props) {
             <h3>{props.item.title}</h3>
         </div>
         <button onClick={processDelete}>Delete this post</button>
-        <button onClick={selectPost}>Change visibility</button>
+        <button onClick={selectVisibility}>Change visibility</button>
+        <button onClick={selectRestriction}>Restrictions</button>
         <div>{props.item.date_posted}</div>
         <div>{props.item.content}</div>
         <div>Visibility: {props.item.visibility}</div>

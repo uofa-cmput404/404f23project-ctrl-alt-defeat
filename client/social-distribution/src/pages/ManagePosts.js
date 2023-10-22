@@ -6,6 +6,7 @@ import SetVisibilityDialog from '../components/SetVisibilityDialog';
 
 const managePostsUrl = 'http://127.0.0.1:5000/posts/manage'
 const updateVisibilityUrl = 'http://127.0.0.1:5000/posts/visibility'
+const restrictUrl = 'http://127.0.0.1:5000/posts/restrict'
 
 function ManagePosts() {
     const styles = {
@@ -19,6 +20,14 @@ function ManagePosts() {
             boxSizing: "border-box",
           },
           
+          red: {
+            backgroundColor: "#04AA6D",
+          },
+
+          green: {
+            backgroundColor: "#eb4034",
+          },
+
           submit: {
             width: "100%",
             backgroundColor: "#04AA6D",
@@ -48,8 +57,40 @@ function ManagePosts() {
     const [postSelected, setPostSelected] = useState(null);
     const [postsLists, setPostsLists] = useState([]);
     const [openVisibilityDialog, setOpenVisibilityDialog] = useState(false);
+    const [openRestrictionsDialog, setRestrictionsDialog] = useState(false);
     const [defaultVisibility, setDefaultVisibility] = useState("");
     const [visibility, setVisibility] = useState("private");
+    const [restrictedUsers, setRestrictedUsers] = useState([])
+    const [restrictedUsername, setRestrictedUsername] = useState("")
+
+    const restrictUserFetch = async () => {
+        try {
+            console.log(restrictedUsername);
+            console.log(postSelected);
+            // Update post request using Axios
+            axios.post(restrictUrl, {
+                post_id: postSelected,
+                username: restrictedUsername
+            })
+            .then(response => {
+            // Handle the successful response here            
+                if (response.data === "success") {
+                    alert("User restricted successfully")
+                } else if (response.data === "duplicate") {
+                    alert("You already added this user")
+                }
+                setRestrictedUsername("") // Empty out field
+            })
+            .catch(error => {
+            // Handle any errors that occur during the request
+            console.error('Error:', error);
+            })
+        } catch (error) {
+            console.error('Error:', error);
+        }
+        
+        setRestrictionsDialog(false);    
+    }
 
     const updateData = async () => {
         try {
@@ -109,11 +150,19 @@ function ManagePosts() {
         // console.log(event.target.value);
     };
 
+    const handleUserRestrictedTextChange = (event) => {
+        setRestrictedUsername(event.target.value);        
+    };
+
+    function addRestrictedUser() {
+        setRestrictedUsers([...restrictedUsers, restrictedUsername])
+    }
+
   return (
     <div>
         <h1>My posts:</h1>
         <dialog open={openVisibilityDialog} style={styles.dialog}>
-            <p>Change visibility</p>
+            <h1>Change visibility</h1>
             <form method="dialog">
                 <select id="visibility" name="visibility" onChange={handleSelectChange}>
                     <option value="private">Private</option>
@@ -126,6 +175,16 @@ function ManagePosts() {
                 <button style={styles.cancel} onClick={() => setOpenVisibilityDialog(false)}>Cancel</button>
             </form>
             </dialog>
+            <dialog open={openRestrictionsDialog} style={styles.dialog}>
+            <h1>Restrictions</h1>
+            <form method="dialog">
+                <button>Check who this is restricted from</button>
+                <p>Add user to restriction:</p>
+                <input style={styles.text} type="text" id="fname" name="fname" onChange={handleUserRestrictedTextChange}></input>
+                <button style={styles.submit} onClick={restrictUserFetch}>Add</button>                                
+                <button style={styles.cancel} onClick={() => setRestrictionsDialog(false)}>Close</button>
+            </form>
+            </dialog>
         <ul>
             {
                 postsLists.length ? 
@@ -134,7 +193,8 @@ function ManagePosts() {
                                     setPostsLists={setPostsLists} 
                                     item={item} index={index}
                                     openVisibilityDialog={openVisibilityDialog}
-                                    setOpenVisibilityDialog={setOpenVisibilityDialog}                                    
+                                    setOpenVisibilityDialog={setOpenVisibilityDialog} 
+                                    setRestrictionsDialog={setRestrictionsDialog}                                   
                                     setPostSelected={setPostSelected}/>
                 )) : <div>You have no posts</div>
             }

@@ -97,4 +97,5 @@ CREATE TABLE post_restrictions (
     restricted_author_id INTEGER,
     FOREIGN KEY (post_id) REFERENCES posts (post_id),
     FOREIGN KEY (restricted_author_id) REFERENCES authors (author_id)
+    UNIQUE (post_id, restricted_author_id) -- Unique constraint
 );

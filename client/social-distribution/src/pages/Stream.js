@@ -9,13 +9,14 @@ export default function Stream() {
 
     // const username = "philiponions" // temporary username
     const navigate = useNavigate();
+    const author_id = 4
 
     const [postsLists, setPostsLists] = useState([])
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
                 axios.post(postsUrl, {
-                    author_id: 1
+                    author_id: author_id
                 })
                 .then(response => {
                 // Handle the successful response here
