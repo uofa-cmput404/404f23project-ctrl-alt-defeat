@@ -16,6 +16,10 @@ function get_content_as_elements(content_type, content){
         let tag = 'data:' + content_type + "," + content;
         return (<img src={tag}/>)
     }
+    else if (content_type === "image/png;url" || content_type === "image/jpeg;url"){
+        //change width property or remove it, resizing will be done at the style level.
+        return(<img src={content} width="100px"/>);
+    }
 }
 function PostItem(props) {
   return (
