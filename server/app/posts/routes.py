@@ -58,20 +58,20 @@ def new_post():
         
         # Check for image OR image post
         # TODO: add image posting, attaching images to posts
-        image_id = request_data["image_id"]
+        img_id = request_data["img_id"]
         
-        if image_id == None: # JSON `null` turns into Python `None`
-            image_id = "NULL" # Change for SQL syntax
+        if img_id == None: # JSON `null` turns into Python `None`
+            img_id = "NULL" # Change for SQL syntax
                 
         conn = get_db_connection()
         
         # Create a new entry in the `posts` table
         query = f"INSERT INTO posts(post_id, " \
                 f"author_id, title, content_type, " \
-                f"content, image_id, visibility) " \
+                f"content, img_id, visibility) " \
                 f"VALUES ('{post_id}', {author_id}, " \
                 f"'{title}', '{content_type}', '{content}', " \
-                f"{image_id}, '{visibility}' )"
+                f"{img_id}, '{visibility}' )"
         
         print(query)
         

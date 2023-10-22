@@ -16,7 +16,7 @@ CREATE TABLE posts (
     title TEXT NOT NULL,
     content_type TEXT NOT NULL DEFAULT "text/plain",
     content TEXT NOT NULL,
-    image_id TEXT,
+    img_id TEXT,
     visibility TEXT NOT NULL DEFAULT "public",
     FOREIGN KEY (image_id) REFERENCES image_post(img_id)
 );
