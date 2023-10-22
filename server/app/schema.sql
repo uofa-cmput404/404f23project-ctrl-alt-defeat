@@ -18,26 +18,26 @@ CREATE TABLE posts (
     content TEXT NOT NULL,
     image_id TEXT,
     visibility TEXT NOT NULL DEFAULT "public",
-    FOREIGN KEY (image_id) REFERENCES image_post(image_id)
+    FOREIGN KEY (image_id) REFERENCES image_post(img_id)
 );
 
 
 CREATE TABLE authors (
     author_id INTEGER PRIMARY KEY,
     username TEXT NOT NULL,
-    passwd TEXT NOT NULL
+    password TEXT NOT NULL
 );
 
 CREATE TABLE requestors (
     requestor_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
-    passwd TEXT NOT NULL
+    password TEXT NOT NULL
 );
 
 CREATE TABLE admins (
     admin_id TEXT PRIMARY KEY,
     username TEXT NOT NULL,
-    passwd TEXT NOT NULL
+    password TEXT NOT NULL
 );
 
 CREATE TABLE image_post (
@@ -80,7 +80,7 @@ CREATE TABLE comments (
     comment_author_id INTEGER NOT NULL,
     date_commented TIMESTAMP NOT NULL,
     FOREIGN KEY (comment_author_id) REFERENCES authors(author_id),
-    FOREIGN KEY (post_id) REFERENCES post(post_id)
+    FOREIGN KEY (post_id) REFERENCES posts(post_id)
 );
 
 CREATE TABLE shares(
@@ -88,5 +88,5 @@ CREATE TABLE shares(
     share_author_id INTEGER NOT NULL,
     date_posted TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (share_author_id) REFERENCES authors(author_id),
-    FOREIGN KEY (post_id) REFERENCES post(post_id)
+    FOREIGN KEY (post_id) REFERENCES posts(post_id)
 );
