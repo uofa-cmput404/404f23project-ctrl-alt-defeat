@@ -65,17 +65,13 @@ def new_post():
                 
         conn = get_db_connection()
         
-        # Create a new entry in the `posts` table
-        query = f"INSERT INTO posts(post_id, " \
-                f"author_id, title, content_type, " \
-                f"content, img_id, visibility) " \
-                f"VALUES ('{post_id}', {author_id}, " \
-                f"'{title}', '{content_type}', '{content}', " \
-                f"{image_id}, '{visibility}' )"
+        query = "INSERT INTO posts (post_id, author_id, title, content_type, content, img_id, visibility) " \
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)"
         
-        print(query)
-        
-        conn.execute(query)
+        # Use a parameterized query to insert values safely
+        conn.execute(query,
+                    (post_id, author_id, title, content_type, content, image_id, visibility))
+
         conn.commit()
         conn.close()
     
