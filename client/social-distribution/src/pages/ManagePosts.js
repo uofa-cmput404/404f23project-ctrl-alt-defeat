@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react'
-import PostsList from '../components/PostsList'
-import axios from 'axios';
+import ManagePostItem from '../components/ManagePostItem'
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-const postsUrl = 'http://127.0.0.1:5000/posts/'
-
-export default function Stream() {
+const managePostsUrl = 'http://127.0.0.1:5000/posts/manage'
+function ManagePosts() {
     const username = "philiponions" // temporary username
     const navigate = useNavigate();
     const [postsLists, setPostsLists] = useState([])
+
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
-                axios.post(postsUrl, {
-                    username: username
+                axios.post(managePostsUrl, {
+                    author_id: username
                 })
                 .then(response => {
                 // Handle the successful response here
@@ -32,17 +32,19 @@ export default function Stream() {
         fetchData();
     }, [])
 
-    function goToManagePosts() {
-        navigate("/manageposts")
-    }
-
   return (
     <div>
-        <h1>Streams</h1>
-        <button onClick={goToManagePosts}>Manage my posts</button>
-        <div>
-            <PostsList postsLists={postsLists}/>
-        </div>
+        <ul>
+            {
+                postsLists.map((item, index) => (
+                    <ManagePostItem postLists={postsLists} 
+                                    setPostsLists={setPostsLists} 
+                                    item={item} index={index}/>
+                ))
+            }
+        </ul>
     </div>
   )
 }
+
+export default ManagePosts
