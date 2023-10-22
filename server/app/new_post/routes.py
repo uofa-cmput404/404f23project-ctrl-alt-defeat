@@ -39,7 +39,7 @@ def index():
         
         # Create a new entry into the `posts` table
         query = f"INSERT INTO posts VALUES" \
-                f"( '{post_id}', '{author_id}', " \
+                f"( '{post_id}', {author_id}, " \
                 f"{date_posted}, '{title}', " \
                 f"'{content_type}', '{content}', " \
                 f"{image_id}, '{visibility}' )"
