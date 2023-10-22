@@ -14,10 +14,7 @@ def create_app():
     app.register_blueprint(main_bp)
 
     from app.posts import bp as posts_bp
-    app.register_blueprint(posts_bp, url_prefix='/posts')    
-
-    from app.new_post import bp as new_post_bp
-    app.register_blueprint(new_post_bp, url_prefix='/new_post') 
+    app.register_blueprint(posts_bp, url_prefix='/posts')
 
     from app.sample import bp as sample_bp
     app.register_blueprint(sample_bp, url_prefix='/sample') 

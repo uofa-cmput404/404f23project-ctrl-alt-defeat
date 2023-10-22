@@ -2,7 +2,9 @@ from app.posts import bp
 import json
 from app.db import get_db_connection
 from flask import request
+from random import randrange
 
+# VIEW POSTS
 @bp.route('/', methods=['POST'])
 def index():
     data = ""
@@ -26,6 +28,56 @@ def index():
         conn.close()
 
         data = json.dumps([dict(i) for i in posts])
+    
+    except Exception as e:
+        print(e)
+        data = str(e)
+
+    return data # data
+
+# MAKE POSTS
+@bp.route('/new/', methods=['POST'])
+def new_post():
+    data = ""
+    try:
+        # Retrieve post data from the request's JSON body
+        # to get author_id, title, content, visibility
+        print("NEW POST data")
+        request_data = request.get_json()
+        author_id = request_data["author_id"]
+        title = request_data["title"]
+        content = request_data["content"]
+        visibility = request_data["visibility"]
+
+        # Assign random post ID - TODO: change method of randomization
+        post_id = str(randrange(0, 100000))
+
+        # Determine type of content
+        # TODO: only plain text for now, add markdown
+        content_type = "text/plain"
+        
+        # Check for image OR image post
+        # TODO: add image posting, attaching images to posts
+        image_id = request_data["image_id"]
+        
+        if image_id == None: # JSON `null` turns into Python `None`
+            image_id = "NULL" # Change for SQL syntax
+                
+        conn = get_db_connection()
+        
+        # Create a new entry in the `posts` table
+        query = f"INSERT INTO posts(post_id, " \
+                f"author_id, title, content_type, " \
+                f"content, image_id, visibility) " \
+                f"VALUES ('{post_id}', {author_id}, " \
+                f"'{title}', '{content_type}', '{content}', " \
+                f"{image_id}, '{visibility}' )"
+        
+        print(query)
+        
+        conn.execute(query)
+        conn.commit()
+        conn.close()
     
     except Exception as e:
         print(e)
