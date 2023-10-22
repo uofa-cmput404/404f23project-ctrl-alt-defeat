@@ -30,6 +30,7 @@ def login():
             print('Wrong cred')
     else:
         result = 'User not found'
+        print('User not found')
 
     db.close()
 
