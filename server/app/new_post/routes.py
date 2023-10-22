@@ -12,7 +12,7 @@ def index():
         # to get author_id, title, content, visibility
         print("NEW POST data")
         request_data = request.get_json()
-        author_id = request_data["username"] # TODO: clarify usage of ID vs username
+        author_id = request_data["author_id"] # TODO: clarify usage of ID vs username
         title = request_data["title"]
         content = request_data["content"]
         visibility = request_data["visibility"]
@@ -26,10 +26,10 @@ def index():
         
         # Check for image OR image post
         # TODO: add image posting, attaching images to posts
-        img_id = request_data["img_id"]
+        image_id = request_data["image_id"]
         
-        if img_id == None: # JSON `null` turns into Python `None`
-            img_id = "NULL" # Change for SQL syntax
+        if image_id == None: # JSON `null` turns into Python `None`
+            image_id = "NULL" # Change for SQL syntax
 
         # Get date posted, i.e. current date/time
         # TODO: Check if current time is accurate
@@ -42,7 +42,7 @@ def index():
                 f"( '{post_id}', '{author_id}', " \
                 f"{date_posted}, '{title}', " \
                 f"'{content_type}', '{content}', " \
-                f"{img_id}, '{visibility}' )"
+                f"{image_id}, '{visibility}' )"
         
         conn.execute(query)
         conn.commit()
