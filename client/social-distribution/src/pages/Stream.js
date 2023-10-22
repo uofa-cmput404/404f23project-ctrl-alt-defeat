@@ -6,7 +6,7 @@ const postsUrl = 'http://127.0.0.1:5000/posts/'
 
 export default function Stream() {
 
-    const username = "philiponions" // temporary username
+    // const username = "philiponions" // temporary username
 
 
     const [postsLists, setPostsLists] = useState([])
@@ -14,7 +14,7 @@ export default function Stream() {
         try {
             // Make the GET request using Axios
                 axios.post(postsUrl, {
-                    username: username
+                    author_id: 1
                 })
                 .then(response => {
                 // Handle the successful response here

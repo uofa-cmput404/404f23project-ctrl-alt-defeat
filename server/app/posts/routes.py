@@ -17,13 +17,14 @@ def index():
         conn = get_db_connection()
         
         # Get all the posts from people who I'm following + posts who are public
-        query = f"SELECT * FROM posts " \
-                f"WHERE posts.author_id in " \
-                f"(SELECT author_following FROM friends WHERE author_followee= '{author_id}') " \
-                f"OR visibility = 'public' " \
-                f"ORDER by date_posted DESC"
+        query = "SELECT username, post_id, date_posted, title, content_type, content, img_id, visibility FROM posts " \
+                "INNER JOIN authors ON posts.author_id = authors.author_id " \
+                "WHERE posts.author_id in " \
+                "(SELECT author_following FROM friends WHERE author_followee = ?) " \
+                "OR visibility = 'public' " \
+                "ORDER by date_posted DESC"
         
-        posts = conn.execute(query).fetchall()                                
+        posts = conn.execute(query, (author_id, )).fetchall()                                
         conn.commit()
         conn.close()
 
