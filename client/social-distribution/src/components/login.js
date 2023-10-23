@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 
 function Login(props) {
   const styles = {
@@ -40,7 +41,7 @@ function Login(props) {
 
   const handleLogin = () => {
     const loginData = { username, password };
-
+  
     fetch('http://localhost:5000/authors/login', {
       method: 'POST',
       headers: {
@@ -51,10 +52,18 @@ function Login(props) {
       .then(response => response.json())
       .then(data => {
         if (data.message === 'Login successful') {
-          console.log('Login successful');
-          props.navigate('/homepage'); 
-        } else {
-          console.error('Login failed:', data.message);
+          props.setIsAuthenticated(true);
+          props.navigate('/homepage');
+        } else if (data.message === 'Wrong Password') {
+          toast.error('Wrong Password', {
+            position: 'top-right',
+            autoClose: 3000,
+          });
+        } else if (data.message === 'User not found') {
+          toast.error('User not found', {
+            position: 'top-right',
+            autoClose: 3000,
+          });
         }
       })
       .catch(error => {

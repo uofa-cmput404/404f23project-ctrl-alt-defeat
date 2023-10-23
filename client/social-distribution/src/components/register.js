@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 
 function Register(props) {
   const [username, setUsername] = useState('');
@@ -49,10 +50,31 @@ function Register(props) {
         body: JSON.stringify(registrationData),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        console.log('Registration successful');
+        if (data.error === 'Username already exists') {
+          console.log('Username taken');
+          toast.error('Username already exists', {
+              position: 'top-right',
+              autoClose: 3000,
+          });
+        } else {
+          console.log('Registration Successful');
+          toast.success('Registration successful', {
+            position: 'top-right',
+            autoClose: 3000,
+          });
+          setTimeout(() => {
+            props.setCurrentPage('login');
+          }, 100);
+        }
       } else {
         console.error('Registration failed');
+        toast.error('Registration failed', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
       }
     } catch (error) {
       console.error('Error:', error);
