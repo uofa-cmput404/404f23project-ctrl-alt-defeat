@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS posts;
 DROP TABLE IF EXISTS authors;
-DROP TABLE IF EXISTS requestors;
+DROP TABLE IF EXISTS requesters;
 DROP TABLE IF EXISTS admins;
 DROP TABLE IF EXISTS image_post;
 DROP TABLE IF EXISTS friends;
@@ -18,7 +18,8 @@ CREATE TABLE posts (
     content TEXT NOT NULL,
     image_id TEXT,
     visibility TEXT NOT NULL DEFAULT "public",
-    FOREIGN KEY (image_id) REFERENCES image_post(img_id)
+    FOREIGN KEY (image_id) REFERENCES image_post(img_id) ON DELETE SET NULL,
+    FOREIGN KEY (author_id) REFERENCES authors(author_id) ON DELETE CASCADE
 );
 
 
@@ -28,8 +29,8 @@ CREATE TABLE authors (
     passwd TEXT NOT NULL
 );
 
-CREATE TABLE requestors (
-    requestor_id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE requesters (
+    requester_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
     passwd TEXT NOT NULL
 );
@@ -44,49 +45,48 @@ CREATE TABLE image_post (
     img_id TEXT PRIMARY KEY,
     author_id INTEGER NOT NULL,
     img_url TEXT NOT NULL,
-    visibility TEXT NOT NULL,
+    visibility TEXT NOT NULL DEFAULT "public",
     date_posted TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
-    FOREIGN KEY (author_id) REFERENCES authors(author_id)
+    FOREIGN KEY (author_id) REFERENCES authors(author_id) ON DELETE CASCADE
 );
 
--- if both AB, BA in friends, AB are true friends
 CREATE TABLE friends (
     author_followee INTEGER NOT NULL,
     author_following INTEGER NOT NULL,
-    FOREIGN KEY (author_followee) REFERENCES authors(author_id),
-    FOREIGN KEY (author_following) REFERENCES authors(author_id)
+    FOREIGN KEY (author_followee) REFERENCES authors(author_id) ON DELETE CASCADE,
+    FOREIGN KEY (author_following) REFERENCES authors(author_id) ON DELETE CASCADE
 );
 
--- if accepted, delete from friend_requests, add to friends
 CREATE TABLE friend_requests (
     author_send INTEGER NOT NULL,
     author_receive INTEGER NOT NULL,
-    FOREIGN KEY (author_send) REFERENCES authors(author_id),
-    FOREIGN KEY (author_receive) REFERENCES authors(author_id)
+    FOREIGN KEY (author_send) REFERENCES authors(author_id) ON DELETE CASCADE,
+    FOREIGN KEY (author_receive) REFERENCES authors(author_id) ON DELETE CASCADE
 );
-
 
 CREATE TABLE likes (
     like_id TEXT PRIMARY KEY,
     like_author_id INTEGER NOT NULL,
     post_id TEXT NOT NULL,
     time_liked TIMESTAMP NOT NULL,
-    FOREIGN KEY (like_author_id) REFERENCES authors(author_id),
+    FOREIGN KEY (like_author_id) REFERENCES authors(author_id) ON DELETE CASCADE,
     FOREIGN KEY (post_id) REFERENCES posts(post_id)
 );
 
 CREATE TABLE comments (
-    post_id TEXT PRIMARY KEY,
+    comment_id TEXT PRIMARY KEY,
+    post_id TEXT NOT NULL,
     comment_author_id INTEGER NOT NULL,
     date_commented TIMESTAMP NOT NULL,
-    FOREIGN KEY (comment_author_id) REFERENCES authors(author_id),
+    FOREIGN KEY (comment_author_id) REFERENCES authors(author_id) ON DELETE CASCADE,
     FOREIGN KEY (post_id) REFERENCES posts(post_id)
 );
 
 CREATE TABLE shares(
-    post_id TEXT PRIMARY KEY,
+    share_id TEXT PRIMARY KEY,
+    post_id TEXT NOT NULL,
     share_author_id INTEGER NOT NULL,
     date_posted TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (share_author_id) REFERENCES authors(author_id),
+    FOREIGN KEY (share_author_id) REFERENCES authors(author_id) ON DELETE CASCADE,
     FOREIGN KEY (post_id) REFERENCES posts(post_id)
 );
