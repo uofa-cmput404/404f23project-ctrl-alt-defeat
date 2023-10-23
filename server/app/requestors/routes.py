@@ -30,7 +30,7 @@ def register():
         return jsonify({'error': 'Username already exists'})
 
     # Insert the user into the requestors table
-    cur.execute("INSERT INTO requestors (username, passwd) VALUES (?, ?)", (username, password))
+    cur.execute("INSERT INTO requestors (username, password) VALUES (?, ?)", (username, password))
     db.commit()
     
     return jsonify({'message': 'Registration successful'})

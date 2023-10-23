@@ -48,11 +48,13 @@ function Login(props) {
       },
       body: JSON.stringify(loginData),
     })
-      .then(response => {
-        if (response.ok) {
-          console.log('Working!');
+      .then(response => response.json())
+      .then(data => {
+        if (data.message === 'Login successful') {
+          console.log('Login successful');
+          props.navigate('/homepage'); 
         } else {
-          console.error('Error!');
+          console.error('Login failed:', data.message);
         }
       })
       .catch(error => {

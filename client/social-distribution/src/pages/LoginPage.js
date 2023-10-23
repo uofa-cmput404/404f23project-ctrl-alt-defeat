@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import Login from '../components/login';
 import Register from '../components/register';
+import { useNavigate } from 'react-router-dom';
 
 function LoginPage() {
-  const [currentPage, setCurrentPage] = useState(null); // null | 'login' | 'register'
+  const [currentPage, setCurrentPage] = useState(null); 
+  const navigate = useNavigate(); 
 
   const styles = {
     container: {
@@ -59,7 +61,7 @@ function LoginPage() {
         </div>
       )}
       
-      {currentPage === 'login' && <Login setCurrentPage={setCurrentPage} />}
+      {currentPage === 'login' && <Login setCurrentPage={setCurrentPage} navigate={navigate} />}
       {currentPage === 'register' && <Register setCurrentPage={setCurrentPage} />}
     </div>
   );
