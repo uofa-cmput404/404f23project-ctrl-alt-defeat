@@ -3,10 +3,12 @@ import ManagePostItem from '../components/ManagePostItem'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SetVisibilityDialog from '../components/SetVisibilityDialog';
+import RestrictedUser from '../components/RestrictedUser';
 
 const managePostsUrl = 'http://127.0.0.1:5000/posts/manage'
 const updateVisibilityUrl = 'http://127.0.0.1:5000/posts/visibility'
 const restrictUrl = 'http://127.0.0.1:5000/posts/restrict'
+const restrictionListUrl = 'http://127.0.0.1:5000/posts/restricted/'
 
 function ManagePosts() {
     const styles = {
@@ -60,8 +62,37 @@ function ManagePosts() {
     const [openRestrictionsDialog, setRestrictionsDialog] = useState(false);
     const [defaultVisibility, setDefaultVisibility] = useState("");
     const [visibility, setVisibility] = useState("private");
-    const [restrictedUsers, setRestrictedUsers] = useState([])
-    const [restrictedUsername, setRestrictedUsername] = useState("")
+    const [restrictedUsers, setRestrictedUsers] = useState([1,2,3,4,5]);
+    const [restrictedUsername, setRestrictedUsername] = useState("");
+
+    const getRestrictedFetch = async () => {
+        try {            
+            
+            // Update post request using Axios
+            // axios.post(restrictUrl, {
+            //     post_id: postSelected,
+            //     username: restrictedUsername
+            // })
+            // .then(response => {
+            // // Handle the successful response here            
+            //     if (response.data === "success") {
+            //         alert("User restricted successfully")
+            //     } else if (response.data === "duplicate") {
+            //         alert("You already added this user")
+            //     } else if (response.data === "not_exists") {
+            //         alert("This user does not exist");
+            //     }
+            //     setRestrictedUsername("") // Empty out field
+            // })
+            // .catch(error => {
+            // // Handle any errors that occur during the request
+            // console.error('Error:', error);
+            //     alert('Error:', error);
+            // })
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 
     const restrictUserFetch = async () => {
         try {
@@ -78,18 +109,21 @@ function ManagePosts() {
                     alert("User restricted successfully")
                 } else if (response.data === "duplicate") {
                     alert("You already added this user")
+                } else if (response.data === "not_exists") {
+                    alert("This user does not exist");
                 }
                 setRestrictedUsername("") // Empty out field
             })
             .catch(error => {
             // Handle any errors that occur during the request
             console.error('Error:', error);
+                alert('Error:', error);
             })
         } catch (error) {
             console.error('Error:', error);
         }
-        
         setRestrictionsDialog(false);    
+        
     }
 
     const updateData = async () => {
@@ -125,7 +159,7 @@ function ManagePosts() {
         try {
             // Make the GET request using Axios
                 axios.post(managePostsUrl, {
-                    author_id: 1
+                    author_id: 1 // temporary
                 })
                 .then(response => {
                 // Handle the successful response here
@@ -154,10 +188,6 @@ function ManagePosts() {
         setRestrictedUsername(event.target.value);        
     };
 
-    function addRestrictedUser() {
-        setRestrictedUsers([...restrictedUsers, restrictedUsername])
-    }
-
   return (
     <div>
         <h1>My posts:</h1>
@@ -178,7 +208,11 @@ function ManagePosts() {
             <dialog open={openRestrictionsDialog} style={styles.dialog}>
             <h1>Restrictions</h1>
             <form method="dialog">
-                <button>Check who this is restricted from</button>
+                Restricted authors
+                {
+                    restrictedUsers.length ? restrictedUsers.map((item) => {return <RestrictedUser username={item.username} setRestrictedUsers={setRestrictedUsers}/>}) : null
+                }
+
                 <p>Add user to restriction:</p>
                 <input style={styles.text} type="text" id="fname" name="fname" onChange={handleUserRestrictedTextChange}></input>
                 <button style={styles.submit} onClick={restrictUserFetch}>Add</button>                                
@@ -195,7 +229,9 @@ function ManagePosts() {
                                     openVisibilityDialog={openVisibilityDialog}
                                     setOpenVisibilityDialog={setOpenVisibilityDialog} 
                                     setRestrictionsDialog={setRestrictionsDialog}                                   
-                                    setPostSelected={setPostSelected}/>
+                                    setPostSelected={setPostSelected}
+                                    setRestrictedUsers={setRestrictedUsers}                            
+                                    />
                 )) : <div>You have no posts</div>
             }
         </ul>

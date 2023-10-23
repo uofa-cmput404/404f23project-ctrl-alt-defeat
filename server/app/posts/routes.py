@@ -5,6 +5,35 @@ from flask import request
 from random import randrange
 import sqlite3
 
+@bp.route("/restricted", methods=["GET"])
+def get_restricted_users():    
+    post_id = request.args.get('post_id')
+    
+    try:
+        conn = get_db_connection()   
+        # print(post_id)
+        query = "SELECT username " \
+                "FROM post_restrictions " \
+                "INNER JOIN authors on post_restrictions.restricted_author_id = authors.author_id " \
+                "WHERE post_id = ?"
+        
+        posts = conn.execute(query, (post_id, )).fetchall()                                        
+
+        data = json.dumps([dict(i) for i in posts])
+        print(data)
+
+        conn.commit()
+        conn.close()
+        
+    
+    except Exception as e:
+        print(e)
+        data = "error"
+
+    return data # data
+
+
+
 @bp.route("/restrict", methods=["POST"])
 def restrict_user():
     request_data = request.get_json()
@@ -22,8 +51,12 @@ def restrict_user():
 
         # Use a parameterized query to insert values safely
         result = conn.execute(query,
-                    (username, ))
+                    (username, )).fetchall()
 
+        if len([dict(i) for i in result]) == 0:
+            print("User not exist")
+            return "not_exists"
+            
         author_id = [dict(i) for i in result][0]['author_id']
         
         query = "INSERT INTO post_restrictions (post_id, restricted_author_id) " \
@@ -143,15 +176,14 @@ def index():
         query = "SELECT username, posts.post_id, date_posted, title, content_type, content, img_id, visibility " \
                 "FROM posts " \
                 "INNER JOIN authors ON posts.author_id = authors.author_id " \
-                "LEFT JOIN post_restrictions pr ON posts.post_id = pr.post_id " \
                 "WHERE " \
-                    "(posts.author_id IN (SELECT author_following FROM friends WHERE author_followee = 1) " \
+                    "(posts.author_id IN (SELECT author_following FROM friends WHERE author_followee = ?) " \
                     "OR posts.visibility = 'public' " \
                     "OR posts.author_id = ?) " \
-                    "AND (pr.post_id IS NULL OR pr.restricted_author_id != ?) " \
+                    "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  ?) " \
                 "ORDER BY date_posted DESC; " 
         
-        posts = conn.execute(query, (author_id, author_id)).fetchall()                                
+        posts = conn.execute(query, (author_id, author_id, author_id)).fetchall()                                
         conn.commit()
         conn.close()
 

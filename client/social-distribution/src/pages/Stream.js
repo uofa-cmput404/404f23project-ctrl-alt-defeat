@@ -9,7 +9,7 @@ export default function Stream() {
 
     // const username = "philiponions" // temporary username
     const navigate = useNavigate();
-    const author_id = 4
+    const author_id = 7
 
     const [postsLists, setPostsLists] = useState([])
     const fetchData = async () => {

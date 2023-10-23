@@ -38,7 +38,16 @@ function ManagePostItem(props) {
     function selectRestriction() {
         props.setRestrictionsDialog(true);
         props.setPostSelected(props.item.post_id);
-        // console.log(props.item.post_id);
+        getRestrictedUsers();
+    }
+
+    function getRestrictedUsers() {
+        const restrictionListUrl = `http://127.0.0.1:5000/posts/restricted?post_id=${props.item.post_id}`
+        console.log(restrictionListUrl)
+        axios.get(restrictionListUrl).then((response) => {
+            console.log(response.data)
+            props.setRestrictedUsers(response.data)
+        })
     }
 
     return (
