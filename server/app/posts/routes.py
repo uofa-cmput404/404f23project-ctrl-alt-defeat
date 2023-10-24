@@ -169,7 +169,7 @@ def new_post():
     return data  # data
 
 
-@bp.route('/edit/<int:post_id>', methods=['POST'])
+@bp.route('/edit/<int:post_id>', methods=['PUT'])
 def edit_post():
     conn = get_db_connection()
     try:
