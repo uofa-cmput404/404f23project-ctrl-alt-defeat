@@ -25,7 +25,7 @@ function PostItem(props) {
   return (
     <li key={props.key}>
         <h3>{props.item.title}</h3>
-        <div>Posted by: {props.item.author_id}</div>
+        <div>Posted by: {props.item.username}</div>
         <div>{props.item.date_posted}</div>
         <div>{get_content_as_elements(props.item.content_type,props.item.content)}</div>
     </li>
