@@ -26,19 +26,19 @@ CREATE TABLE posts (
 CREATE TABLE authors (
     author_id INTEGER PRIMARY KEY,
     username TEXT NOT NULL,
-    passwd TEXT NOT NULL
+    password TEXT NOT NULL
 );
 
 CREATE TABLE requestors (
     requestor_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
-    passwd TEXT NOT NULL
+    password TEXT NOT NULL
 );
 
 CREATE TABLE admins (
     admin_id TEXT PRIMARY KEY,
     username TEXT NOT NULL,
-    passwd TEXT NOT NULL
+    password TEXT NOT NULL
 );
 
 CREATE TABLE image_post (
