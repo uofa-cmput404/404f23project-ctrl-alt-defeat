@@ -40,6 +40,14 @@ function Register(props) {
   };
 
   const handleRegistration = async () => {
+    if (!username || !password) {
+      toast.error('Empty Fields!', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+      return;
+    }
+
     const registrationData = { username, password };
     try {
       const response = await fetch('http://localhost:5000/requestors/register', {
@@ -61,13 +69,10 @@ function Register(props) {
           });
         } else {
           console.log('Registration Successful');
-          toast.success('Registration successful', {
+          toast.success('Awaiting Approval!', {
             position: 'top-right',
             autoClose: 3000,
           });
-          setTimeout(() => {
-            props.setCurrentPage('login');
-          }, 100);
         }
       } else {
         console.error('Registration failed');
