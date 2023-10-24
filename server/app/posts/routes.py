@@ -82,6 +82,42 @@ def restrict_user():
 
     return data # data
 
+
+@bp.route("/unrestrict/<post_id>/<username>", methods=["DELETE"])
+def unrestrict_user(post_id, username):    
+    print(post_id, username)
+    data = ""
+
+    try:
+        query = "SELECT author_id FROM authors WHERE username = ?"
+        # # print(post_id, privacy)
+        conn = get_db_connection()        
+
+        # Use a parameterized query to insert values safely
+        result = conn.execute(query,
+                    (username, )).fetchall()
+
+        if len([dict(i) for i in result]) == 0:
+            print("User not exist")
+            return "not_exists"
+            
+        author_id = [dict(i) for i in result][0]['author_id']
+        
+        query = "DELETE FROM post_restrictions " \
+                "WHERE post_id = ? AND restricted_author_id = ?"
+
+        # Use a parameterized query to insert values safely
+        result = conn.execute(query, (post_id, author_id))
+        
+        conn.commit()
+        conn.close()                
+        
+    except Exception as e:        
+        print(e)
+        data = "error"
+
+    return data # data
+
 @bp.route("/visibility", methods=["POST"])
 def change_visibility():
     request_data = request.get_json()
@@ -191,7 +227,7 @@ def index():
     
     except Exception as e:
         print(e)
-        data = str(e)
+        data = None
 
     return data # data
 

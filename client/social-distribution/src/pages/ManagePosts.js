@@ -63,64 +63,39 @@ function ManagePosts() {
     const [defaultVisibility, setDefaultVisibility] = useState("");
     const [visibility, setVisibility] = useState("private");
     const [restrictedUsers, setRestrictedUsers] = useState([1,2,3,4,5]);
-    const [restrictedUsername, setRestrictedUsername] = useState("");
+    const [restrictedUsername, setRestrictedUsername] = useState("");   
 
-    const getRestrictedFetch = async () => {
-        try {            
-            
-            // Update post request using Axios
-            // axios.post(restrictUrl, {
-            //     post_id: postSelected,
-            //     username: restrictedUsername
-            // })
-            // .then(response => {
-            // // Handle the successful response here            
-            //     if (response.data === "success") {
-            //         alert("User restricted successfully")
-            //     } else if (response.data === "duplicate") {
-            //         alert("You already added this user")
-            //     } else if (response.data === "not_exists") {
-            //         alert("This user does not exist");
-            //     }
-            //     setRestrictedUsername("") // Empty out field
-            // })
-            // .catch(error => {
-            // // Handle any errors that occur during the request
-            // console.error('Error:', error);
-            //     alert('Error:', error);
-            // })
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    }
-
-    const restrictUserFetch = async () => {
-        try {
-            console.log(restrictedUsername);
-            console.log(postSelected);
-            // Update post request using Axios
-            axios.post(restrictUrl, {
-                post_id: postSelected,
-                username: restrictedUsername
-            })
-            .then(response => {
-            // Handle the successful response here            
-                if (response.data === "success") {
-                    alert("User restricted successfully")
-                } else if (response.data === "duplicate") {
-                    alert("You already added this user")
-                } else if (response.data === "not_exists") {
-                    alert("This user does not exist");
-                }
-                setRestrictedUsername("") // Empty out field
-            })
-            .catch(error => {
-            // Handle any errors that occur during the request
-            console.error('Error:', error);
-                alert('Error:', error);
-            })
-        } catch (error) {
-            console.error('Error:', error);
+    const restrictUser = async () => {
+        if (restrictedUsername !== username) {            
+            try {
+                console.log(restrictedUsername);
+                console.log(postSelected);
+                // Update post request using Axios
+                axios.post(restrictUrl, {
+                    post_id: postSelected,
+                    username: restrictedUsername
+                })
+                .then(response => {
+                // Handle the successful response here            
+                    if (response.data === "success") {
+                        alert("User restricted successfully")
+                    } else if (response.data === "duplicate") {
+                        alert("You already added this user")
+                    } else if (response.data === "not_exists") {
+                        alert("This user does not exist");
+                    }
+                    setRestrictedUsername("") // Empty out field
+                })
+                .catch(error => {
+                // Handle any errors that occur during the request
+                console.error('Error:', error);
+                    alert('Error:', error);
+                })
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        } else {
+            alert("You can't restrict yourself")
         }
         setRestrictionsDialog(false);    
         
@@ -210,12 +185,15 @@ function ManagePosts() {
             <form method="dialog">
                 Restricted authors
                 {
-                    restrictedUsers.length ? restrictedUsers.map((item) => {return <RestrictedUser username={item.username} setRestrictedUsers={setRestrictedUsers}/>}) : null
+                    restrictedUsers.length ? restrictedUsers.map((item) => {return <RestrictedUser username={item.username} 
+                                                                                                   setRestrictedUsers={setRestrictedUsers}
+                                                                                                   restrictedUsers={restrictedUsers}
+                                                                                                   postSelected={postSelected}/>}) : null
                 }
 
                 <p>Add user to restriction:</p>
                 <input style={styles.text} type="text" id="fname" name="fname" onChange={handleUserRestrictedTextChange}></input>
-                <button style={styles.submit} onClick={restrictUserFetch}>Add</button>                                
+                <button style={styles.submit} onClick={restrictUser}>Add</button>                                
                 <button style={styles.cancel} onClick={() => setRestrictionsDialog(false)}>Close</button>
             </form>
             </dialog>
