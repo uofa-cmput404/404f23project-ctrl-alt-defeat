@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import ManagePostItem from '../components/ManagePostItem'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SetVisibilityDialog from '../components/SetVisibilityDialog';
 import RestrictedUser from '../components/RestrictedUser';
+import { UserContext } from '../App';
 
 const managePostsUrl = 'http://127.0.0.1:5000/posts/manage'
 const updateVisibilityUrl = 'http://127.0.0.1:5000/posts/visibility'
@@ -53,7 +54,8 @@ function ManagePosts() {
           }
 
     }
-    const username = "philiponions" // temporary username
+
+    const {username, authorId} = useContext(UserContext);    
     const navigate = useNavigate();
 
     const [postSelected, setPostSelected] = useState(null);
@@ -134,7 +136,7 @@ function ManagePosts() {
         try {
             // Make the GET request using Axios
                 axios.post(managePostsUrl, {
-                    author_id: 1 // temporary
+                    author_id: authorId // temporary
                 })
                 .then(response => {
                 // Handle the successful response here

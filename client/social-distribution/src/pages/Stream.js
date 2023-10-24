@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import PostsList from '../components/PostsList'
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { UserContext } from '../App';
 
 const postsUrl = 'http://127.0.0.1:5000/posts/'
 
@@ -9,7 +10,7 @@ export default function Stream() {
 
     // const username = "philiponions" // temporary username
     const navigate = useNavigate();
-    const author_id = 1
+    const {username, authorId} = useContext(UserContext);    
     
 
     const [postsLists, setPostsLists] = useState([])
@@ -17,7 +18,7 @@ export default function Stream() {
         try {
             // Make the GET request using Axios
                 axios.post(postsUrl, {
-                    author_id: author_id
+                    author_id: authorId
                 })
                 .then(response => {
                 // Handle the successful response here
