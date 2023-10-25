@@ -13,14 +13,14 @@ function App() {
   
   return (
     <UserContext.Provider value = {{username, authorId}}>
-    <BrowserRouter>
-      <Routes>
-          <Route path="/" element={<LoginPage/>}/>
-          <Route path="/homepage" element={<Stream/>}/>
-          <Route path="/manageposts" element={<ManagePosts/>}/> /* Merge with /posts? */
-          <Route path="/manageposts/restrictions" element={<Restrictions/>}/> /* Merge with /posts? */
-      </Routes>
-    </BrowserRouter>
+      <BrowserRouter>
+        <Routes>
+            <Route path="/" element={<LoginPage/>}/>
+            <Route path="/homepage" element={<Stream/>}/>
+            <Route path="/manageposts" element={<ManagePosts/>}/> /* Merge with /posts? */
+            <Route path="/manageposts/restrictions" element={<Restrictions/>}/> /* Merge with /posts? */
+        </Routes>
+      </BrowserRouter>
     </UserContext.Provider>
   );
 }
