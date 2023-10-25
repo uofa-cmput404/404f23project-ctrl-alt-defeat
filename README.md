@@ -23,11 +23,11 @@ npm install --save react-toastify
 
 How to flask admin dashboard
 ===================================
-before running:
-&nbsp; pip3 install flask
-&nbsp; pip3 install flask-admin
-&nbsp; pip3 install flask_sqlalchemy
-Run inside server:
-&nbsp; python3 -m flask run
-Admin page:
-&nbsp; http://127.0.0.1:5000/admin/ 
+before running:\
+&nbsp; pip3 install flask\
+&nbsp; pip3 install flask-admin\
+&nbsp; pip3 install flask_sqlalchemy\
+Run inside server:\
+&nbsp; python3 -m flask run\
+Admin page:\
+&nbsp; http://127.0.0.1:5000/admin/ \
