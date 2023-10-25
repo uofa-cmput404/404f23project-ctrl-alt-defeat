@@ -17,3 +17,6 @@ Authors:
 * Jingtong Yang
 
 Generally everything is LICENSE'D under the Apache License 2.0.
+
+Install:
+npm install --save react-toastify
