@@ -5,7 +5,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function LoginPage({ setIsAuthenticated, isAuthenticated }) {
+function LoginPage({ isAuthenticated, updateAuthStatus }) {
   const [currentPage, setCurrentPage] = useState(null); 
   const navigate = useNavigate(); 
 
@@ -67,12 +67,11 @@ function LoginPage({ setIsAuthenticated, isAuthenticated }) {
         </div>
       )}
       
-      {/* {currentPage === 'login' && <Login setCurrentPage={setCurrentPage} navigate={navigate} />} */}
       {currentPage === 'login' && (
         <Login
           setCurrentPage={setCurrentPage}
-          setIsAuthenticated={setIsAuthenticated}
           navigate={navigate}
+          updateAuthStatus={updateAuthStatus}
         />
       )}
       {currentPage === 'register' && <Register setCurrentPage={setCurrentPage} />}

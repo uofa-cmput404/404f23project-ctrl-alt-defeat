@@ -52,7 +52,8 @@ function Login(props) {
       .then(response => response.json())
       .then(data => {
         if (data.message === 'Login successful') {
-          props.setIsAuthenticated(true);
+          localStorage.setItem('isAuthenticated', 'true');
+          props.updateAuthStatus(true);
           props.navigate('/homepage');
         } else if (data.message === 'Wrong Password') {
           toast.error('Wrong Password', {
