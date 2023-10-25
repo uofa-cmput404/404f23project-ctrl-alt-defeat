@@ -30,4 +30,4 @@ before running:\
 Run inside server:\
 &nbsp; python3 -m flask run\
 Admin page:\
-&nbsp; http://127.0.0.1:5000/admin/ \
+&nbsp; http://127.0.0.1:5000/admin/ 
