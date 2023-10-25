@@ -1,6 +1,5 @@
 from app.requestors import bp
-from flask import Flask, request, jsonify, g, render_template, redirect, url_for
-
+from flask import request, jsonify, g
 import sqlite3
 
 def get_db():
@@ -23,14 +22,19 @@ def register():
     db = get_db()
     cur = db.cursor()
 
-    # Check if the username is already taken
-    cur.execute("SELECT * FROM authors WHERE username = ?", (username,))
-    existing_user = cur.fetchone()
-    if existing_user:
-        return jsonify({'error': 'Username already exists'})
+    try:
+        cur.execute("SELECT * FROM requestors WHERE username = ?", (username,))
+        existing_user = cur.fetchone()
+        
+        if existing_user:
+            return jsonify({'error': 'Username already exists'})
+        
+        cur.execute("INSERT INTO requestors (username, password) VALUES (?, ?)", (username, password))
+        db.commit()
+        
+        return jsonify({'message': 'Registration successful'})
+    except Exception as e:
+        return jsonify({'error': 'An error occurred while registering.'})
 
-    # Insert the user into the requestors table
-    cur.execute("INSERT INTO requestors (username, password) VALUES (?, ?)", (username, password))
-    db.commit()
-    
-    return jsonify({'message': 'Registration successful'})
+    finally:
+        db.close()
