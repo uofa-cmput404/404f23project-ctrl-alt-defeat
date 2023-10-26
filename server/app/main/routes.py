@@ -34,8 +34,9 @@ def edit_post(author_id, post_id):
         if exists is None:
             abort(404)
     except HTTPException as e:
-        print(e.code, " Can't find post_id.")
-        final_message = str(e)
+        final_message = str(e.code, " Can't find post_id.")
+        print(final_message)
+        return final_message
 
     # Get the new data.
     try:
@@ -60,12 +61,13 @@ def edit_post(author_id, post_id):
     # Overwrite the entry with the new data.
     # TODO: Only update what has changed. Comparison with old vs. new data needed.
     try:
-        query = "UPDATE posts SET title = ?, content_type = ?,content = ?, img_id = ?, visibility = ? WHERE post_id = ? AND author_id = ?"
+        query = "UPDATE posts SET title = ?, content_type = ?,content = ?, img_id = ?, visibility = ? WHERE post_id = ? AND author_id = ?;"
         conn.execute(query, (title, content_type, content, image_id, visibility, post_id, author_id))
+        final_message = "Post Updated Successfully"
         conn.commit()
     except Exception as e:
         print(e, "Data not written to database. Rolling back...")
-        final_message = str(e)
+        final_message = str(e, " Post unable to update. Rolling back database changes.")
         conn.rollback()
     finally:
         conn.close()
