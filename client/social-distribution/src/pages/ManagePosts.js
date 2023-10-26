@@ -14,6 +14,9 @@ const editUrl = 'http://127.0.0.1:5000/posts/authors/'
 
 function ManagePosts() {
     const styles = {
+        dialog: {
+            position: 'fixed'
+        },
         text: {
             width: "100%",
             padding: "12px 20px",
