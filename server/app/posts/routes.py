@@ -95,8 +95,43 @@ def new_post():
 
     return data  # data
 
-@bp.route('/<post_id>/authors/<author_id>', methods=['POST'])
-@bp.route('/authors/<author_id>/<post_id>/', methods=['POST'])
+
+@bp.route('/authors/<author_id>/<post_id>/image/', methods=['GET'])
+def get_image(author_id, post_id):
+    conn = get_db_connection()
+    final_message = "Nothing happened."
+    # check if image exists
+    try:
+        query = "SELECT img_id, content_type from posts WHERE (post_id = ? AND img_id IS NOT NULL AND author_id = ?);"
+        cursor = conn.cursor()
+        conn.execute(query, (post_id, author_id))
+        img_id = cursor.fetchone()
+        if img_id[0] is None:
+            abort(404, "The post with this image id does not exist.")
+        print("Successfully found the post with this image id.")
+
+        query = "SELECT img_url,visibility FROM image_post WHERE img_id = ?;"
+
+        conn.execute(query, (img_id[0],))
+        img_visibility = cursor.fetchone()
+        if img_visibility is None:
+            abort(404, "The post exists, but the image it references does not exist.")
+        elif img_visibility["visibility"] != "public":
+            abort(403, "This post exists, but the image contained is only visible to specific users.")
+
+        content_type = img_id["content_type"]
+        content = img_visibility["img_url"]
+        final_message = f"data:{content_type},{content}"
+        return final_message
+    except HTTPException as e:
+        final_message = str(e)
+        print(final_message)
+    finally:
+        conn.close()
+        return final_message
+
+
+@bp.route('/authors/<author_id>/<post_id>/edit/', methods=['POST'])
 def edit_post(author_id, post_id):
     final_message = ""
     conn = get_db_connection()
