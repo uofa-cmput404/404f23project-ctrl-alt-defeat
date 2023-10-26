@@ -25,7 +25,8 @@ npm install --save react-toastify
 - **before running:**\
       pip3 install flask\
       pip3 install flask-admin\
-      pip3 install flask_sqlalchemy
+      pip3 install flask_sqlalchemy\
+      pip3 install jinja2
 - **Run inside server:**\
       python3 -m flask run
 - **Admin page:**\
