@@ -35,11 +35,16 @@ npm install --save react-markdown
 **Testing HTTP requests**
 Use curl or Postman.
 - Editing posts (POST)
-  - Use path ```{server_url}/service/authors/<author_id>/posts/<post_id> {json}```
+  - Use path ```{server_url}/posts/<post_id>/authors/<author_id> {json}```
   - The JSON, for now, must include the following:
     - title
     - content_type
     - content
     - img_id (can be 'null')
     - visibility
-  - The entry must exist on the database. Otherwise, it will throw a 404 response code.
+  - Images, at the moment, are not changed. So it doesn't work.
+  - Exceptions thrown:
+    - 400 if the data sent wasn't a JSON.
+    - 404 if the post doesn't even exist.
+    - KeyError if the JSON is missing keys.
+    - DatabaseError if something goes wrong with the database commit.
