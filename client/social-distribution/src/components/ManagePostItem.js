@@ -55,6 +55,7 @@ function ManagePostItem(props) {
         <div>
             <h3>{props.item.title}</h3>
         </div>
+        <button>Edit</button>
         <button onClick={processDelete}>Delete this post</button>
         <button onClick={selectVisibility}>Change visibility</button>
         <button onClick={selectRestriction}>Restrictions</button>
