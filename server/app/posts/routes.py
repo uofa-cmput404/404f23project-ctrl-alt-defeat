@@ -96,6 +96,7 @@ def new_post():
     return data  # data
 
 @bp.route('/<post_id>/authors/<author_id>', methods=['POST'])
+@bp.route('/authors/<author_id>/<post_id>/', methods=['POST'])
 def edit_post(author_id, post_id):
     final_message = ""
     conn = get_db_connection()
@@ -109,10 +110,12 @@ def edit_post(author_id, post_id):
         exists = cursor.fetchall()
         if exists is None:
             abort(404, "The post_id cannot be found.")
-        # Check if JSON.
-        if not request.is_json():
-            abort(400, "The data sent was not a valid JSON.")
-        request_data = request.get_json()
+
+        # Check if valid JSON.
+        try:
+            request_data = request.get_json()
+        except Exception:
+            abort(400, "No JSON in request.")
 
         post_id = to_find[0]
         title = request_data["title"]
