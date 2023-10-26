@@ -4,6 +4,7 @@ from app.db import get_db_connection
 from flask import request, abort
 from werkzeug.exceptions import HTTPException
 from random import randrange
+from sqlite3 import DatabaseError
 
 
 # VIEW POSTS
@@ -94,7 +95,62 @@ def new_post():
 
     return data  # data
 
+@bp.route('/<post_id>/authors/<author_id>', methods=['POST'])
+def edit_post(author_id, post_id):
+    final_message = ""
+    conn = get_db_connection()
+    try:
+        # check if the post exists
+        to_find = (post_id,)
+        print(f"Attempting to find post with {post_id}")
+        cursor = conn.cursor()
+        query = "SELECT * FROM posts WHERE post_id = ?;"
+        conn.execute(query, to_find)
+        exists = cursor.fetchall()
+        if exists is None:
+            abort(404, "The post_id cannot be found.")
+        # Check if JSON.
+        if not request.is_json():
+            abort(400, "The data sent was not a valid JSON.")
+        request_data = request.get_json()
 
+        post_id = to_find[0]
+        title = request_data["title"]
+
+        # At the moment, I am assuming the content provided is of this content_type. Some entry validation might be needed.
+
+        # TODO: Images will need to be updated as well in the image_post table.
+
+        content_type = request_data["content_type"]
+        content = request_data["content"]
+        image_id = request_data["img_id"]
+        image_id = "NULL" if image_id is None else image_id
+        visibility = request_data["visibility"]
+
+        # The things that will not change:
+        # - Date posted
+        # - Author ID
+        # - Post ID
+
+        # Overwrite the entry with the new data.
+        # TODO: Only update what has changed. Comparison with old vs. new data needed.
+
+        query = "UPDATE posts SET title = ?, content_type = ?,content = ?, img_id = ?, visibility = ? WHERE post_id = ? AND author_id = ?;"
+        conn.execute(query, (title, content_type, content, image_id, visibility, post_id, author_id))
+        final_message = "Post Updated Successfully"
+        conn.commit()
+    except HTTPException as e:
+        final_message = str(e)
+    except KeyError as e:
+        final_message = str(e, "There are missing keys in the received JSON.")
+    except DatabaseError as e:
+        final_message = str(e, " Post unable to update. Rolling back database changes.")
+        conn.rollback()
+    except Exception as e:
+        final_message = str(e)
+    finally:
+        conn.close()
+        return final_message
 
 @bp.route('/test/')
 def categories():
