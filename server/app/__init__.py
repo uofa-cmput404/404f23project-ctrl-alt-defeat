@@ -1,9 +1,10 @@
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.actions import action
 from flask_admin import expose
+from markupsafe import Markup
 
 db = SQLAlchemy()
 admin = Admin()
@@ -66,15 +67,22 @@ class PostView(ModelView):
 
 class Image(db.Model):
     __tablename__ = "image_post"
-    img_id = db.Column(db.Integer, primary_key=True)
+    img_id = db.Column(db.Text, primary_key=True)
     img_url = db.Column(db.Text, nullable=False)  
     author_id = db.Column(db.Integer, db.ForeignKey('authors.author_id'))
 
 class ImageView(ModelView):
     can_delete = True
     form_columns = ["img_id", "img_url", "author_id"]
-    column_list = ["img_id", "img_url", "author_id"]
+    column_list = ["img_id", "author_id", "view_button"]
     column_searchable_list = ["author_id"]
+    def view_button(view, context, model, name):
+        return Markup(f'<a href="{model.img_url}" target="_blank">View</a>')
+    
+    column_formatters = {
+        'view_button': view_button
+    }
+    column_labels = dict(view_button='View Image')
 
 admin.add_view(AuthorView(Author, db.session))
 admin.add_view(RequesterView(Requester, db.session))
