@@ -373,7 +373,7 @@ def edit_post(author_id, post_id):
         final_message = str(e)
     except KeyError as e:
         final_message = str(e, "There are missing keys in the received JSON.")
-    except DatabaseError as e:
+    except sqlite3.DatabaseError as e:
         final_message = str(e, " Post unable to update. Rolling back database changes.")
         conn.rollback()
     except Exception as e:

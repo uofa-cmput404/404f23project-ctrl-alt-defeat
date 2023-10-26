@@ -10,8 +10,8 @@ export const UserContext = createContext();
 function App() {
 
   // Have the username and authorId state here and pass it down to pages and components
-  const [username, setUsername] = useState('techgeek5000')
-  const [authorId, setAuthorId] = useState('11')
+  const [username, setUsername] = useState('philiponins')
+  const [authorId, setAuthorId] = useState('1')
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   return (

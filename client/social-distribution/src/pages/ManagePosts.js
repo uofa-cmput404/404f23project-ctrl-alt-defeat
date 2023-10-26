@@ -10,6 +10,7 @@ const managePostsUrl = 'http://127.0.0.1:5000/posts/manage'
 const updateVisibilityUrl = 'http://127.0.0.1:5000/posts/visibility'
 const restrictUrl = 'http://127.0.0.1:5000/posts/restrict'
 const restrictionListUrl = 'http://127.0.0.1:5000/posts/restricted/'
+const editUrl = 'http://127.0.0.1:5000/posts/authors/'
 
 function ManagePosts() {
     const styles = {
@@ -66,7 +67,48 @@ function ManagePosts() {
     const [visibility, setVisibility] = useState("private");
     const [restrictedUsers, setRestrictedUsers] = useState([1,2,3,4,5]);
     const [restrictedUsername, setRestrictedUsername] = useState("");   
+    const [openEditDialog, setOpenEditDialog] = useState(false);  
+    const [editContent, setEditContent] = useState(""); 
+    const [editTitle, setEditTitle] = useState(""); 
+    const [edittedContentType, setEdittedContentType] = useState("");
 
+    const editRequest = async () => {
+        console.log(authorId);
+        console.log(postSelected);
+        console.log(editContent);
+        console.log(editTitle);
+        console.log(edittedContentType);
+        
+        axios.post(editUrl + authorId + "/" + postSelected + "/edit/", {
+            "content_type": edittedContentType,
+            "content": editContent,
+            "img_id": null,
+            "visibility": "public",
+            "post_id": postSelected,
+            "title": editTitle
+        }).then((response) => {
+            if (response.data === "Post Updated Successfully") {
+                
+                setPostsLists(postsLists.map(item => {
+                    if (item.post_id === postSelected) {
+                      return { ...item, content: editContent, title: editTitle }; // Create a new object with the updated value
+                    }
+                    return item; // Return the original object for other items
+                }))
+                alert("The post was successfully editted.");
+            } else {
+                alert("Something went wronng")
+            }
+        }).catch(error => {
+            // Handle any errors that occur during the request
+            console.error('Error:', error);
+                alert('Error:', error);
+        })
+
+        setOpenEditDialog(false);
+
+
+    }
     const restrictUser = async () => {
         if (restrictedUsername !== username) {            
             try {
@@ -101,7 +143,7 @@ function ManagePosts() {
         }
         setRestrictionsDialog(false);    
         
-    }
+    }    
 
     const updateData = async () => {
         try {
@@ -168,7 +210,7 @@ function ManagePosts() {
   return (
     <div>
         <h1>My posts:</h1>
-        <dialog open={openVisibilityDialog} style={styles.dialog}>
+            <dialog open={openVisibilityDialog} style={styles.dialog}>
             <h1>Change visibility</h1>
             <form method="dialog">
                 <select id="visibility" name="visibility" onChange={handleSelectChange}>
@@ -180,6 +222,23 @@ function ManagePosts() {
                 {/* <input style={styles.text} type="text" id="fname" name="fname"></input> */}
                 <button style={styles.submit} onClick={updateData}>OK</button>
                 <button style={styles.cancel} onClick={() => setOpenVisibilityDialog(false)}>Cancel</button>
+            </form>
+            </dialog>
+            <dialog open={openEditDialog} style={styles.dialog}>
+            <h1>Edit Post</h1>
+            <form method="dialog">
+                <label for="freeform">Change title</label>                
+                <br/>
+                <input  defaultValue={editTitle} onChange={(e) => setEditTitle(e.target.value)}></input>                
+                <br/>
+                <label for="freeform">Edit your post:</label>                
+                <br/>
+                
+                <textarea id="freeform" name="freeform" rows="4" cols="50" defaultValue={editContent} onChange={(e) => setEditContent(e.target.value)}/>                                
+                {/* <p>Set this private from:</p> */}
+                {/* <input style={styles.text} type="text" id="fname" name="fname"></input> */}
+                <button style={styles.submit} onClick={editRequest}>OK</button>
+                <button style={styles.cancel} onClick={() => setOpenEditDialog(false)}>Cancel</button>
             </form>
             </dialog>
             <dialog open={openRestrictionsDialog} style={styles.dialog}>
@@ -210,7 +269,11 @@ function ManagePosts() {
                                     setOpenVisibilityDialog={setOpenVisibilityDialog} 
                                     setRestrictionsDialog={setRestrictionsDialog}                                   
                                     setPostSelected={setPostSelected}
-                                    setRestrictedUsers={setRestrictedUsers}                            
+                                    setRestrictedUsers={setRestrictedUsers}  
+                                    setOpenEditDialog={setOpenEditDialog}   
+                                    setEditContent={setEditContent}  
+                                    setEditTitle={setEditTitle}                     
+                                    setEdittedContentType={setEdittedContentType}
                                     />
                 )) : <div>You have no posts</div>
             }
