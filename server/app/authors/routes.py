@@ -1,5 +1,5 @@
 from app.authors import bp
-from flask import Flask, request, g, jsonify
+from flask import request, g, jsonify
 import sqlite3
 
 def get_db():
@@ -21,13 +21,12 @@ def login():
 
     if author:
         stored_password = author['password']
-        print(stored_password)
         if password == stored_password:
             result = 'Login successful'
             print('Login succ')
         else:
-            result = 'Wrong credentials'
-            print('Wrong cred')
+            result = 'Wrong Password'
+            print('Wrong Password')
     else:
         result = 'User not found'
         print('User not found')

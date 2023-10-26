@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import Login from '../components/login';
 import Register from '../components/register';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-function LoginPage() {
+function LoginPage({ setIsAuthenticated, isAuthenticated }) {
   const [currentPage, setCurrentPage] = useState(null); 
   const navigate = useNavigate(); 
 
@@ -38,6 +40,10 @@ function LoginPage() {
     }
   };
 
+  if (isAuthenticated) {
+    return <Navigate to="/homepage" />;
+  }
+
   return (
     <div style={styles.container}>
       {currentPage === null && (
@@ -61,8 +67,17 @@ function LoginPage() {
         </div>
       )}
       
-      {currentPage === 'login' && <Login setCurrentPage={setCurrentPage} navigate={navigate} />}
+      {/* {currentPage === 'login' && <Login setCurrentPage={setCurrentPage} navigate={navigate} />} */}
+      {currentPage === 'login' && (
+        <Login
+          setCurrentPage={setCurrentPage}
+          setIsAuthenticated={setIsAuthenticated}
+          navigate={navigate}
+        />
+      )}
       {currentPage === 'register' && <Register setCurrentPage={setCurrentPage} />}
+
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </div>
   );
 }

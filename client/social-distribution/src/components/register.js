@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 
 function Register(props) {
   const [username, setUsername] = useState('');
@@ -39,6 +40,14 @@ function Register(props) {
   };
 
   const handleRegistration = async () => {
+    if (!username || !password) {
+      toast.error('Empty Fields!', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+      return;
+    }
+
     const registrationData = { username, password };
     try {
       const response = await fetch('http://localhost:5000/requestors/register', {
@@ -49,10 +58,28 @@ function Register(props) {
         body: JSON.stringify(registrationData),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        console.log('Registration successful');
+        if (data.error === 'Username already exists') {
+          console.log('Username taken');
+          toast.error('Username already exists', {
+              position: 'top-right',
+              autoClose: 3000,
+          });
+        } else {
+          console.log('Registration Successful');
+          toast.success('Awaiting Approval!', {
+            position: 'top-right',
+            autoClose: 3000,
+          });
+        }
       } else {
         console.error('Registration failed');
+        toast.error('Registration failed', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
       }
     } catch (error) {
       console.error('Error:', error);
