@@ -86,7 +86,7 @@ function get_content_as_elements(content_type, content){
         <div>
             <h3>{props.item.title}</h3>
         </div>
-        <button onClick={selectEdit}>Edit</button>
+        {props.item.content_type === "text/plain" || props.item.content_type === "text/markdown" ? <button onClick={selectEdit}>Edit</button> : null}
         <button onClick={processDelete}>Delete this post</button>
         <button onClick={selectVisibility}>Change visibility</button>
         <button onClick={selectRestriction}>Restrictions</button>
