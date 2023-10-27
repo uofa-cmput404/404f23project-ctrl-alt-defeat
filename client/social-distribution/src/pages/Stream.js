@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import PostsList from '../components/PostsList'
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const postsUrl = 'http://127.0.0.1:5000/posts/'
 
@@ -8,7 +9,7 @@ export default function Stream() {
 
     // const username = "philiponions" // temporary username
 
-
+    const navigate = useNavigate();
     const [postsLists, setPostsLists] = useState([])
     const fetchData = async () => {
         try {
@@ -33,8 +34,13 @@ export default function Stream() {
         fetchData();
     }, [])
 
+    const goToProfile = () => {
+        navigate('/profile');
+      };
+
   return (
     <div>
+        <button onClick={goToProfile}>Edit Profile</button>
         <h1>Streams</h1>
         <div>
             <PostsList postsLists={postsLists}/>

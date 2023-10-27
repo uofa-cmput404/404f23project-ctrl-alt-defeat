@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { UserContext } from '../App';
 import { toast } from 'react-toastify';
 
 function Profile() {
+  const { username, authorId } = useContext(UserContext);
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
@@ -16,7 +18,7 @@ function Profile() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ new_username: newUsername }),
+      body: JSON.stringify({ new_username: newUsername, authorId }),
     });
 
     const data = await response.json();
@@ -40,7 +42,7 @@ function Profile() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ new_password: newPassword }),
+      body: JSON.stringify({ new_password: newPassword, authorId }),
     });
 
     const data = await response.json();
@@ -112,6 +114,7 @@ function Profile() {
   return (
     <div className="profile-container" style={{ display: 'block' }}>
       <h2>Edit Profile</h2>
+      <p>Current Username: {username}</p> 
       <div className="input-container">
         <label>Enter New Username:</label>
         <input

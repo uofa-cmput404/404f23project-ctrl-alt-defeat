@@ -53,18 +53,14 @@ function Login(props) {
       .then(data => {
         if (data.message === 'Login successful') {
           localStorage.setItem('isAuthenticated', 'true');
+          localStorage.setItem('username', username.toLowerCase());
+          localStorage.setItem('author_id', data.author_id); 
           props.updateAuthStatus(true);
           props.navigate('/homepage');
         } else if (data.message === 'Wrong Password') {
-          toast.error('Wrong Password', {
-            position: 'top-right',
-            autoClose: 3000,
-          });
+          toast.error('Wrong Password');
         } else if (data.message === 'User not found') {
-          toast.error('User not found', {
-            position: 'top-right',
-            autoClose: 3000,
-          });
+          toast.error('User not found');
         }
       })
       .catch(error => {
