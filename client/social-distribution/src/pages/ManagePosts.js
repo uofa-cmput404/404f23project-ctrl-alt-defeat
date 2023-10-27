@@ -76,11 +76,11 @@ function ManagePosts() {
     const [edittedContentType, setEdittedContentType] = useState("");
 
     const editRequest = async () => {
-        console.log(authorId);
-        console.log(postSelected);
-        console.log(editContent);
-        console.log(editTitle);
-        console.log(edittedContentType);
+        // console.log(authorId);
+        // console.log(postSelected);
+        // console.log(editContent);
+        // console.log(editTitle);
+        // console.log(edittedContentType);
         
         axios.post(editUrl + authorId + "/" + postSelected + "/edit/", {
             "content_type": edittedContentType,
@@ -210,6 +210,42 @@ function ManagePosts() {
         setRestrictedUsername(event.target.value);        
     };
 
+    const encodeImageToBase64 = (file) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64Image = e.target.result; // The base64 encoded image string
+          // You can now send this 'base64Image' to your backend or use it in your React component
+          // Assuming 'base64Image' is your base64-encoded image string
+          const jpegDataURL = 'data:image/jpeg;base64,';
+          const pngDataURL = 'data:image/png;base64,';
+          
+          if (base64Image.startsWith(jpegDataURL)) {
+              const strippedBase64Image = base64Image.substring(jpegDataURL.length);              
+                setEditContent(strippedBase64Image);
+            // Now, 'strippedBase64Image' contains the base64-encoded image data without the prefix
+            } else if (base64Image.startsWith(pngDataURL)) {
+                const strippedBase64Image = base64Image.substring(pngDataURL.length);
+                setEditContent(strippedBase64Image);
+            // Now, 'strippedBase64Image' contains the base64-encoded image data without the prefix
+            } else {
+            // Handle the case where the string doesn't start with either data URL prefix
+            console.error("The string does not start with a recognized data URL prefix.");
+            }
+
+        };
+        reader.readAsDataURL(file);
+      };
+    
+    const handleImageChange = (e) => {        
+            const file = e.target.files[0];
+            console.log(file);
+            if (file) {
+              encodeImageToBase64(file);
+            } else {
+                alert("No file selected.");
+            }                  
+    };
+
   return (
     <div>
         <h1>My posts:</h1>
@@ -236,8 +272,8 @@ function ManagePosts() {
                 <br/>
                 <label for="freeform">Edit your post:</label>                
                 <br/>
-                
-                <textarea id="freeform" name="freeform" rows="4" cols="50" defaultValue={editContent} onChange={(e) => setEditContent(e.target.value)}/>                                
+                                
+                {edittedContentType === 'text/plain' || edittedContentType === 'text/markdown' ? <textarea id="freeform" name="freeform" rows="4" cols="50" defaultValue={editContent} onChange={(e) => setEditContent(e.target.value)}/> : <input type="file" id="img" name="img" accept="image/*" onChange={handleImageChange}></input>}                                
                 {/* <p>Set this private from:</p> */}
                 {/* <input style={styles.text} type="text" id="fname" name="fname"></input> */}
                 <button style={styles.submit} onClick={editRequest}>OK</button>
