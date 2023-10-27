@@ -56,6 +56,8 @@ function Login(props) {
       .then(data => {
         if (data.message === 'Login successful') {
           localStorage.setItem('isAuthenticated', 'true');
+          localStorage.setItem('username', username.toLowerCase());
+          localStorage.setItem('author_id', data.author_id); 
           props.updateAuthStatus(true);
           props.navigate('/homepage');
         } else if (data.message === 'Wrong Password') {

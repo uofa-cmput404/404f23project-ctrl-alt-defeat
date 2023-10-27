@@ -16,27 +16,27 @@ def login():
     db = get_db()
     cur = db.cursor()
 
-    cur.execute("SELECT * FROM authors WHERE username = ?", (username,))
+    cur.execute("SELECT author_id, password FROM authors WHERE username = ?", (username,))
     author = cur.fetchone()
 
     if author:
         stored_password = author['password']
         if password == stored_password:
-            result = 'Login successful'
+            result = {'message': 'Login successful', 'author_id': author['author_id']}
         else:
-            result = 'Wrong Password'
+            result = {'message': 'Wrong Password'}
     else:
-        result = 'User not found'
+        result = {'message': 'User not found'}
 
     db.close()
 
-    return jsonify({'message': result})
+    return jsonify(result)
 
 @bp.route('/update_username', methods=['POST'])
 def update_username():
     data = request.get_json()
     new_username = data.get('new_username')
-    author_id = data.get('author_id')
+    author_id = data.get('authorId')
 
     db = get_db()
     cur = db.cursor()
@@ -62,7 +62,7 @@ def update_username():
 def update_password():
     data = request.get_json()
     new_password = data.get('new_password')
-    author_id = data.get('author_id') 
+    author_id = data.get('authorId') 
 
     db = get_db()
     cur = db.cursor()
