@@ -5,6 +5,7 @@ from flask import request, abort
 from werkzeug.exceptions import HTTPException
 from random import randrange
 from sqlite3 import DatabaseError
+import sqlite3
 
 
 # VIEW POSTS
@@ -96,33 +97,37 @@ def new_post():
     return data  # data
 
 
-@bp.route('/authors/<author_id>/<post_id>/image/', methods=['GET'])
-def get_image(author_id, post_id):
-    conn = get_db_connection()
+@bp.route('/<post_id>/image/', methods=['GET'])
+def get_image(post_id):
     final_message = "Nothing happened."
     # check if image exists
     try:
-        query = "SELECT img_id, content_type from posts WHERE (post_id = ? AND img_id IS NOT NULL AND author_id = ?);"
-        cursor = conn.cursor()
-        conn.execute(query, (post_id, author_id))
-        img_id = cursor.fetchone()
-        if img_id[0] is None:
-            abort(404, "The post with this image id does not exist.")
+        conn = get_db_connection()
+        to_find = (post_id,)
+        query = 'SELECT * FROM posts WHERE post_id = ?;'
+        contents = conn.execute(query,to_find).fetchone()
+
+        if contents is None:
+            abort(404, "The post with this post_id does not exist.")
+        elif contents["img_id"] is None or (contents["content_type"] == "text/plain" or contents["content_type"] == "text/markdown"):
+            abort(404, f"The post exists, but it is not an image. Got {contents[1]}")
+        elif contents["visibility"] != "public":
+            abort(403, "This post exists, but it is only visible to specific users.")
         print("Successfully found the post with this image id.")
 
-        query = "SELECT img_url,visibility FROM image_post WHERE img_id = ?;"
+        query = "SELECT * FROM image_post WHERE img_id = ?;"
 
-        conn.execute(query, (img_id[0],))
-        img_visibility = cursor.fetchone()
+        img_visibility = conn.execute(query, (contents["img_id"],)).fetchone()
         if img_visibility is None:
             abort(404, "The post exists, but the image it references does not exist.")
         elif img_visibility["visibility"] != "public":
             abort(403, "This post exists, but the image contained is only visible to specific users.")
 
-        content_type = img_id["content_type"]
+        content_type = contents["content_type"]
         content = img_visibility["img_url"]
+        #display as HTML for testing
+        #final_message = f"<img src=\"data:{content_type},{content}\"/>"
         final_message = f"data:{content_type},{content}"
-        return final_message
     except HTTPException as e:
         final_message = str(e)
         print(final_message)
@@ -157,8 +162,6 @@ def edit_post(author_id, post_id):
 
         # At the moment, I am assuming the content provided is of this content_type. Some entry validation might be needed.
 
-        # TODO: Images will need to be updated as well in the image_post table.
-
         content_type = request_data["content_type"]
         content = request_data["content"]
         image_id = request_data["img_id"]
@@ -175,6 +178,15 @@ def edit_post(author_id, post_id):
 
         query = "UPDATE posts SET title = ?, content_type = ?,content = ?, img_id = ?, visibility = ? WHERE post_id = ? AND author_id = ?;"
         conn.execute(query, (title, content_type, content, image_id, visibility, post_id, author_id))
+
+        if image_id == "NULL":
+            query = "DELETE from image_post WHERE img_id = ?;"
+            conn.execute(query,(image_id,))
+        else:
+            # check for existence
+            query = "SELECT * from image_post WHERE img_id = ? AND img_url <> ?"
+
+
         final_message = "Post Updated Successfully"
         conn.commit()
     except HTTPException as e:
