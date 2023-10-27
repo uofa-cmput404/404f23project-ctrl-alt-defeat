@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import PostsList from '../components/PostsList'
+import UserSearch from '../components/UserSearch';
 import axios from 'axios';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const postsUrl = 'http://127.0.0.1:5000/posts/'
 
@@ -35,10 +38,14 @@ export default function Stream() {
 
   return (
     <div>
+        <div>
+            <UserSearch />
+        </div>
         <h1>Streams</h1>
         <div>
             <PostsList postsLists={postsLists}/>
         </div>
+        <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </div>
   )
 }

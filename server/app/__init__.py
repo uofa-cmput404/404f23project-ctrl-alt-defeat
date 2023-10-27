@@ -1,9 +1,7 @@
 from flask import Flask
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_basicauth import BasicAuth
-from app.requestors import bp as requestors_bp
-from app.authors import bp as authors_bp
 
 db = SQLAlchemy()
 basic_auth = BasicAuth()
@@ -25,6 +23,9 @@ def create_app():
 
     from app.authors import bp as authors_bp
     app.register_blueprint(authors_bp, url_prefix='/authors')   
+
+    from app.follow import bp as follow_bp
+    app.register_blueprint(follow_bp, url_prefix='/follow') 
 
     from app.posts import bp as posts_bp
     app.register_blueprint(posts_bp, url_prefix='/posts')

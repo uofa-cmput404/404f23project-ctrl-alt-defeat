@@ -1,19 +1,52 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 
 function UserSearch() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  
-  const handleSearch = () => {
-    // Send a request to your Flask API to search for users based on the searchQuery
-    // Update the searchResults state with the API response
-    // You can use the `fetch` function or Axios to make the API call
-    
-    // Example using fetch:
-    fetch(`API_URL_HERE?query=${searchQuery}`)
-      .then((response) => response.json())
-      .then((data) => setSearchResults(data))
-      .catch((error) => console.error('Error:', error));
+
+  const handleSearch = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/follow/usersearch?query=${searchQuery}`);
+      if (response.ok) {
+        const data = await response.json();
+        setSearchResults(data.users);
+      } else {
+        console.error('Search failed');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const handleFollowRequest = async (authorId) => {
+    try {
+      const response = await fetch('http://localhost:5000/follow/follow_request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          author_send: 2,  // Replace with the ID of the current user
+          author_receive: authorId, 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        if (data.message === 'Follow request already sent') {
+          toast.error('Follow request already sent');
+        } else {
+          toast.success('Follow Request Sent');
+          console.log('hereee',authorId)
+        }
+      } else {
+        console.error('Follow request failed');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   return (
@@ -28,12 +61,12 @@ function UserSearch() {
 
       {searchResults.length > 0 ? (
         <div>
-          <h2>Search Results:</h2>
+          <h2>Users Found:</h2>
           <ul>
             {searchResults.map((user) => (
               <li key={user.id}>
                 {user.username}
-                <button onClick={() => handleFollow(user.id)}>Follow</button>
+                <button onClick={() => handleFollowRequest(user.id)}>Follow Request</button>
               </li>
             ))}
           </ul>

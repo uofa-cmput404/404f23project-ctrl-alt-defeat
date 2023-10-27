@@ -40,7 +40,10 @@ function Login(props) {
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    const loginData = { username, password };
+    const loginData = {
+      username: username.toLowerCase(), 
+      password: password.toLowerCase(), 
+    };
   
     fetch('http://localhost:5000/authors/login', {
       method: 'POST',
@@ -56,15 +59,9 @@ function Login(props) {
           props.updateAuthStatus(true);
           props.navigate('/homepage');
         } else if (data.message === 'Wrong Password') {
-          toast.error('Wrong Password', {
-            position: 'top-right',
-            autoClose: 3000,
-          });
+          toast.error('Wrong Password');
         } else if (data.message === 'User not found') {
-          toast.error('User not found', {
-            position: 'top-right',
-            autoClose: 3000,
-          });
+          toast.error('User not found');
         }
       })
       .catch(error => {

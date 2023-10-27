@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS requestors;
 DROP TABLE IF EXISTS admins;
 DROP TABLE IF EXISTS image_post;
 DROP TABLE IF EXISTS friends;
-DROP TABLE IF EXISTS friend_requests;
+DROP TABLE IF EXISTS follow_requests;
 DROP TABLE IF EXISTS likes;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS shares;
@@ -49,7 +49,7 @@ CREATE TABLE image_post (
     FOREIGN KEY (author_id) REFERENCES authors(author_id)
 );
 
--- if both AB, BA in friends, AB are true friends
+-- if both AB, BA in follow, AB are true friends
 CREATE TABLE friends (
     author_followee INTEGER NOT NULL,
     author_following INTEGER NOT NULL,
@@ -57,8 +57,8 @@ CREATE TABLE friends (
     FOREIGN KEY (author_following) REFERENCES authors(author_id)
 );
 
--- if accepted, delete from friend_requests, add to friends
-CREATE TABLE friend_requests (
+-- if accepted, delete from follow_requests, add to follow
+CREATE TABLE follow_requests (
     author_send INTEGER NOT NULL,
     author_receive INTEGER NOT NULL,
     FOREIGN KEY (author_send) REFERENCES authors(author_id),
