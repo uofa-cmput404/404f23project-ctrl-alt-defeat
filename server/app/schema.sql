@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS posts;
 DROP TABLE IF EXISTS authors;
-DROP TABLE IF EXISTS requesters;
+DROP TABLE IF EXISTS requestors;
 DROP TABLE IF EXISTS admins;
 DROP TABLE IF EXISTS image_post;
 DROP TABLE IF EXISTS friends;
@@ -29,8 +29,8 @@ CREATE TABLE authors (
     passwd TEXT NOT NULL
 );
 
-CREATE TABLE requesters (
-    requester_id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE requestors (
+    requestor_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
     passwd TEXT NOT NULL
 );

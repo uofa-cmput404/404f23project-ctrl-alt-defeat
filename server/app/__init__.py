@@ -6,7 +6,15 @@ from flask_admin.actions import action
 from flask_admin import expose
 from markupsafe import Markup
 
+from flask_cors import CORS, cross_origin
+
+from flask_basicauth import BasicAuth
+from app.requestors import bp as requestors_bp
+from app.authors import bp as authors_bp
+
+
 db = SQLAlchemy()
+basic_auth = BasicAuth()
 admin = Admin()
 
 class Author(db.Model):
@@ -23,32 +31,32 @@ class AuthorView(ModelView):
     column_list = ["author_id", "username", "passwd"]
     column_searchable_list = ['username']  
 
-class Requester(db.Model):
-    __tablename__ = "requesters"
-    requester_id = db.Column(db.Integer, primary_key=True)
+class Requestor(db.Model):
+    __tablename__ = "requestors"
+    requestor_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.Text)
     passwd = db.Column(db.Text)
 
 
-class RequesterView(ModelView):
+class RequestorView(ModelView):
     can_delete = True
-    form_columns = ["requester_id", "username", "passwd"]
-    column_list = ["requester_id", "username", "passwd"]
+    form_columns = ["requestor_id", "username", "passwd"]
+    column_list = ["requestor_id", "username", "passwd"]
 
     @action('approve', 'Approve', 'Are you sure you want to approve selected requesters?')
     def action_approve(self, ids):
         for id in ids:
-            requester = Requester.query.get(id)
-            if requester:
-                # Transfer requester to author
-                new_author = Author(username=requester.username, passwd=requester.passwd)
+            requestor = Requestor.query.get(id)
+            if requestor:
+                # Transfer requestor to author
+                new_author = Author(username=requestor.username, passwd=requestor.passwd)
                 db.session.add(new_author)
 
-                # Remove requester
-                db.session.delete(requester)
+                # Remove requestor
+                db.session.delete(requestor)
                     
         db.session.commit()
-        # navigate to the index_view of the RequesterView
+        # navigate to the index_view of the RequestorView
         return redirect(url_for('.index_view'))
     
 
@@ -85,7 +93,7 @@ class ImageView(ModelView):
     column_labels = dict(view_button='View Image')
 
 admin.add_view(AuthorView(Author, db.session))
-admin.add_view(RequesterView(Requester, db.session))
+admin.add_view(RequestorView(Requestor, db.session))
 admin.add_view(PostView(Post, db.session))
 admin.add_view(ImageView(Image, db.session))
 
@@ -93,10 +101,28 @@ admin.add_view(ImageView(Image, db.session))
 def create_app():
     app = Flask(__name__)
 
+  
+    # HUGE SECURITY ISSUE - DO NOT KEEP THIS IN PRODUCTION
+    # Need this so that the API allows all urls to make requests.
+    # Change it so that only our web client is allowed.
+    CORS(app, resources={r"/*": {"origins": "*"}})
+
+
+     # Register blueprints here
+    from app.main import bp as main_bp
+    app.register_blueprint(main_bp)
+    from app.requestors import bp as requestors_bp
+    app.register_blueprint(requestors_bp, url_prefix='/requestors')   
+    from app.authors import bp as authors_bp
+    app.register_blueprint(authors_bp, url_prefix='/authors')   
+    from app.posts import bp as posts_bp
+    app.register_blueprint(posts_bp, url_prefix='/posts')
+
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///../database.db"
     app.config["SECRET_KEY"] = "mysecret"
 
     db.init_app(app)
     admin.init_app(app)
-
     return app
+
+

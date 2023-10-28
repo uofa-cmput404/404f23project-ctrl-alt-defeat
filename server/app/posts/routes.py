@@ -1,6 +1,6 @@
 from app.posts import bp
 import json
-from app.db import get_db_connection
+from app.dbase import get_db_connection
 from flask import request
 from random import randrange
 
