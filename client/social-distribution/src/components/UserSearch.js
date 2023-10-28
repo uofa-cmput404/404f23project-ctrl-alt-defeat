@@ -10,7 +10,8 @@ function UserSearch({ username, authorId }) {
       const response = await fetch(`http://localhost:5000/follow/usersearch?query=${searchQuery}`);
       if (response.ok) {
         const data = await response.json();
-        setSearchResults(data.users);
+        const filteredResults = data.users.filter(user => user.id !== authorId);
+        setSearchResults(filteredResults);
       } else {
         console.error('Search failed');
       }
@@ -35,7 +36,9 @@ function UserSearch({ username, authorId }) {
       const data = await response.json();
 
       if (response.ok) {
-        if (data.message === 'Follow request already sent') {
+        if (data.message === 'Already following') {
+          toast.error('Already following');
+        } else if (data.message === 'Follow request already sent') {
           toast.error('Follow request already sent');
         } else {
           toast.success('Follow Request Sent');

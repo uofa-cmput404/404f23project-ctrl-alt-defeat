@@ -35,6 +35,12 @@ def follow_request():
     db = get_db()
     cursor = db.cursor()
 
+    cursor.execute("SELECT * FROM friends WHERE author_following = ? AND author_followee = ?", (author_send, author_receive))
+    existing_friendship = cursor.fetchone()
+
+    if existing_friendship:
+        return jsonify({'message': 'Already following'})
+
     cursor.execute("SELECT * FROM follow_requests WHERE author_send = ? AND author_receive = ?", (author_send, author_receive))
     existing_request = cursor.fetchone()
 
@@ -80,15 +86,12 @@ def accept_follow_request():
     db = get_db()
     cursor = db.cursor()
 
-    # Check if the follow request exists
     cursor.execute("SELECT * FROM follow_requests WHERE author_send = ? AND author_receive = ?", (author_following, author_followee))
     existing_request = cursor.fetchone()
 
     if existing_request:
-        # Insert the data into the friends table
-        cursor.execute("INSERT INTO friends (author_followee, author_following) VALUES (?, ?)", (author_following, author_followee))
+        cursor.execute("INSERT INTO friends (author_followee, author_following) VALUES (?, ?)", (author_followee, author_following))
 
-        # Delete the data from the follow_requests table
         cursor.execute("DELETE FROM follow_requests WHERE author_send = ? AND author_receive = ?", (author_following, author_followee))
 
         db.commit()
@@ -110,7 +113,6 @@ def reject_follow_request():
     existing_request = cursor.fetchone()
 
     if existing_request:
-        # Delete the data from the follow_requests table
         cursor.execute("DELETE FROM follow_requests WHERE author_send = ? AND author_receive = ?", (author_following, author_followee))
 
         db.commit()
