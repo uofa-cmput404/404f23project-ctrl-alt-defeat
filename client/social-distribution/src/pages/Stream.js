@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import PostsList from '../components/PostsList'
 import UserSearch from '../components/UserSearch';
 import Profile from '../components/Profile';
@@ -7,12 +7,15 @@ import axios from 'axios';
 import { UserContext } from '../App';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 
 const postsUrl = 'http://127.0.0.1:5000/posts/'
 
 export default function Stream() {
     const { username, authorId, setUsername } = useContext(UserContext);
     // const username = "philiponions" // temporary username
+    const navigate = useNavigate();
+
     const [postsLists, setPostsLists] = useState([])
     const [showProfile, setShowProfile] = useState(false); 
 
@@ -20,7 +23,7 @@ export default function Stream() {
         try {
             // Make the GET request using Axios
                 axios.post(postsUrl, {
-                    author_id: 1
+                    author_id: authorId
                 })
                 .then(response => {
                 // Handle the successful response here
@@ -47,6 +50,10 @@ export default function Stream() {
     setShowProfile(false);
     };
       
+    function goToManagePosts() {
+        navigate("/manageposts")
+    }
+
   return (
     <div>
         <FollowRequests authorId={authorId} />
@@ -56,8 +63,11 @@ export default function Stream() {
         {showProfile && <Profile username={username} authorId={authorId} setUsername={setUsername} onClose={closeProfile} />}
         <button onClick={toggleProfile}>Edit Profile</button>
         <h1>Streams</h1>
+        <button onClick={goToManagePosts}>Manage my posts</button>
         <div>
-            <PostsList postsLists={postsLists}/>
+            {
+                postsLists.length !== 0 ? <PostsList postsLists={postsLists}/> : <div>There are no posts</div>
+            }
         </div>
         <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </div>
