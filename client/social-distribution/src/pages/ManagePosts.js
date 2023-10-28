@@ -98,7 +98,7 @@ function ManagePosts() {
                     }
                     return item; // Return the original object for other items
                 }))
-                alert("The post was successfully editted.");
+                alert("The post was successfully edited.");
             } else {
                 alert("Something went wronng")
             }
@@ -282,8 +282,9 @@ function ManagePosts() {
             </dialog>
             <dialog open={openRestrictionsDialog} style={styles.dialog}>
             <h1>Restrictions</h1>
+            <p><i>You can restrict specific authors from seeing this post.</i></p>
             <form method="dialog">
-                Restricted authors
+                Restricted authors:
                 {
                     restrictedUsers.length ? restrictedUsers.map((item) => {return <RestrictedUser username={item.username} 
                                                                                                    setRestrictedUsers={setRestrictedUsers}

@@ -85,14 +85,14 @@ function get_content_as_elements(content_type, content){
     <li key={props.key}>
         <div>
             <h3>{props.item.title}</h3>
+            <div>{props.item.date_posted}</div>
+            <div>Visibility: {props.item.visibility}</div>
         </div>
         <button onClick={selectEdit}>Edit</button>
         <button onClick={processDelete}>Delete this post</button>
         <button onClick={selectVisibility}>Change visibility</button>
         <button onClick={selectRestriction}>Restrictions</button>
-        <div>{props.item.date_posted}</div>
         <div>{get_content_as_elements(props.item.content_type,props.item.content)}</div>
-        <div>Visibility: {props.item.visibility}</div>
     </li>
   )
 }
