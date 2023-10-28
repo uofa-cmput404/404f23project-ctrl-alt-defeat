@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS friend_requests;
 DROP TABLE IF EXISTS likes;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS shares;
+DROP TABLE IF EXISTS post_restrictions;
 
 CREATE TABLE posts (
     post_id TEXT PRIMARY KEY,
@@ -89,4 +90,12 @@ CREATE TABLE shares(
     date_posted TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (share_author_id) REFERENCES authors(author_id),
     FOREIGN KEY (post_id) REFERENCES posts(post_id)
+);
+
+CREATE TABLE post_restrictions (
+    post_id INTEGER,
+    restricted_author_id INTEGER,
+    FOREIGN KEY (post_id) REFERENCES posts (post_id),
+    FOREIGN KEY (restricted_author_id) REFERENCES authors (author_id)
+    UNIQUE (post_id, restricted_author_id) -- Unique constraint
 );
