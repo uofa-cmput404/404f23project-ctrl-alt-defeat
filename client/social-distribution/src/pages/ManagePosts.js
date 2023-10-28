@@ -273,7 +273,7 @@ function ManagePosts() {
                 <label for="freeform">Edit your post:</label>                
                 <br/>
                                 
-                {edittedContentType === 'text/plain' || edittedContentType === 'text/markdown' ? <textarea id="freeform" name="freeform" rows="4" cols="50" defaultValue={editContent} onChange={(e) => setEditContent(e.target.value)}/> : <input type="file" id="img" name="img" accept="image/*" onChange={handleImageChange}></input>}                                
+                {edittedContentType === 'text/plain' || edittedContentType === 'text/markdown' ? <textarea id="freeform" name="freeform" rows="4" cols="50" value={editContent} onChange={(e) => setEditContent(e.target.value)}/> : <input type="file" id="img" name="img" accept="image/*" onChange={handleImageChange}></input>}                                
                 {/* <p>Set this private from:</p> */}
                 {/* <input style={styles.text} type="text" id="fname" name="fname"></input> */}
                 <button style={styles.submit} onClick={editRequest}>OK</button>
