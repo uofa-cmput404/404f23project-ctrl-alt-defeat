@@ -86,7 +86,7 @@ function ManagePosts() {
             "content_type": edittedContentType,
             "content": editContent,
             "img_id": null,
-            "visibility": "public",
+            "visibility": visibility,
             "post_id": postSelected,
             "title": editTitle
         }).then((response) => {
@@ -255,7 +255,7 @@ function ManagePosts() {
                 <select id="visibility" name="visibility" onChange={handleSelectChange}>
                     <option value="private">Private</option>
                     <option value="public">Public</option>                
-                    <option value="unlisted">Unlisted</option>                
+                    <option value="friends-only">Friends-Only</option>                    
                 </select>
                 {/* <p>Set this private from:</p> */}
                 {/* <input style={styles.text} type="text" id="fname" name="fname"></input> */}
