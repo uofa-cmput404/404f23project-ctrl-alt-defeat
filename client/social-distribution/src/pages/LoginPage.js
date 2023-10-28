@@ -5,7 +5,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function LoginPage({ isAuthenticated, updateAuthStatus }) {
+function LoginPage({ isAuthenticated, updateAuthStatus, updateUserAndAuthorId }) {
   const [currentPage, setCurrentPage] = useState(null); 
   const navigate = useNavigate(); 
 
@@ -21,7 +21,7 @@ function LoginPage({ isAuthenticated, updateAuthStatus }) {
     buttonContainer: {
       display: 'flex',
       flexDirection: 'column',
-      gap: '20px',
+      gap: '20px',  
     },
     button: {
       padding: '10px 20px',
@@ -72,6 +72,7 @@ function LoginPage({ isAuthenticated, updateAuthStatus }) {
           setCurrentPage={setCurrentPage}
           navigate={navigate}
           updateAuthStatus={updateAuthStatus}
+          updateUserAndAuthorId={updateUserAndAuthorId}
         />
       )}
       {currentPage === 'register' && <Register setCurrentPage={setCurrentPage} />}

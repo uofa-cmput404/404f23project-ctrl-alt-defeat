@@ -1,9 +1,7 @@
-import React, { useState, useContext } from 'react';
-import { UserContext } from '../App';
+import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 
-function Profile() {
-  const { username, authorId } = useContext(UserContext);
+function Profile({ username, authorId, setUsername, onClose }) {
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
@@ -26,6 +24,8 @@ function Profile() {
     if (data.error) {
       toast.error(data.error);
     } else {
+      setUsername(newUsername);
+      localStorage.setItem('username', newUsername);
       toast.success(data.message);
     }
     setNewUsername('');
@@ -58,13 +58,25 @@ function Profile() {
 
   const styles = `
     .profile-container {
+      position: relative;
       max-width: 400px;
-      margin: 0 auto;
+      margin: 20px auto 0;
       padding: 20px;
       background-color: #f5f5f5;
       border: 1px solid #ccc;
       border-radius: 5px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    button.close-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: black;
     }
 
     h2 {
@@ -113,6 +125,7 @@ function Profile() {
 
   return (
     <div className="profile-container" style={{ display: 'block' }}>
+      <button className="close-button" onClick={onClose}>x</button>
       <h2>Edit Profile</h2>
       <p>Current Username: {username}</p> 
       <div className="input-container">

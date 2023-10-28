@@ -14,7 +14,7 @@ function Login(props) {
     input: {
       margin: '10px',
       padding: '10px',
-      fontSize: '16px',
+      fontSize: '16px', 
       width: '200px'
     },
     button_login: {
@@ -56,9 +56,12 @@ function Login(props) {
       .then(data => {
         if (data.message === 'Login successful') {
           localStorage.setItem('isAuthenticated', 'true');
-          localStorage.setItem('username', username.toLowerCase());
-          localStorage.setItem('author_id', data.author_id); 
+          const newUsername = username.toLowerCase();
+          const newAuthorId = data.author_id;
+          localStorage.setItem('username', newUsername);
+          localStorage.setItem('authorId', newAuthorId); 
           props.updateAuthStatus(true);
+          props.updateUserAndAuthorId(newUsername, newAuthorId);
           props.navigate('/homepage');
         } else if (data.message === 'Wrong Password') {
           toast.error('Wrong Password');

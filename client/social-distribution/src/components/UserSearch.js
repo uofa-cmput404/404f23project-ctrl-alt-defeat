@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 
-function UserSearch() {
+function UserSearch({ username, authorId }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
 
@@ -19,7 +19,7 @@ function UserSearch() {
     }
   };
 
-  const handleFollowRequest = async (authorId) => {
+  const handleFollowRequest = async (recieveAuthorId) => {
     try {
       const response = await fetch('http://localhost:5000/follow/follow_request', {
         method: 'POST',
@@ -27,8 +27,8 @@ function UserSearch() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          author_send: 2,  // Replace with the ID of the current user
-          author_receive: authorId, 
+          author_send: authorId,
+          author_receive: recieveAuthorId, 
         }),
       });
 
@@ -39,7 +39,6 @@ function UserSearch() {
           toast.error('Follow request already sent');
         } else {
           toast.success('Follow Request Sent');
-          console.log('hereee',authorId)
         }
       } else {
         console.error('Follow request failed');

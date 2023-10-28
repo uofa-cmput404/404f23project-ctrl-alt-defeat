@@ -1,19 +1,20 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import PostsList from '../components/PostsList'
 import UserSearch from '../components/UserSearch';
+import Profile from '../components/Profile';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { UserContext } from '../App';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const postsUrl = 'http://127.0.0.1:5000/posts/'
 
 export default function Stream() {
-
+    const { username, authorId, setUsername } = useContext(UserContext);
     // const username = "philiponions" // temporary username
-
-    const navigate = useNavigate();
     const [postsLists, setPostsLists] = useState([])
+    const [showProfile, setShowProfile] = useState(false); 
+
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
@@ -37,16 +38,21 @@ export default function Stream() {
         fetchData();
     }, [])
 
-    const goToProfile = () => {
-        navigate('/profile');
+    const toggleProfile = () => {
+        setShowProfile(!showProfile);
       };
 
+    const closeProfile = () => {
+    setShowProfile(false);
+    };
+      
   return (
     <div>
         <div>
-            <UserSearch />
+            <UserSearch username={username} authorId={authorId} />
         </div>
-        <button onClick={goToProfile}>Edit Profile</button>
+        {showProfile && <Profile username={username} authorId={authorId} setUsername={setUsername} onClose={closeProfile} />}
+        <button onClick={toggleProfile}>Edit Profile</button>
         <h1>Streams</h1>
         <div>
             <PostsList postsLists={postsLists}/>
