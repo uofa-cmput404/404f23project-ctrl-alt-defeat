@@ -51,8 +51,8 @@ CREATE TABLE image_post (
 
 -- if both AB, BA in follow, AB are true friends
 CREATE TABLE friends (
-    author_followee INTEGER NOT NULL,
-    author_following INTEGER NOT NULL,
+    author_followee INTEGER NOT NULL, -- author_receive
+    author_following INTEGER NOT NULL, -- author_send
     FOREIGN KEY (author_followee) REFERENCES authors(author_id),
     FOREIGN KEY (author_following) REFERENCES authors(author_id)
 );

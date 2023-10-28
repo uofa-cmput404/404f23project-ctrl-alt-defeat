@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from 'react'
 import PostsList from '../components/PostsList'
 import UserSearch from '../components/UserSearch';
 import Profile from '../components/Profile';
+import FollowRequests from '../components/followRequests';
 import axios from 'axios';
 import { UserContext } from '../App';
 import { ToastContainer } from 'react-toastify';
@@ -48,6 +49,7 @@ export default function Stream() {
       
   return (
     <div>
+        <FollowRequests authorId={authorId} />
         <div>
             <UserSearch username={username} authorId={authorId} />
         </div>
