@@ -268,7 +268,7 @@ function ManagePosts() {
             <form method="dialog">
                 <label for="freeform">Change title</label>                
                 <br/>
-                <input  defaultValue={editTitle} onChange={(e) => setEditTitle(e.target.value)}></input>                
+                <input  value={editTitle} onChange={(e) => setEditTitle(e.target.value)}></input>                
                 <br/>
                 <label for="freeform">Edit your post:</label>                
                 <br/>
