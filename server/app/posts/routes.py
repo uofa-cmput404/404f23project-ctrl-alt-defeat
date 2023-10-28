@@ -1,11 +1,11 @@
 from app.posts import bp
 import json
 from app.db import get_db_connection
-from flask import request, abort
+from flask import request, abort, Response
 from werkzeug.exceptions import HTTPException
 from random import randrange
 from sqlite3 import DatabaseError
-import sqlite3
+import base64
 
 
 # VIEW POSTS
@@ -95,6 +95,61 @@ def new_post():
         data = str(e)
 
     return data  # data
+
+
+@bp.route('/new/image/', methods=['POST'])
+def new_image():
+    final_message = ""
+    conn = get_db_connection()
+    try:
+        request_data = request.get_json()
+        try:
+            # check JSON keys
+
+            author_id = request_data["author_id"]
+            title = request_data["title"]
+            image_extension = request_data["content_type"]
+            image = request_data["content"]
+            print(image)
+            visibility = request_data["visibility"]
+        except KeyError:
+            abort(400, "Invalid JSON provided. Check for missing keys/values, JSON formatting, etc.")
+
+        # data validation
+
+        if image_extension not in ["image/png;base64","image/jpeg;base64","application/base64"]:
+            abort(400,"This is not an image.")
+
+        # check if content is valid base64
+        #
+        try:
+            # from StackOverflow
+            # https://stackoverflow.com/a/45928164
+            value = base64.b64encode(base64.b64decode(image)) == image
+        except Exception:
+            abort(400, "The image provided was not base64 encoded.")
+
+        # replace later
+        post_id = str(randrange(0, 100000))
+        img_id = str(randrange(0,100000))
+        insert_into_posts = 'INSERT INTO posts (post_id,author_id,title,content_type,content,img_id,visibility) VALUES (?,?,?,?,?,?,?);'
+        conn.execute(insert_into_posts,(post_id,author_id,title,image_extension,image,img_id,visibility))
+        conn.commit()
+        add_to_image_table = 'INSERT INTO image_post (img_id,author_id,img_url,visibility,date_posted) SELECT img_id,author_id,content,visibility,date_posted FROM posts WHERE post_id = ?;'
+
+        conn.execute(add_to_image_table,(post_id,))
+        conn.commit()
+        final_message = Response("Image successfully added.",201)
+    except DatabaseError as e:
+        conn.rollback()
+        abort(500,"Unable to commit changes to database. Reverting changes.")
+    except HTTPException as e:
+        final_message = str(e)
+    except Exception as e:
+        final_message = Response(f"Some error caught, exception returned '{e}'",status = 500)
+    finally:
+        conn.close()
+        return final_message
 
 
 @bp.route('/<post_id>/image/', methods=['GET'])
