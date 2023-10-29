@@ -1,3 +1,4 @@
+
 DROP TABLE IF EXISTS posts;
 DROP TABLE IF EXISTS authors;
 DROP TABLE IF EXISTS requestors;
@@ -19,7 +20,8 @@ CREATE TABLE posts (
     content TEXT NOT NULL,
     image_id TEXT,
     visibility TEXT NOT NULL DEFAULT "public",
-    FOREIGN KEY (image_id) REFERENCES image_post(img_id)
+    FOREIGN KEY (image_id) REFERENCES image_post(img_id) ON DELETE SET NULL,
+    FOREIGN KEY (author_id) REFERENCES authors(author_id) ON DELETE CASCADE
 );
 
 
@@ -45,34 +47,31 @@ CREATE TABLE image_post (
     img_id TEXT PRIMARY KEY,
     author_id INTEGER NOT NULL,
     img_url TEXT NOT NULL,
-    visibility TEXT NOT NULL,
+    visibility TEXT NOT NULL DEFAULT "public",
     date_posted TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
-    FOREIGN KEY (author_id) REFERENCES authors(author_id)
+    FOREIGN KEY (author_id) REFERENCES authors(author_id) ON DELETE CASCADE
 );
 
--- if both AB, BA in follow, AB are true friends
 CREATE TABLE friends (
-    author_followee INTEGER NOT NULL, -- author_receive
-    author_following INTEGER NOT NULL, -- author_send
-    FOREIGN KEY (author_followee) REFERENCES authors(author_id),
-    FOREIGN KEY (author_following) REFERENCES authors(author_id)
+    author_followee INTEGER NOT NULL,
+    author_following INTEGER NOT NULL,
+    FOREIGN KEY (author_followee) REFERENCES authors(author_id) ON DELETE CASCADE,
+    FOREIGN KEY (author_following) REFERENCES authors(author_id) ON DELETE CASCADE
 );
 
--- if accepted, delete from follow_requests, add to follow
 CREATE TABLE follow_requests (
-    author_send INTEGER NOT NULL,
-    author_receive INTEGER NOT NULL,
-    FOREIGN KEY (author_send) REFERENCES authors(author_id),
-    FOREIGN KEY (author_receive) REFERENCES authors(author_id)
-);
-
+     author_send INTEGER NOT NULL,
+     author_receive INTEGER NOT NULL,
+     FOREIGN KEY (author_send) REFERENCES authors(author_id),
+     FOREIGN KEY (author_receive) REFERENCES authors(author_id)
+ );
 
 CREATE TABLE likes (
     like_id TEXT PRIMARY KEY,
     like_author_id INTEGER NOT NULL,
     post_id TEXT NOT NULL,
     time_liked TIMESTAMP NOT NULL,
-    FOREIGN KEY (like_author_id) REFERENCES authors(author_id),
+    FOREIGN KEY (like_author_id) REFERENCES authors(author_id) ON DELETE CASCADE,
     FOREIGN KEY (post_id) REFERENCES posts(post_id)
 );
 

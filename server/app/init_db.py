@@ -1,7 +1,15 @@
 import sqlite3
-# Creates a database (based on our schema) file in the server folder
+import os
 
-connection = sqlite3.connect('../database.db')
+# Path to the database
+db_path = '../database.db'
+
+# Delete the database file if it exists
+if os.path.exists(db_path):
+    os.remove(db_path)
+
+# Now create a new database connection
+connection = sqlite3.connect(db_path)
 
 with open('schema.sql') as f:
     connection.executescript(f.read())
