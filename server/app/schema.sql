@@ -28,19 +28,19 @@ CREATE TABLE posts (
 CREATE TABLE authors (
     author_id INTEGER PRIMARY KEY,
     username TEXT NOT NULL,
-    passwd TEXT NOT NULL
+    password TEXT NOT NULL
 );
 
 CREATE TABLE requestors (
     requestor_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
-    passwd TEXT NOT NULL
+    password TEXT NOT NULL
 );
 
 CREATE TABLE admins (
     admin_id TEXT PRIMARY KEY,
     username TEXT NOT NULL,
-    passwd TEXT NOT NULL
+    password TEXT NOT NULL
 );
 
 CREATE TABLE image_post (
@@ -59,12 +59,12 @@ CREATE TABLE friends (
     FOREIGN KEY (author_following) REFERENCES authors(author_id) ON DELETE CASCADE
 );
 
-CREATE TABLE friend_requests (
-    author_send INTEGER NOT NULL,
-    author_receive INTEGER NOT NULL,
-    FOREIGN KEY (author_send) REFERENCES authors(author_id) ON DELETE CASCADE,
-    FOREIGN KEY (author_receive) REFERENCES authors(author_id) ON DELETE CASCADE
-);
+CREATE TABLE follow_requests (
+     author_send INTEGER NOT NULL,
+     author_receive INTEGER NOT NULL,
+     FOREIGN KEY (author_send) REFERENCES authors(author_id),
+     FOREIGN KEY (author_receive) REFERENCES authors(author_id)
+ );
 
 CREATE TABLE likes (
     like_id TEXT PRIMARY KEY,
