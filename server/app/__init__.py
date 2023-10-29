@@ -22,27 +22,27 @@ class Author(db.Model):
     __tablename__ = "authors"
     author_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.Text)
-    passwd = db.Column(db.Text)
+    password = db.Column(db.Text)
     posts = db.relationship('Post', backref='author', lazy=True, cascade="all, delete-orphan")
     images = db.relationship('Image', backref='author', lazy=True, cascade="all, delete-orphan")
 
 class AuthorView(ModelView):
     can_delete = True
-    form_columns = ["author_id", "username", "passwd"]
-    column_list = ["author_id", "username", "passwd"]
+    form_columns = ["author_id", "username", "password"]
+    column_list = ["author_id", "username", "password"]
     column_searchable_list = ['username']  
 
 class Requestor(db.Model):
     __tablename__ = "requestors"
     requestor_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.Text)
-    passwd = db.Column(db.Text)
+    password = db.Column(db.Text)
 
 
 class RequestorView(ModelView):
     can_delete = True
-    form_columns = ["requestor_id", "username", "passwd"]
-    column_list = ["requestor_id", "username", "passwd"]
+    form_columns = ["requestor_id", "username", "password"]
+    column_list = ["requestor_id", "username", "password"]
 
     @action('approve', 'Approve', 'Are you sure you want to approve selected requesters?')
     def action_approve(self, ids):
@@ -50,7 +50,7 @@ class RequestorView(ModelView):
             requestor = Requestor.query.get(id)
             if requestor:
                 # Transfer requestor to author
-                new_author = Author(username=requestor.username, passwd=requestor.passwd)
+                new_author = Author(username=requestor.username, password=requestor.password)
                 db.session.add(new_author)
 
                 # Remove requestor
