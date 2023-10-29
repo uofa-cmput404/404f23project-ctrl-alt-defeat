@@ -41,9 +41,14 @@ export default function Stream() {
         navigate("/manageposts")
     }
 
+    function goToNewPost() {
+        navigate("/newpost")
+    }
+
   return (
     <div>
         <h1>Streams</h1>
+        <button onClick={goToNewPost}>New post</button>
         <button onClick={goToManagePosts}>Manage my posts</button>
         <div>
             {

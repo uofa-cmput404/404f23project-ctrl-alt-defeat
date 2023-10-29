@@ -233,25 +233,22 @@ def index():
     return data # data
 
 # MAKE POSTS
-@bp.route('/new/', methods=['POST'])
+@bp.route('/new', methods=['POST'])
 def new_post():
     data = ""
     try:
         # Retrieve post data from the request's JSON body
-        # to get author_id, title, content, visibility
+        # to get author_id, title, content, visibility, type
         print("NEW POST data")
         request_data = request.get_json()
         author_id = request_data["author_id"]
         title = request_data["title"]
         content = request_data["content"]
         visibility = request_data["visibility"]
+        content_type = request_data["content_type"]
 
         # Assign random post ID - TODO: change method of randomization
         post_id = str(randrange(0, 100000))
-
-        # Determine type of content
-        # TODO: only plain text for now, add markdown
-        content_type = request_data["content_type"]
 
         # validate the content_type is of the following,
         try:
@@ -279,6 +276,8 @@ def new_post():
 
         conn.commit()
         conn.close()
+
+        data = "success"
 
     except Exception as e:
 
