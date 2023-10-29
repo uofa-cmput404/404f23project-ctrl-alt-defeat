@@ -10,7 +10,6 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export const UserContext = createContext();
 
-export const UserContext = createContext();
 function App() {
 
   // Have the username and authorId state here and pass it down to pages and components

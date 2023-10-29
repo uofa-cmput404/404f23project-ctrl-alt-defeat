@@ -216,7 +216,7 @@ def index():
                 "WHERE " \
                     "(posts.visibility = 'public' " \
                     "OR posts.author_id = ? " \
-					 "OR(posts.visibility = 'friends-only' AND posts.author_id IN (SELECT author_following FROM friends WHERE author_followee = ?))) " \
+					 "OR(posts.visibility = 'friends-only' AND posts.author_id IN (SELECT author_followee FROM friends WHERE author_following = ?))) " \
                     "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  ?) " \
                 "ORDER BY date_posted DESC; " 
         
