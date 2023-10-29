@@ -8,11 +8,6 @@ def get_db():
         g.db.row_factory = sqlite3.Row
     return g.db
 
-def close_db(e=None):
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
-
 @bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -24,9 +19,12 @@ def register():
 
     try:
         cur.execute("SELECT * FROM requestors WHERE username = ?", (username,))
-        existing_user = cur.fetchone()
-        
-        if existing_user:
+        existing_requestor = cur.fetchone()
+
+        cur.execute("SELECT * FROM authors WHERE username = ?", (username,))
+        existing_author = cur.fetchone()
+
+        if existing_requestor or existing_author:
             return jsonify({'error': 'Username already exists'})
         
         cur.execute("INSERT INTO requestors (username, password) VALUES (?, ?)", (username, password))

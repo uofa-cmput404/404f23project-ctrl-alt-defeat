@@ -14,7 +14,7 @@ function get_content_as_elements(content_type, content){
         //var image = new Image();
         //let decodedString = atob(content);
         let tag = 'data:' + content_type + "," + content;
-        return (<img src={tag}/>)
+        return (<img width={500} src={tag}/>) // Set to have width of 500 for now
     }
     else if (content_type === "image/png;url" || content_type === "image/jpeg;url"){
         //change width property or remove it, resizing will be done at the style level.

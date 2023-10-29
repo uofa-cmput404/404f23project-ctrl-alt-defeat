@@ -1,3 +1,4 @@
+
 DROP TABLE IF EXISTS posts;
 DROP TABLE IF EXISTS authors;
 DROP TABLE IF EXISTS requestors;
@@ -8,6 +9,7 @@ DROP TABLE IF EXISTS friend_requests;
 DROP TABLE IF EXISTS likes;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS shares;
+DROP TABLE IF EXISTS post_restrictions;
 
 CREATE TABLE posts (
     post_id TEXT PRIMARY KEY,
@@ -74,19 +76,25 @@ CREATE TABLE likes (
 );
 
 CREATE TABLE comments (
-    comment_id TEXT PRIMARY KEY,
-    post_id TEXT NOT NULL,
+    post_id TEXT PRIMARY KEY,
     comment_author_id INTEGER NOT NULL,
     date_commented TIMESTAMP NOT NULL,
-    FOREIGN KEY (comment_author_id) REFERENCES authors(author_id) ON DELETE CASCADE,
+    FOREIGN KEY (comment_author_id) REFERENCES authors(author_id),
     FOREIGN KEY (post_id) REFERENCES posts(post_id)
 );
 
 CREATE TABLE shares(
-    share_id TEXT PRIMARY KEY,
-    post_id TEXT NOT NULL,
+    post_id TEXT PRIMARY KEY,
     share_author_id INTEGER NOT NULL,
     date_posted TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (share_author_id) REFERENCES authors(author_id) ON DELETE CASCADE,
+    FOREIGN KEY (share_author_id) REFERENCES authors(author_id),
     FOREIGN KEY (post_id) REFERENCES posts(post_id)
+);
+
+CREATE TABLE post_restrictions (
+    post_id INTEGER,
+    restricted_author_id INTEGER,
+    FOREIGN KEY (post_id) REFERENCES posts (post_id),
+    FOREIGN KEY (restricted_author_id) REFERENCES authors (author_id)
+    UNIQUE (post_id, restricted_author_id) -- Unique constraint
 );

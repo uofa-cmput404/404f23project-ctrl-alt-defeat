@@ -18,6 +18,7 @@ Authors:
 
 Generally everything is LICENSE'D under the Apache License 2.0.
 
+There is no logout function yet for part 1, use incognito browser to login to new user.
 Install:
 npm install --save react-toastify
 npm install --save react-markdown

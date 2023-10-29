@@ -1,4 +1,7 @@
+
 from flask import Flask, redirect, url_for, render_template
+from flask_cors import CORS, cross_origin
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -9,8 +12,6 @@ from markupsafe import Markup
 from flask_cors import CORS, cross_origin
 
 from flask_basicauth import BasicAuth
-from app.requestors import bp as requestors_bp
-from app.authors import bp as authors_bp
 
 
 db = SQLAlchemy()
@@ -115,14 +116,17 @@ def create_app():
     app.register_blueprint(requestors_bp, url_prefix='/requestors')   
     from app.authors import bp as authors_bp
     app.register_blueprint(authors_bp, url_prefix='/authors')   
+
+    from app.follow import bp as follow_bp
+    app.register_blueprint(follow_bp, url_prefix='/follow') 
+
     from app.posts import bp as posts_bp
     app.register_blueprint(posts_bp, url_prefix='/posts')
-
+    
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///../database.db"
     app.config["SECRET_KEY"] = "mysecret"
 
     db.init_app(app)
     admin.init_app(app)
     return app
-
 
