@@ -10,7 +10,9 @@ export default function Stream() {
 
     // const username = "philiponions" // temporary username
     const navigate = useNavigate();
-    const {username, authorId} = useContext(UserContext);    
+    const {username, authorId} = useContext(UserContext);   
+
+    const likedPostsUrl = 'http://127.0.0.1:5000/authors/' + authorId + '/liked'
     
 
     const [postsLists, setPostsLists] = useState([])
@@ -23,7 +25,15 @@ export default function Stream() {
                 .then(response => {
                 // Handle the successful response here
                 console.log('Response data:', response.data);
-                    setPostsLists(response.data)
+                
+                const likedPostIds = fetchLikedPosts();
+                // Check if each post if it has been liked or not
+                const posts = response.data.map( (data, index) => ({...data, liked: false}) );
+                
+                console.log("Posts:", posts)
+
+                // Pass the posts to setPostsLists
+                setPostsLists(posts);
                 })
                 .catch(error => {
                 // Handle any errors that occur during the request
@@ -36,6 +46,22 @@ export default function Stream() {
     useEffect(() => {
         fetchData();
     }, [])
+
+    async function fetchLikedPosts() {
+        try {
+            // Check `likes` table for all posts that logged in author has liked
+            axios.get(likedPostsUrl)
+            .then(response => {
+                console.log('liked ids:', response.data);
+                return response.data;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 
     function goToManagePosts() {
         navigate("/manageposts")
@@ -52,7 +78,8 @@ export default function Stream() {
         <button onClick={goToManagePosts}>Manage my posts</button>
         <div>
             {
-                postsLists.length !== 0 ? <PostsList postsLists={postsLists}/> : <div>There are no posts</div>
+                postsLists.length !== 0 ? <PostsList postsLists={postsLists}
+                setPostsLists={setPostsLists}/> : <div>There are no posts</div>
             }
         </div>
     </div>
