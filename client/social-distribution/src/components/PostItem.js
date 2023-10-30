@@ -58,25 +58,25 @@ function PostItem(props) {
     props.setPostSelectedLiked(props.item.liked);
   }
 
+  //console.log(props.item.post_id, props.item.liked);
+
   return (
     <li key={props.key}>
         <h3>{props.item.title}</h3>
         <div>Posted by: {props.item.username}</div>
         <div>{props.item.date_posted}</div>
         <div>{get_content_as_elements(props.item.content_type,props.item.content)}</div>
+        
+        <div style={styles.container} onClick={selectToggleLike}>
         {// Show like icon as liked or not based on if logged in author has liked the post
         props.item.liked ?
-          <div style={styles.container} onClick={selectToggleLike}>
-            <img style={styles.img} src={likedImgUrl} /> 
-            
-          </div>
+
+            <img style={styles.img} src={likedImgUrl} />
           
-          : <div style={styles.container} onClick={selectToggleLike}>
-            <img style={styles.img} src={notLikedImgUrl} onClick={selectToggleLike} /> 
-            
-            </div>
+            : <img style={styles.img} src={notLikedImgUrl} onClick={selectToggleLike} /> 
           
         }
+        </div>
     </li>
   )
 }

@@ -13,6 +13,8 @@ export default function Stream() {
     const {username, authorId} = useContext(UserContext);   
 
     const likedPostsUrl = 'http://127.0.0.1:5000/authors/' + authorId + '/liked'
+    const [likedPostIds, setLikedPostIds] = useState({});
+    const [responseData, setResponseData] = useState([]);
     
 
     const [postsLists, setPostsLists] = useState([])
@@ -24,16 +26,15 @@ export default function Stream() {
                 })
                 .then(response => {
                 // Handle the successful response here
-                console.log('Response data:', response.data);
-                
-                const likedPostIds = fetchLikedPosts();
-                // Check if each post if it has been liked or not
-                const posts = response.data.map( (data, index) => ({...data, liked: false}) );
-                
-                console.log("Posts:", posts)
+                //console.log('Response data:', response.data);
 
-                // Pass the posts to setPostsLists
-                setPostsLists(posts);
+                // Check if each post if it has been liked or not
+                fetchLikedPosts()
+                
+                setResponseData(response.data);
+
+                setPostsLists(response.data);
+                
                 })
                 .catch(error => {
                 // Handle any errors that occur during the request
@@ -45,22 +46,43 @@ export default function Stream() {
     }
     useEffect(() => {
         fetchData();
-    }, [])
+    }, []);
 
-    async function fetchLikedPosts() {
+    useEffect(() => {
+        // Label (on front-end) which posts have been liked by the logged in author
+        let posts = responseData.map((item, index) => {
+            let liked = false;
+            for (let i = 0; i < likedPostIds.length; i++) {
+                //console.log("check post id in likedPostIds", likedPostIds[i].post_id);
+                if (likedPostIds[i].post_id === item.post_id) {
+                    liked = true;
+                }
+            }
+
+            return {...item, liked: liked}; 
+        });
+        
+        
+        //console.log("posts passed:", posts);
+        // Pass the posts to setPostsLists
+        setPostsLists(posts);
+    }, [postsLists]);
+
+
+     // Check `likes` table (back-end) for all posts that logged in author has liked
+     async function fetchLikedPosts() {
         try {
-            // Check `likes` table for all posts that logged in author has liked
             axios.get(likedPostsUrl)
             .then(response => {
-                console.log('liked ids:', response.data);
-                return response.data;
+                //console.log('liked ids:', response.data);
+                setLikedPostIds(response.data);
             })
             .catch(error => {
                 console.error('Error:', error);
             });
-        } catch (error) {
-            console.error('Error:', error);
-        }
+            } catch (error) {
+                console.error('Error:', error);
+            }
     }
 
     function goToManagePosts() {
