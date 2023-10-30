@@ -50,22 +50,25 @@ export default function Stream({ username, authorId, setUsername }) {;
         navigate("/manageposts")
     }
 
-  return (
-    <div>
-        <FollowRequests authorId={authorId} />
+    return (
         <div>
-            <UserSearch username={username} authorId={authorId} />
+          <div className="flex-container">
+            <div className="search-container">
+              <h1>Search:</h1>
+              <UserSearch username={username} authorId={authorId} />
+            </div>
+            <div className="follow-requests-container">
+              <FollowRequests authorId={authorId} />
+            </div>
+          </div>
+          {showProfile && <Profile username={username} authorId={authorId} setUsername={setUsername} onClose={closeProfile} />}
+          <button onClick={toggleProfile}>Edit Profile</button>
+          <h1>Stream</h1>
+          <button onClick={goToManagePosts}>Manage my posts</button>
+          <div>
+            {postsLists.length !== 0 ? <PostsList postsLists={postsLists} /> : <div>There are no posts</div>}
+          </div>
+          <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
         </div>
-        {showProfile && <Profile username={username} authorId={authorId} setUsername={setUsername} onClose={closeProfile} />}
-        <button onClick={toggleProfile}>Edit Profile</button>
-        <h1>Streams</h1>
-        <button onClick={goToManagePosts}>Manage my posts</button>
-        <div>
-            {
-                postsLists.length !== 0 ? <PostsList postsLists={postsLists}/> : <div>There are no posts</div>
-            }
-        </div>
-        <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
-    </div>
-  )
+      );
 }
