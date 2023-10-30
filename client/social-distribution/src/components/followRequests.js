@@ -73,7 +73,7 @@ function FollowRequests({ authorId }) {
 
   return (
     <div>
-      <h2>Follow Requests</h2>
+      <h1>Follow Requests:</h1>
       <ul>
         {followRequests.map((request) => (
           <li key={request.id}>

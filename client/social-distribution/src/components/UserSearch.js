@@ -74,7 +74,7 @@ function UserSearch({ username, authorId }) {
           </ul>
         </div>
       ) : (
-        <p>No users found</p>
+        <p></p>
       )}
     </div>
   );

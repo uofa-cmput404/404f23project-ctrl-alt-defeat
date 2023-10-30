@@ -9,3 +9,21 @@ button {
     color: rgb(72, 67, 67);
 }
 
+input {
+    font-size: large;
+    border-radius: 5px;
+}
+
+.flex-container {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .search-container {
+    width: 70%;
+  }
+  
+  .follow-requests-container {
+    width: 30%;
+  }
+  

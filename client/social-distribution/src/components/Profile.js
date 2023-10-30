@@ -55,103 +55,63 @@ function Profile({ username, authorId, setUsername, onClose }) {
     setNewPassword('');
   };
 
+  const modalStyles = {
+    display: 'block',
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    zIndex: '9999',
+    backgroundColor: '#f5f5f5',
+    borderRadius: '5px',
+    padding: '20px',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    width: '400px',
+  };
 
-  const styles = `
-    .profile-container {
-      position: relative;
-      max-width: 400px;
-      margin: 20px auto 0;
-      padding: 20px;
-      background-color: #f5f5f5;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    button.close-button {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      color: black;
-    }
-
-    h2 {
-      font-size: 24px;
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    .input-container {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #333;
-    }
-
-    input[type="text"],
-    input[type="password"] {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-
-    button.save-button {
-      display: block;
-      width: 100%;
-      padding: 10px;
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    button.save-button:hover {
-      background-color: #0056b3;
-    }
-  `;
+  const overlayStyles = {
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: '9998',
+  };
 
   return (
-    <div className="profile-container" style={{ display: 'block' }}>
-      <button className="close-button" onClick={onClose}>x</button>
-      <h2>Edit Profile</h2>
-      <p>Current Username: {username}</p> 
-      <div className="input-container">
-        <label>Enter New Username:</label>
-        <input
-          type="text"
-          value={newUsername}
-          onChange={(e) => setNewUsername(e.target.value)}
-        />
-        <button className="save-button" onClick={handleUsernameUpdate}>
-          Save Username
+    <>
+      <div style={overlayStyles}></div>
+      <div style={modalStyles}>
+        <button className="close-button" onClick={onClose}>
+          x
         </button>
+        <h2>Edit Profile</h2>
+        <p>Current Username: {username}</p>
+        <div className="input-container">
+          <label>Enter New Username:</label>
+          <input
+            type="text"
+            value={newUsername}
+            onChange={(e) => setNewUsername(e.target.value)}
+          />
+          <button className="save-button" onClick={handleUsernameUpdate}>
+            Save Username
+          </button>
+        </div>
+        <div className="input-container">
+          <label>Enter New Password:</label>
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          <button className="save-button" onClick={handlePasswordUpdate}>
+            Save Password
+          </button>
+        </div>
       </div>
-      <div className="input-container">
-        <label>Enter New Password:</label>
-        <input
-          type="password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-        />
-        <button className="save-button" onClick={handlePasswordUpdate}>
-          Save Password
-        </button>
-      </div>
-      <style>{styles}</style>
-    </div>
+    </>
   );
 }
 
