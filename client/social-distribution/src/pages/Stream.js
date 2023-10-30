@@ -1,21 +1,17 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import PostsList from '../components/PostsList'
 import UserSearch from '../components/UserSearch';
 import Profile from '../components/Profile';
 import FollowRequests from '../components/followRequests';
 import axios from 'axios';
-import { UserContext } from '../App';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
 const postsUrl = 'http://127.0.0.1:5000/posts/'
 
-export default function Stream() {
-    const { username, authorId, setUsername } = useContext(UserContext);
-    // const username = "philiponions" // temporary username
+export default function Stream({ username, authorId, setUsername }) {;
     const navigate = useNavigate();
-
     const [postsLists, setPostsLists] = useState([])
     const [showProfile, setShowProfile] = useState(false); 
 
