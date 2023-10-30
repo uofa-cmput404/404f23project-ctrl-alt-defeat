@@ -355,7 +355,7 @@ def edit_post(author_id, post_id):
 
         content_type = request_data["content_type"]
         content = request_data["content"]
-        image_id = request_data["img_id"]
+        image_id = request_data["image_id"]
         image_id = "NULL" if image_id is None else image_id
         visibility = request_data["visibility"]
 
@@ -367,7 +367,7 @@ def edit_post(author_id, post_id):
         # Overwrite the entry with the new data.
         # TODO: Only update what has changed. Comparison with old vs. new data needed.
 
-        query = "UPDATE posts SET title = ?, content_type = ?,content = ?, img_id = ?, visibility = ? WHERE post_id = ? AND author_id = ?;"
+        query = "UPDATE posts SET title = ?, content_type = ?,content = ?, image_id = ?, visibility = ? WHERE post_id = ? AND author_id = ?;"
         conn.execute(query, (title, content_type, content, image_id, visibility, post_id, author_id))
         final_message = "Post Updated Successfully"
         conn.commit()
