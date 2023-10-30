@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect } from 'react';
 import LoginPage from './pages/LoginPage';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Stream from './pages/Stream';
+import NewPost from './pages/NewPost'
 import ManagePosts from './pages/ManagePosts';
 import Restrictions from './pages/Restrictions';
 import { Navigate } from 'react-router-dom';
@@ -67,6 +68,7 @@ function App() {
           />
           <Route path="/manageposts" element={<ManagePosts/>}/> /* Merge with /posts? */
           <Route path="/manageposts/restrictions" element={<Restrictions/>}/> /* Merge with /posts? */
+          <Route path="/newpost" element={<NewPost/>}/> /* Merge with /posts?*/
         </Routes>
         <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       </BrowserRouter>

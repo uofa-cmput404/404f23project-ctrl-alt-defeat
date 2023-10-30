@@ -213,7 +213,7 @@ def index():
         
         # Get all the posts from people who I'm following + posts who are public + posts that are mine
         # Do not include posts that I'm restricted from
-        query = "SELECT username, posts.post_id, date_posted, title, content_type, content, image_id, visibility " \
+        query = "SELECT posts.author_id, username, posts.post_id, date_posted, title, content_type, content, image_id, visibility " \
                 "FROM posts " \
                 "INNER JOIN authors ON posts.author_id = authors.author_id " \
                 "WHERE " \
@@ -236,25 +236,22 @@ def index():
     return data # data
 
 # MAKE POSTS
-@bp.route('/new/', methods=['POST'])
+@bp.route('/new', methods=['POST'])
 def new_post():
     data = ""
     try:
         # Retrieve post data from the request's JSON body
-        # to get author_id, title, content, visibility
+        # to get author_id, title, content, visibility, type
         print("NEW POST data")
         request_data = request.get_json()
         author_id = request_data["author_id"]
         title = request_data["title"]
         content = request_data["content"]
         visibility = request_data["visibility"]
+        content_type = request_data["content_type"]
 
         # Assign random post ID - TODO: change method of randomization
         post_id = str(randrange(0, 100000))
-
-        # Determine type of content
-        # TODO: only plain text for now, add markdown
-        content_type = request_data["content_type"]
 
         # validate the content_type is of the following,
         try:
@@ -273,7 +270,7 @@ def new_post():
 
         conn = get_db_connection()
 
-        query = "INSERT INTO posts (post_id, author_id, title, content_type, content, img_id, visibility) " \
+        query = "INSERT INTO posts (post_id, author_id, title, content_type, content, image_id, visibility) " \
                 "VALUES (?, ?, ?, ?, ?, ?, ?)"
 
         # Use a parameterized query to insert values safely
@@ -282,6 +279,8 @@ def new_post():
 
         conn.commit()
         conn.close()
+
+        data = "success"
 
     except Exception as e:
 
