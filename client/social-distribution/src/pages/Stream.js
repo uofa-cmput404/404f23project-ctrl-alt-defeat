@@ -46,8 +46,12 @@ export default function Stream({ username, authorId, setUsername }) {;
     useEffect(() => {
         fetchData();
         fetchLikedPosts();
-        labelLikedPosts();
+        
     }, []);
+
+    useEffect(() => {
+        labelLikedPosts();
+    }, [likedPostIds]);
 
     const labelLikedPosts = () => {
         // Label (on front-end) which posts have been liked by the logged in author
@@ -75,6 +79,7 @@ export default function Stream({ username, authorId, setUsername }) {;
             .then(response => {
                 //console.log('liked ids:', response.data);
                 setLikedPostIds(response.data);
+                console.log(response.data);
             })
             .catch(error => {
                 console.error('Error:', error);
