@@ -10,10 +10,7 @@ function LoginPage({ isAuthenticated, updateAuthStatus, updateUserAndAuthorId })
   const navigate = useNavigate(); 
 
   const styles = {
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
+    container: {      
       justifyContent: 'center',
       height: '100vh',
       backgroundColor: '#f4f4f4',
