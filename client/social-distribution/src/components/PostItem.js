@@ -1,6 +1,6 @@
 import React from 'react'
 import Markdown from "react-markdown";
-
+import './PostItem.css';
 
 function get_content_as_elements(content_type, content){
     if (content_type === "text/plain"){
