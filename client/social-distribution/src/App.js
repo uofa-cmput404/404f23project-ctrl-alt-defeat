@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import LoginPage from './pages/LoginPage';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Stream from './pages/Stream';
@@ -11,11 +11,6 @@ import 'react-toastify/dist/ReactToastify.css';
 export const UserContext = createContext();
 
 function App() {
-
-  // Have the username and authorId state here and pass it down to pages and components
-  // const [username, setUsername] = useState('philiponins')
-  // const [authorId, setAuthorId] = useState('1')
-  // const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(
     localStorage.getItem('isAuthenticated') === 'true'
   );
@@ -68,7 +63,7 @@ function App() {
           />
           <Route
             path="/homepage"
-            element={isAuthenticated ? <Stream /> : <Navigate to="/" />}
+            element={isAuthenticated ? <Stream username={username} authorId={authorId} setUsername={setUsername} /> : <Navigate to="/" />}
           />
           <Route path="/manageposts" element={<ManagePosts/>}/> /* Merge with /posts? */
           <Route path="/manageposts/restrictions" element={<Restrictions/>}/> /* Merge with /posts? */
