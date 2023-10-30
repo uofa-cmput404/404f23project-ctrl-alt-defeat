@@ -46,4 +46,5 @@ npm install --save react-markdown
   - Images, at the moment, are not changed. So it doesn't work.
 
 **Unit Tests**
-- If running the unit tests more than once, make sure the data in database.db is reverted back to the original.
+- You can run unit tests by accessing the server/unittests directory and running each script individually.
+- Ex) ```python3 test_posts.py```
