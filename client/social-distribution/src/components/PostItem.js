@@ -56,9 +56,8 @@ function PostItem(props) {
     props.setChangeLike(true);
     props.setPostSelected(props.item.post_id);
     props.setPostSelectedLiked(props.item.liked);
+    props.setPostSelectedAuthor(props.item.author_id);
   }
-
-  //console.log(props.item.post_id, props.item.liked);
 
   return (
     <li key={props.key}>

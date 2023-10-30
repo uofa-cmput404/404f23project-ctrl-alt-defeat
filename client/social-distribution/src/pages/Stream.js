@@ -32,9 +32,9 @@ export default function Stream() {
                 fetchLikedPosts()
                 
                 setResponseData(response.data);
-
-                setPostsLists(response.data);
                 
+                setPostsLists(response.data);
+                labelLikedPosts();
                 })
                 .catch(error => {
                 // Handle any errors that occur during the request
@@ -46,9 +46,13 @@ export default function Stream() {
     }
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [postsLists]);
 
     useEffect(() => {
+        //labelLikedPosts();
+    }, []);
+
+    const labelLikedPosts = () => {
         // Label (on front-end) which posts have been liked by the logged in author
         let posts = responseData.map((item, index) => {
             let liked = false;
@@ -62,12 +66,10 @@ export default function Stream() {
             return {...item, liked: liked}; 
         });
         
-        
         //console.log("posts passed:", posts);
         // Pass the posts to setPostsLists
         setPostsLists(posts);
-    }, [postsLists]);
-
+    };
 
      // Check `likes` table (back-end) for all posts that logged in author has liked
      async function fetchLikedPosts() {
@@ -101,7 +103,8 @@ export default function Stream() {
         <div>
             {
                 postsLists.length !== 0 ? <PostsList postsLists={postsLists}
-                setPostsLists={setPostsLists}/> : <div>There are no posts</div>
+                setPostsLists={setPostsLists}
+                authorId = {authorId}/> : <div>There are no posts</div>
             }
         </div>
     </div>

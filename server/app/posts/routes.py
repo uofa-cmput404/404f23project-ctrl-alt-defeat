@@ -210,7 +210,7 @@ def index():
         
         # Get all the posts from people who I'm following + posts who are public + posts that are mine
         # Do not include posts that I'm restricted from
-        query = "SELECT username, posts.post_id, date_posted, title, content_type, content, img_id, visibility " \
+        query = "SELECT posts.author_id, username, posts.post_id, date_posted, title, content_type, content, image_id, visibility " \
                 "FROM posts " \
                 "INNER JOIN authors ON posts.author_id = authors.author_id " \
                 "WHERE " \
