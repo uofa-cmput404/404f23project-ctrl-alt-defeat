@@ -108,6 +108,14 @@ INSERT INTO posts (post_id, author_id, date_posted, title, content_type, content
 INSERT INTO authors (author_id, username, password) VALUES
 (1, 'techgeek5000', 'password1'),
 (2, 'happyuser123', 'password2'),
-(3, 'coolguy456', 'password3');
+(3, 'coolguy456', 'password3'),
+(4, 'jane_doe', 'securepass456');
 
+INSERT INTO friends (author_followee, author_following) VALUES
+(2, 3);
 
+INSERT INTO follow_requests (author_send, author_receive) VALUES
+(2, 1);
+
+INSERT INTO follow_requests (author_send, author_receive) VALUES
+(3, 2);

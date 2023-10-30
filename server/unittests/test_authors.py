@@ -2,19 +2,18 @@ import sys
 import os
 import unittest
 from flask import json
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from app import create_app
+sys.path.append("..")
+from app.__init__ import create_app
+import sqlite3
 
 class AuthorsTestCase(unittest.TestCase):
     def setUp(self):
-        app = create_app()
-        app.config['TESTING'] = True
-        self.client = app.test_client()
-        self.app_context = app.app_context()
-        self.app_context.push()
+        self.app = create_app()  # Create a Flask test app
+        self.client = self.app.test_client()  # Create a test client
 
-    def tearDown(self):
-        self.app_context.pop()
+        connection = sqlite3.connect("database.db") # Populate test data
+        with open('mock_schema.sql') as f:
+            connection.executescript(f.read())
 
     def test_login_success(self):
         data = {

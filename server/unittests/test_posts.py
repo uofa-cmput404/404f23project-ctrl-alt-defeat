@@ -83,27 +83,17 @@ class PostsTestcase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         # Add more assertions based on the expected behavior of this route
 
-    # def test_get_image(self):
-    #     response = self.client.get('/authors/1/1/image/')
-    #     self.assertEqual(response.status_code, 200)
-    #     # Add more assertions based on the expected behavior of this route
-
-    # def test_edit_post(self):
-    #     data = {
-    #         'title': 'Updated Test Post',
-    #         'content_type': 'text/plain',
-    #         'content': 'This is an updated test post',
-    #         'img_id': None,
-    #         'visibility': 'public'
-    #     }
-    #     response = self.client.post('/authors/1/1/edit/', json=data)
-    #     self.assertEqual(response.status_code, 200)
-    #     # Add more assertions based on the expected behavior of this route
-
-    # def test_categories(self):
-    #     response = self.client.get('/test/')
-    #     self.assertEqual(response.status_code, 200)
-    #     # Add more assertions based on the expected behavior of this route
+    def test_edit_post(self):
+        data = {
+            'title': 'Updated Test Post',
+            'content_type': 'text/plain',
+            'content': 'This is an updated test post',
+            'img_id': None,
+            'visibility': 'public'
+        }
+        response = self.client.post('posts/authors/2/post2/edit/', json=data)
+        self.assertEqual(response.status_code, 200)
+        # Add more assertions based on the expected behavior of this route
 
 if __name__ == '__main__':
     unittest.main()
