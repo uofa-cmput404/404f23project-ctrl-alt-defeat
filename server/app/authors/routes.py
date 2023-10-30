@@ -35,6 +35,7 @@ def login():
 
     return jsonify(result)
 
+
 @bp.route('/update_username', methods=['POST'])
 def update_username():
     data = request.get_json()
@@ -166,10 +167,52 @@ def delete_like(author_id):
 
         conn.commit()
         conn.close()
-
-
     except Exception as e:
         print("liked error: ", e)
         data = "error"
-    
     return data
+
+@bp.route('/update_username', methods=['POST'])
+def update_username():
+    data = request.get_json()
+    new_username = data.get('new_username')
+    author_id = data.get('authorId')
+
+    db = get_db()
+    cur = db.cursor()
+
+    try:
+        cur.execute("SELECT author_id FROM authors WHERE username = ?", (new_username,))
+        existing_username = cur.fetchone()
+
+        if existing_username:
+            return jsonify({'error': 'Username already exists'})
+
+        cur.execute("UPDATE authors SET username = ? WHERE author_id = ?", (new_username, author_id))
+        db.commit()
+
+        return jsonify({'message': 'Username updated successfully'})
+    except Exception as e:
+        return jsonify({'error': 'An error occurred while updating the username.'})
+    finally:
+        db.close()
+
+
+@bp.route('/update_password', methods=['POST'])
+def update_password():
+    data = request.get_json()
+    new_password = data.get('new_password')
+    author_id = data.get('authorId') 
+
+    db = get_db()
+    cur = db.cursor()
+
+    try:
+        cur.execute("UPDATE authors SET password = ? WHERE author_id = ?", (new_password, author_id))
+        db.commit()
+        return jsonify({'message': 'Password updated successfully'})
+    except Exception as e:
+        return jsonify({'error': 'An error occurred while updating the password.'})
+    finally:
+        db.close()
+
