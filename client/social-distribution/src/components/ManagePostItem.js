@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React from 'react'
 import Markdown from 'react-markdown';
+import './ManagePostItem.css';
 
 const deleteUrl = 'http://127.0.0.1:5000/posts/delete'
 function ManagePostItem(props) {
