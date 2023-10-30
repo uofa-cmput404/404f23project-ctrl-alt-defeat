@@ -10,15 +10,24 @@ function LoginPage({ isAuthenticated, updateAuthStatus, updateUserAndAuthorId })
   const navigate = useNavigate(); 
 
   const styles = {
+    buttonSpace: {
+      display: "flex",
+      width: "100%",
+      
+      justifyContent: "center",
+      height: "100%"
+    },
     container: {      
       justifyContent: 'center',
       height: '100vh',
-      backgroundColor: '#f4f4f4',
+      backgroundColor: '#f4f4f4',      
     },
     buttonContainer: {
       display: 'flex',
       flexDirection: 'column',
-      gap: '20px',  
+      justifyContent: "center",            
+      gap: '20px',        
+      height: "100%"
     },
     button: {
       padding: '10px 20px',
@@ -44,6 +53,8 @@ function LoginPage({ isAuthenticated, updateAuthStatus, updateUserAndAuthorId })
   return (
     <div style={styles.container}>
       {currentPage === null && (
+        <div style={styles.buttonSpace}>
+
         <div style={styles.buttonContainer}>
           <button 
             style={styles.button} 
@@ -61,6 +72,7 @@ function LoginPage({ isAuthenticated, updateAuthStatus, updateUserAndAuthorId })
           >
             Register
           </button>
+          </div>
         </div>
       )}
       
