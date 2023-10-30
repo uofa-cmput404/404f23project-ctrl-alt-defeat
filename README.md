@@ -44,3 +44,6 @@ npm install --save react-markdown
     - img_id (can be 'null')
     - visibility
   - Images, at the moment, are not changed. So it doesn't work.
+
+**Unit Tests**
+- If running the unit tests more than once, make sure the data in database.db is reverted back to the original.
