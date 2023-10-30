@@ -85,7 +85,7 @@ function ManagePosts() {
         axios.post(editUrl + authorId + "/" + postSelected + "/edit/", {
             "content_type": edittedContentType,
             "content": editContent,
-            "img_id": null,
+            "image_id": null,
             "visibility": visibility,
             "post_id": postSelected,
             "title": editTitle
