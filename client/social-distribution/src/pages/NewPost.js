@@ -40,14 +40,21 @@ export default function NewPost(props) {
         width: '25vw'
       },
       button_goback: {
-          padding: '10px 20px',
-          margin: '10px 0px',
-          fontSize: '16px',
-          cursor: 'pointer',
-          color: '#808080',
-          border: 'none',
-          borderRadius: '4px',
-          width: '25vw'
+        padding: '10px 20px',
+        margin: '10px 0px',
+        fontSize: '16px',
+        cursor: 'pointer',
+        backgroundColor: '#d1d1d1',
+        color: '#808080',
+        border: 'none',
+        borderRadius: '4px',
+        width: '25vw'
+      },
+      buttonHover_post: {
+        backgroundColor: '#666666'
+      },
+      buttonHover_goback: {
+        backgroundColor: '#aaaaaa'
       }
     };
 
@@ -200,10 +207,16 @@ export default function NewPost(props) {
       
       : <input type="file" id="img" name="img" accept="image/jpeg, image/png" onChange={handleImageChange}></input>} 
 
-      <button style={styles.button_post} onClick={handleNewPost}>
+      <button style={styles.button_post} 
+      onClick={handleNewPost}
+      onMouseOver={(e) => e.currentTarget.style.backgroundColor = styles.buttonHover_post.backgroundColor}
+      onMouseOut={(e) => e.currentTarget.style.backgroundColor = styles.button_post.backgroundColor}>
         Post
       </button>
-      <button style={styles.button_goback} onClick={handleGoBack}>
+      <button style={styles.button_goback} 
+      onClick={handleGoBack}
+      onMouseOver={(e) => e.currentTarget.style.backgroundColor = styles.buttonHover_goback.backgroundColor}
+      onMouseOut={(e) => e.currentTarget.style.backgroundColor = styles.button_goback.backgroundColor}>
         Cancel
       </button>
     </div>
