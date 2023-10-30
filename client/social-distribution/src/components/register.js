@@ -48,7 +48,11 @@ function Register(props) {
       return;
     }
 
-    const registrationData = { username, password };
+    const registrationData = {
+      username: username.toLowerCase(),
+      password: password.toLowerCase(),
+    };
+    
     try {
       const response = await fetch('http://localhost:5000/requestors/register', {
         method: 'POST',
@@ -62,24 +66,13 @@ function Register(props) {
 
       if (response.ok) {
         if (data.error === 'Username already exists') {
-          console.log('Username taken');
-          toast.error('Username already exists', {
-              position: 'top-right',
-              autoClose: 3000,
-          });
+          toast.error('Username already exists');
         } else {
-          console.log('Registration Successful');
-          toast.success('Awaiting Approval!', {
-            position: 'top-right',
-            autoClose: 3000,
-          });
+          toast.success('Awaiting Approval!');
         }
       } else {
         console.error('Registration failed');
-        toast.error('Registration failed', {
-          position: 'top-right',
-          autoClose: 3000,
-        });
+        toast.error('Registration failed');
       }
     } catch (error) {
       console.error('Error:', error);

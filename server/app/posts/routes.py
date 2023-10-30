@@ -1,8 +1,11 @@
 from app.posts import bp
 import json
-from app.db import get_db_connection
+
+from app.dbase import get_db_connection
+
 from flask import request, abort
 from werkzeug.exceptions import HTTPException
+
 from random import randrange
 import sqlite3
 
@@ -216,7 +219,7 @@ def index():
                 "WHERE " \
                     "(posts.visibility = 'public' " \
                     "OR posts.author_id = ? " \
-					 "OR(posts.visibility = 'friends-only' AND posts.author_id IN (SELECT author_following FROM friends WHERE author_followee = ?))) " \
+					 "OR(posts.visibility = 'friends-only' AND posts.author_id IN (SELECT author_followee FROM friends WHERE author_following = ?))) " \
                     "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  ?) " \
                 "ORDER BY date_posted DESC; " 
         
@@ -267,7 +270,7 @@ def new_post():
 
         conn = get_db_connection()
 
-        query = "INSERT INTO posts (post_id, author_id, title, content_type, content, img_id, visibility) " \
+        query = "INSERT INTO posts (post_id, author_id, title, content_type, content, image_id, visibility) " \
                 "VALUES (?, ?, ?, ?, ?, ?, ?)"
 
         # Use a parameterized query to insert values safely

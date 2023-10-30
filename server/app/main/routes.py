@@ -1,5 +1,5 @@
 from app.main import bp
-from app.db import get_db_connection
+from app.dbase import get_db_connection
 from flask import abort, request
 from werkzeug.exceptions import HTTPException
 

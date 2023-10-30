@@ -1,0 +1,57 @@
+/* Styling the list item */
+li {
+    
+    padding: 5px;
+    margin: 25px 0;
+    border-radius: 20px;/* change border of each list item to be round */
+    list-style-type: none;
+    background-color: #ebebeb;
+}
+
+
+
+/* Styling the title of the post */
+h3 {
+    font-size: 25px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    align-self: center; /* horizontally center the title */
+    text-align: center; /* center the text within the title */
+    border-bottom: 2px solid #d3d3d3; /* add a line under the title */
+    padding-bottom: 20px; /* space between the title and the underline */
+}
+
+
+
+
+/* Styling the image */
+img {
+    max-width: 100%;
+    height: auto; 
+    display: block;
+    margin: 10px auto; /* centers the image horizontally */
+    border-radius: 15px;/* change border of image to be round */
+}
+
+/* Styling the title and text */
+div:nth-child(1) {
+    font-size: 14px;
+    font-style: italic;
+    color: #000000;
+    align-self: flex-start; /* align to the left */
+}
+
+/* Styling the date */
+div:nth-child(2) {
+    font-size: 13px;
+    margin: 5px 0;
+    color: rgb(58, 53, 53);
+    align-self: flex-start; /* align to the left */
+}
+/* Styling the visibility */
+div:nth-child(3) {
+    font-size: 13px;
+    margin: 5px 0;
+    color: rgb(149, 144, 144);
+    align-self: flex-start; /* align to the left */
+}

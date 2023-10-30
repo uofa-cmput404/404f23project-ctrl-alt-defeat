@@ -14,7 +14,7 @@ function Login(props) {
     input: {
       margin: '10px',
       padding: '10px',
-      fontSize: '16px',
+      fontSize: '16px', 
       width: '200px'
     },
     button_login: {
@@ -40,7 +40,10 @@ function Login(props) {
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    const loginData = { username, password };
+    const loginData = {
+      username: username.toLowerCase(), 
+      password: password.toLowerCase(), 
+    };
   
     fetch('http://localhost:5000/authors/login', {
       method: 'POST',
@@ -52,18 +55,18 @@ function Login(props) {
       .then(response => response.json())
       .then(data => {
         if (data.message === 'Login successful') {
-          props.setIsAuthenticated(true);
+          localStorage.setItem('isAuthenticated', 'true');
+          const newUsername = username.toLowerCase();
+          const newAuthorId = data.author_id;
+          localStorage.setItem('username', newUsername);
+          localStorage.setItem('authorId', newAuthorId); 
+          props.updateAuthStatus(true);
+          props.updateUserAndAuthorId(newUsername, newAuthorId);
           props.navigate('/homepage');
         } else if (data.message === 'Wrong Password') {
-          toast.error('Wrong Password', {
-            position: 'top-right',
-            autoClose: 3000,
-          });
+          toast.error('Wrong Password');
         } else if (data.message === 'User not found') {
-          toast.error('User not found', {
-            position: 'top-right',
-            autoClose: 3000,
-          });
+          toast.error('User not found');
         }
       })
       .catch(error => {

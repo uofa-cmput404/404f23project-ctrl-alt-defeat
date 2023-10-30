@@ -1,16 +1,17 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import PostsList from '../components/PostsList'
+import UserSearch from '../components/UserSearch';
+import Profile from '../components/Profile';
+import FollowRequests from '../components/followRequests';
 import axios from 'axios';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
-import { UserContext } from '../App';
 
 const postsUrl = 'http://127.0.0.1:5000/posts/'
 
-export default function Stream() {
-
-    // const username = "philiponions" // temporary username
+export default function Stream({ username, authorId, setUsername }) {;
     const navigate = useNavigate();
-    const {username, authorId} = useContext(UserContext);   
 
     const likedPostsUrl = 'http://127.0.0.1:5000/authors/' + authorId + '/liked'
     const [likedPostIds, setLikedPostIds] = useState({});
@@ -18,6 +19,8 @@ export default function Stream() {
     
 
     const [postsLists, setPostsLists] = useState([])
+    const [showProfile, setShowProfile] = useState(false); 
+
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
@@ -87,6 +90,14 @@ export default function Stream() {
             }
     }
 
+    const toggleProfile = () => {
+        setShowProfile(!showProfile);
+      };
+
+    const closeProfile = () => {
+    setShowProfile(false);
+    };
+      
     function goToManagePosts() {
         navigate("/manageposts")
     }
@@ -97,6 +108,12 @@ export default function Stream() {
 
   return (
     <div>
+        <FollowRequests authorId={authorId} />
+        <div>
+            <UserSearch username={username} authorId={authorId} />
+        </div>
+        {showProfile && <Profile username={username} authorId={authorId} setUsername={setUsername} onClose={closeProfile} />}
+        <button onClick={toggleProfile}>Edit Profile</button>
         <h1>Streams</h1>
         <button onClick={goToNewPost}>New post</button>
         <button onClick={goToManagePosts}>Manage my posts</button>
@@ -107,6 +124,7 @@ export default function Stream() {
                 authorId = {authorId}/> : <div>There are no posts</div>
             }
         </div>
+        <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </div>
   )
 }

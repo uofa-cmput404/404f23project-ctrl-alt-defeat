@@ -44,3 +44,7 @@ npm install --save react-markdown
     - img_id (can be 'null')
     - visibility
   - Images, at the moment, are not changed. So it doesn't work.
+
+**Unit Tests**
+- You can run unit tests by accessing the server/unittests folder and running each script individually
+- Ex) ```python3 test_posts.py```

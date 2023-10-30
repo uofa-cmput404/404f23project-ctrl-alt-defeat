@@ -1,6 +1,6 @@
 import React from 'react'
 import Markdown from "react-markdown";
-
+import './PostItem.css';
 
 import notLikedImgUrl from "../notLiked_black_24dp.svg";
 import likedImgUrl from "../liked_black_24dp.svg";

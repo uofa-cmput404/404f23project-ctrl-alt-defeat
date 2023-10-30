@@ -98,3 +98,24 @@ CREATE TABLE post_restrictions (
     FOREIGN KEY (restricted_author_id) REFERENCES authors (author_id)
     UNIQUE (post_id, restricted_author_id) -- Unique constraint
 );
+
+
+INSERT INTO posts (post_id, author_id, date_posted, title, content_type, content, image_id, visibility) VALUES
+('post1', 1, '2023-10-29 22:31:02', 'First Post', 'text/plain', 'This is the first post.', 'img1', 'public'),
+('post2', 2, '2023-10-30 08:15:30', 'Second Post', 'text/plain', 'This is the second post.', NULL, 'private'),
+('post3', 1, '2023-10-30 12:45:00', 'Third Post', 'text/markdown', '# This is the third post.', 'img2', 'public');
+
+INSERT INTO authors (author_id, username, password) VALUES
+(1, 'techgeek5000', 'password1'),
+(2, 'happyuser123', 'password2'),
+(3, 'coolguy456', 'password3'),
+(4, 'jane_doe', 'securepass456');
+
+INSERT INTO friends (author_followee, author_following) VALUES
+(2, 3);
+
+INSERT INTO follow_requests (author_send, author_receive) VALUES
+(2, 1);
+
+INSERT INTO follow_requests (author_send, author_receive) VALUES
+(3, 2);

@@ -1,0 +1,11 @@
+button {
+    padding: 8px 14px;  /* Vertical padding of 8px, horizontal padding of 12px */
+    font-size: 14px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    background-color: #d3d3d3;
+    color: rgb(72, 67, 67);
+}
+
