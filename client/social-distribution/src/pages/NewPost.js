@@ -64,7 +64,7 @@ export default function NewPost(props) {
   const jpegDataURL = 'data:image/jpeg;base64,';
   const pngDataURL = 'data:image/png;base64,';
 
-  const handleNewPost = () => {
+  const handleNewPost = async () => {
     // Send POST request with new post info
     if (title === "" || content === "") {
       alert("Please enter a title and content.");
@@ -72,6 +72,7 @@ export default function NewPost(props) {
     } else {
     
       try {
+        console.log(JSON.stringify({author_id: authorId, content_type: contentType, title: title, content: content, visibility: visibility, image_id: imageId}));
         axios.post(newPostUrl, {
           author_id: authorId,
           content_type: contentType,
@@ -107,10 +108,6 @@ export default function NewPost(props) {
 
   // TODO: Erase content text box when the post type is switching from image to text or markdown
   const handleSelectContentType = (event) => {
-    /*if ((event.target.value === "text/plain" || event.target.value === "text/markdown") && (contentType === jpegDataURL || contentType === pngDataURL)) {
-      setContent("");
-      console.log("erased");
-    }*/
     setContentType(event.target.value);
     //console.log(event.target.value);
   }
@@ -133,14 +130,17 @@ export default function NewPost(props) {
       if (base64Image.startsWith(jpegDataURL)) {
           const strippedBase64Image = base64Image.substring(jpegDataURL.length);              
             setContent(strippedBase64Image);
+            setContentType("image/jpeg;base64");
         // Now, 'strippedBase64Image' contains the base64-encoded image data without the prefix
         } else if (base64Image.startsWith(pngDataURL)) {
             const strippedBase64Image = base64Image.substring(pngDataURL.length);
             setContent(strippedBase64Image);
+            setContentType("image/png;base64");
         // Now, 'strippedBase64Image' contains the base64-encoded image data without the prefix
         } else {
         // Handle the case where the string doesn't start with either data URL prefix
         console.error("The string does not start with a recognized data URL prefix.");
+        alert("Please only upload JPG or PNG files.");
         }
 
     };
@@ -182,7 +182,7 @@ export default function NewPost(props) {
         <select id="content-type" name="content-type" onChange={handleSelectContentType}>
           <option value="text/plain">Plain Text</option>
           <option value="text/markdown">Markdown</option>
-          <option value={jpegDataURL}>Image Only</option>
+          <option value="UNKNOWN-IMAGE-TYPE">Image Only</option>
         </select>
       </form>
 
