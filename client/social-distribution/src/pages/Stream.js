@@ -30,14 +30,10 @@ export default function Stream({ username, authorId, setUsername }) {;
                 .then(response => {
                 // Handle the successful response here
                 //console.log('Response data:', response.data);
-
-                // Check if each post if it has been liked or not
-                fetchLikedPosts()
                 
-                setResponseData(response.data);
-                
-                setPostsLists(response.data);
-                labelLikedPosts();
+                setResponseData(response.data);      
+                console.log(response.data)          
+                setPostsLists(response.data);                
                 })
                 .catch(error => {
                 // Handle any errors that occur during the request
@@ -49,10 +45,8 @@ export default function Stream({ username, authorId, setUsername }) {;
     }
     useEffect(() => {
         fetchData();
-    }, [postsLists]);
-
-    useEffect(() => {
-        //labelLikedPosts();
+        fetchLikedPosts();
+        labelLikedPosts();
     }, []);
 
     const labelLikedPosts = () => {
