@@ -8,7 +8,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
-const postsUrl = 'http://127.0.0.1:5000/posts/'
+const postsUrl = 'http://127.0.0.1:5000/posts'
 
 export default function Stream({ username, authorId, setUsername }) {;
     const navigate = useNavigate();
@@ -24,9 +24,7 @@ export default function Stream({ username, authorId, setUsername }) {;
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
-                axios.post(postsUrl, {
-                    author_id: authorId
-                })
+                axios.get(postsUrl + `?author_id=${authorId}`)
                 .then(response => {
                 // Handle the successful response here
                 //console.log('Response data:', response.data);
