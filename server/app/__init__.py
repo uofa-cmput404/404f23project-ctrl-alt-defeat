@@ -24,8 +24,6 @@ class Author(db.Model):
     username = db.Column(db.Text)
     password = db.Column(db.Text)
     posts = db.relationship('Post', backref='author', lazy=True, cascade="all, delete-orphan")
-    images = db.relationship('Image', backref='author', lazy=True, cascade="all, delete-orphan")
-
 class AuthorView(ModelView):
     can_delete = True
     form_columns = ["author_id", "username", "password"]
@@ -68,35 +66,27 @@ class Post(db.Model):
     title = db.Column(db.Text)
     content = db.Column(db.Text)
     author_id = db.Column(db.Integer, db.ForeignKey('authors.author_id'))
+    content_type = db.Column(db.Text)
 class PostView(ModelView):
     can_delete = True
-    form_columns = ["post_id", "title", "content", "author_id"]
-    column_list = ["post_id", "title", "content", "author_id"]  
+    form_columns = ["post_id", "title", "content", "content_type", "author_id"]
+    column_list = ["post_id", "title", "content_type", "author_id","content_preview"]
     column_searchable_list = ["author_id","title"]
 
-class Image(db.Model):
-    __tablename__ = "image_post"
-    img_id = db.Column(db.Text, primary_key=True)
-    img_url = db.Column(db.Text, nullable=False)  
-    author_id = db.Column(db.Integer, db.ForeignKey('authors.author_id'))
+    def view_content(view, content, model, name):
+        if model.content_type in ["image/png;base64", "image/jpeg;base64"]:
+            content_string = f"data:{model.content_type},{model.content}"
+            print(content_string)
+            return Markup(f'<p><img width=300px src="{content_string}"/></p>')
+        else:
+            return Markup(f"<p>{model.content}</p>")
+    column_formatters = {"content_preview": view_content}
+    column_labels = dict(view_content="Content Preview")
 
-class ImageView(ModelView):
-    can_delete = True
-    form_columns = ["img_id", "img_url", "author_id"]
-    column_list = ["img_id", "author_id", "view_button"]
-    column_searchable_list = ["author_id"]
-    def view_button(view, context, model, name):
-        return Markup(f'<a href="{model.img_url}" target="_blank">View</a>')
-    
-    column_formatters = {
-        'view_button': view_button
-    }
-    column_labels = dict(view_button='View Image')
 
 admin.add_view(AuthorView(Author, db.session))
 admin.add_view(RequestorView(Requestor, db.session))
 admin.add_view(PostView(Post, db.session))
-admin.add_view(ImageView(Image, db.session))
 
 
 def create_app():
