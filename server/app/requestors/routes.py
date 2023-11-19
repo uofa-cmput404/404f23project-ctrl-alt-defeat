@@ -1,6 +1,8 @@
 from app.requestors import bp
 from flask import request, jsonify, g
 import sqlite3
+from flask_bcrypt import Bcrypt
+bcrypt = Bcrypt()
 
 def get_db():
     if 'db' not in g:
@@ -13,6 +15,9 @@ def register():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
+
+    # Hash the password
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     db = get_db()
     cur = db.cursor()
@@ -27,7 +32,7 @@ def register():
         if existing_requestor or existing_author:
             return jsonify({'error': 'Username already exists'})
         
-        cur.execute("INSERT INTO requestors (username, password) VALUES (?, ?)", (username, password))
+        cur.execute("INSERT INTO requestors (username, password) VALUES (?, ?)", (username, hashed_password))
         db.commit()
         
         return jsonify({'message': 'Registration successful'})

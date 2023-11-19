@@ -4,6 +4,10 @@ from flask import request, g, jsonify
 import sqlite3
 from app.dbase import get_db_connection
 from random import randrange
+from flask_bcrypt import Bcrypt
+
+from flask_bcrypt import check_password_hash
+from flask_bcrypt import generate_password_hash
 
 def get_db():
     if 'db' not in g:
@@ -24,7 +28,7 @@ def login():
 
     if author:
         stored_password = author['password']
-        if password == stored_password:
+        if check_password_hash(stored_password, password):
             result = {'message': 'Login successful', 'author_id': author['author_id']}
         else:
             result = {'message': 'Wrong Password'}
@@ -72,7 +76,8 @@ def update_password():
     cur = db.cursor()
 
     try:
-        cur.execute("UPDATE authors SET password = ? WHERE author_id = ?", (new_password, author_id))
+        hashed_password = generate_password_hash(new_password).decode('utf-8')
+        cur.execute("UPDATE authors SET password = ? WHERE author_id = ?", (hashed_password, author_id))
         db.commit()
 
         return jsonify({'message': 'Password updated successfully'})

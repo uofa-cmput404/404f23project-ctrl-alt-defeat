@@ -29,7 +29,7 @@ class Author(db.Model):
 class AuthorView(ModelView):
     can_delete = True
     form_columns = ["author_id", "username", "password"]
-    column_list = ["author_id", "username", "password"]
+    column_list = ["author_id", "username"]  # Removed 'password'
     column_searchable_list = ['username']  
 
 class Requestor(db.Model):
@@ -42,7 +42,7 @@ class Requestor(db.Model):
 class RequestorView(ModelView):
     can_delete = True
     form_columns = ["requestor_id", "username", "password"]
-    column_list = ["requestor_id", "username", "password"]
+    column_list = ["requestor_id", "username"]  # Removed 'password'
 
     @action('approve', 'Approve', 'Are you sure you want to approve selected requesters?')
     def action_approve(self, ids):
