@@ -20,7 +20,7 @@ admin = Admin()
 
 class Author(db.Model):
     __tablename__ = "authors"
-    author_id = db.Column(db.Integer, primary_key=True)
+    author_id = db.Column(db.Text, primary_key=True)
     username = db.Column(db.Text)
     password = db.Column(db.Text)
     posts = db.relationship('Post', backref='author', lazy=True, cascade="all, delete-orphan")
@@ -34,7 +34,7 @@ class AuthorView(ModelView):
 
 class Requestor(db.Model):
     __tablename__ = "requestors"
-    requestor_id = db.Column(db.Integer, primary_key=True)
+    requestor_id = db.Column(db.Text, primary_key=True)
     username = db.Column(db.Text)
     password = db.Column(db.Text)
 
@@ -50,7 +50,7 @@ class RequestorView(ModelView):
             requestor = Requestor.query.get(id)
             if requestor:
                 # Transfer requestor to author
-                new_author = Author(username=requestor.username, password=requestor.password)
+                new_author = Author(author_id=requestor.requestor_id, username=requestor.username, password=requestor.password)
                 db.session.add(new_author)
 
                 # Remove requestor
@@ -67,7 +67,7 @@ class Post(db.Model):
     post_id = db.Column(db.Text, primary_key=True)
     title = db.Column(db.Text)
     content = db.Column(db.Text)
-    author_id = db.Column(db.Integer, db.ForeignKey('authors.author_id'))
+    author_id = db.Column(db.Text, db.ForeignKey('authors.author_id'))
 class PostView(ModelView):
     can_delete = True
     form_columns = ["post_id", "title", "content", "author_id"]
@@ -78,7 +78,7 @@ class Image(db.Model):
     __tablename__ = "image_post"
     img_id = db.Column(db.Text, primary_key=True)
     img_url = db.Column(db.Text, nullable=False)  
-    author_id = db.Column(db.Integer, db.ForeignKey('authors.author_id'))
+    author_id = db.Column(db.Text, db.ForeignKey('authors.author_id'))
 
 class ImageView(ModelView):
     can_delete = True

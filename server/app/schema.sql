@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS post_restrictions;
 
 CREATE TABLE posts (
     post_id TEXT PRIMARY KEY,
-    author_id INTEGER NOT NULL,
+    author_id TEXT NOT NULL, --TEXT
     date_posted TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     title TEXT NOT NULL,
     content_type TEXT NOT NULL DEFAULT "text/plain",
@@ -26,14 +26,14 @@ CREATE TABLE posts (
 
 
 CREATE TABLE authors (
-    author_id INTEGER PRIMARY KEY,
+    author_id TEXT PRIMARY KEY, --TEXT
     username TEXT NOT NULL,
     github TEXT NOT NULL,
     password TEXT NOT NULL
 );
 
 CREATE TABLE requestors (
-    requestor_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    requestor_id TEXT PRIMARY KEY, --TEXT
     username TEXT NOT NULL,
     password TEXT NOT NULL
 );
@@ -46,7 +46,7 @@ CREATE TABLE admins (
 
 CREATE TABLE image_post (
     img_id TEXT PRIMARY KEY,
-    author_id INTEGER NOT NULL,
+    author_id TEXT NOT NULL, --TEXT
     img_url TEXT NOT NULL,
     visibility TEXT NOT NULL DEFAULT "public",
     date_posted TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
@@ -54,22 +54,22 @@ CREATE TABLE image_post (
 );
 
 CREATE TABLE friends (
-    author_followee INTEGER NOT NULL,
-    author_following INTEGER NOT NULL,
+    author_followee TEXT NOT NULL, --TEXT
+    author_following TEXT NOT NULL, --TEXT
     FOREIGN KEY (author_followee) REFERENCES authors(author_id) ON DELETE CASCADE,
     FOREIGN KEY (author_following) REFERENCES authors(author_id) ON DELETE CASCADE
 );
 
 CREATE TABLE follow_requests (
-     author_send INTEGER NOT NULL,
-     author_receive INTEGER NOT NULL,
+     author_send TEXT NOT NULL, --TEXT
+     author_receive TEXT NOT NULL, --TEXT
      FOREIGN KEY (author_send) REFERENCES authors(author_id),
      FOREIGN KEY (author_receive) REFERENCES authors(author_id)
  );
 
 CREATE TABLE likes (
     like_id TEXT PRIMARY KEY,
-    like_author_id INTEGER NOT NULL,
+    like_author_id TEXT NOT NULL, --TEXT
     post_id TEXT NOT NULL,
     time_liked TIMESTAMP NOT NULL,
     FOREIGN KEY (like_author_id) REFERENCES authors(author_id) ON DELETE CASCADE,
@@ -78,7 +78,7 @@ CREATE TABLE likes (
 
 CREATE TABLE comments (
     post_id TEXT PRIMARY KEY,
-    comment_author_id INTEGER NOT NULL,
+    comment_author_id TEXT NOT NULL, --TEXT
     date_commented TIMESTAMP NOT NULL,
     FOREIGN KEY (comment_author_id) REFERENCES authors(author_id),
     FOREIGN KEY (post_id) REFERENCES posts(post_id)
@@ -86,7 +86,7 @@ CREATE TABLE comments (
 
 CREATE TABLE shares(
     post_id TEXT PRIMARY KEY,
-    share_author_id INTEGER NOT NULL,
+    share_author_id TEXT NOT NULL, --TEXT
     date_posted TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (share_author_id) REFERENCES authors(author_id),
     FOREIGN KEY (post_id) REFERENCES posts(post_id)
@@ -94,7 +94,7 @@ CREATE TABLE shares(
 
 CREATE TABLE post_restrictions (
     post_id INTEGER,
-    restricted_author_id INTEGER,
+    restricted_author_id TEXT, --TEXT
     FOREIGN KEY (post_id) REFERENCES posts (post_id),
     FOREIGN KEY (restricted_author_id) REFERENCES authors (author_id)
     UNIQUE (post_id, restricted_author_id) -- Unique constraint
