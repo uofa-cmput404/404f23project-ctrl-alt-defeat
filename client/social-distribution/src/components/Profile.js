@@ -1,9 +1,21 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-
+import axios from 'axios';
 function Profile({ username, authorId, setUsername, onClose }) {
   const [newUsername, setNewUsername] = useState('');
+  const [GithubName, setGithubName] = useState('');
   const [newPassword, setNewPassword] = useState('');
+
+  const handleGithubUpdate = async () => {
+    axios.post('http://localhost:5000/authors/github', {
+      
+        author_id: authorId,
+        github: GithubName
+      
+    }).then((response) => {
+      toast.success(response.data);
+    })
+  }
 
   const handleUsernameUpdate = async () => {
     if (!newUsername) {
@@ -108,6 +120,15 @@ function Profile({ username, authorId, setUsername, onClose }) {
           />
           <button className="save-button" onClick={handlePasswordUpdate}>
             Save Password
+          </button>
+        </div>
+        <div className="input-container">
+          <label>Enter Github Username:</label>
+          <input            
+            onChange={(e) => setGithubName(e.target.value)}
+          />
+          <button className="save-button" onClick={handleGithubUpdate}>
+            Save Github Name
           </button>
         </div>
       </div>
