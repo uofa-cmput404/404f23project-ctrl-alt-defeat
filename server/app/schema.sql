@@ -98,3 +98,10 @@ CREATE TABLE post_restrictions (
     FOREIGN KEY (restricted_author_id) REFERENCES authors (author_id)
     UNIQUE (post_id, restricted_author_id) -- Unique constraint
 );
+
+CREATE TABLE nodes (
+    node_id INTEGER,
+    node_name TEXT,
+    base_url TEXT NOT NULL    
+);
+
