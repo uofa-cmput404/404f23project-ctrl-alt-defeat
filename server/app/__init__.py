@@ -12,7 +12,9 @@ from markupsafe import Markup
 from flask_cors import CORS, cross_origin
 
 from flask_basicauth import BasicAuth
+from flask_bcrypt import Bcrypt
 
+bcrypt = Bcrypt()
 
 db = SQLAlchemy()
 basic_auth = BasicAuth()
@@ -29,8 +31,13 @@ class Author(db.Model):
 class AuthorView(ModelView):
     can_delete = True
     form_columns = ["author_id", "username", "password"]
-    column_list = ["author_id", "username"]
-    column_searchable_list = ['username']  
+    column_list = ["author_id", "username", "password"]
+    column_searchable_list = ['username'] 
+
+    def on_model_change(self, form, model, is_created):
+        # Hash the password
+        hashed_password = bcrypt.generate_password_hash(model.password).decode('utf-8')
+        model.password = hashed_password 
 
 class Requestor(db.Model):
     __tablename__ = "requestors"
@@ -42,7 +49,12 @@ class Requestor(db.Model):
 class RequestorView(ModelView):
     can_delete = True
     form_columns = ["requestor_id", "username", "password"]
-    column_list = ["requestor_id", "username"]
+    column_list = ["requestor_id", "username","password"]
+
+    def on_model_change(self, form, model, is_created):
+        # Hash the password
+        hashed_password = bcrypt.generate_password_hash(model.password).decode('utf-8')
+        model.password = hashed_password
 
     @action('approve', 'Approve', 'Are you sure you want to approve selected requesters?')
     def action_approve(self, ids):
