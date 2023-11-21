@@ -14,6 +14,9 @@ const editUrl = 'http://127.0.0.1:5000/posts/authors/'
 
 function ManagePosts() {
     const styles = {
+        container: {
+            margin: 20
+        },
         dialog: {
             position: 'fixed'
         },
@@ -247,7 +250,7 @@ function ManagePosts() {
     };
 
   return (
-    <div>
+    <div style={styles.container}>
         <h1>My posts:</h1>
             <dialog open={openVisibilityDialog} style={styles.dialog}>
             <h1>Change visibility</h1>

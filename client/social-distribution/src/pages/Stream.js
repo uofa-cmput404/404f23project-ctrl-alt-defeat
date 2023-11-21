@@ -8,6 +8,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
+import Navbar from '../components/Navbar';
+
 const postsUrl = 'http://127.0.0.1:5000/posts/'
 
 export default function Stream({ username, authorId, setUsername }) {;
@@ -20,6 +22,23 @@ export default function Stream({ username, authorId, setUsername }) {;
 
     const [postsLists, setPostsLists] = useState([])
     const [showProfile, setShowProfile] = useState(false); 
+
+    const styles = {
+        container: {
+            margin: 20,
+            display: "flex",
+            justifyContent: "space-between",                        
+        },
+        followContainer: {
+            position: "sticky",            
+        },
+        contentContainer: {
+            display: "flex",            
+        },
+        postsContainer: {
+            marginTop: 20
+        }
+    }
 
     const fetchData = async () => {
         try {
@@ -107,24 +126,30 @@ export default function Stream({ username, authorId, setUsername }) {;
 
     return (
         <div>
-          <div className="flex-container">
-            <div className="search-container">
-              <h1>Search:</h1>
-              <UserSearch username={username} authorId={authorId} />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"/>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+        <div style={styles.container}>               
+            {showProfile && <Profile username={username} authorId={authorId} setUsername={setUsername} onClose={closeProfile} />}          
+            <div>
+                <h1>Streams</h1>
+                <button onClick={goToNewPost} type="button" class="btn btn-primary"><i class="fa fa-comment"></i> New Post</button>                      
+                <div style={styles.postsContainer}>
+                    {postsLists.length !== 0 ? <PostsList postsLists={postsLists} setPostsLists={setPostsLists} authorId={authorId} /> : <div>There are no posts</div>}
+                </div>
+            </div>         
+            <div>
+                <div className="search-container">
+                {/* <h1>Search:</h1> */}
+                {/* <UserSearch username={username} authorId={authorId} /> */}
+                </div>
+                <div style={styles.followContainer}>
+                    <FollowRequests authorId={authorId} />
+                </div>                
             </div>
-            <div className="follow-requests-container">
-              <FollowRequests authorId={authorId} />
             </div>
-          </div>
-          {showProfile && <Profile username={username} authorId={authorId} setUsername={setUsername} onClose={closeProfile} />}
-          <button onClick={toggleProfile}>Edit Profile</button>
-          <h1>Streams</h1>
-          <button onClick={goToNewPost}>New post</button>
-          <button onClick={goToManagePosts}>Manage my posts</button>
-          <div>
-            {postsLists.length !== 0 ? <PostsList postsLists={postsLists} setPostsLists={setPostsLists} authorId={authorId} /> : <div>There are no posts</div>}
-          </div>
-          <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+            <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
         </div>
     );
 }

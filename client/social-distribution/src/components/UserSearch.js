@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
+import { UserContext } from '../App';
 
-function UserSearch({ username, authorId }) {
+function UserSearch() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const {username, authorId} = useContext(UserContext);    
 
   const handleSearch = async () => {
     try {

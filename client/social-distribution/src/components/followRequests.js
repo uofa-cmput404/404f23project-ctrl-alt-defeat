@@ -3,6 +3,13 @@ import React, { useState, useEffect } from 'react';
 function FollowRequests({ authorId }) {
   const [followRequests, setFollowRequests] = useState([]);
 
+  const styles = {
+    container: {
+      padding: 20,
+      minHeight: 300
+    }
+  }
+
   useEffect(() => {
     // Fetch follow requests for the current user (authorId)
     const fetchFollowRequests = async () => {
@@ -73,16 +80,21 @@ function FollowRequests({ authorId }) {
 
   return (
     <div>
-      <h1>Follow Requests:</h1>
-      <ul>
-        {followRequests.map((request) => (
-          <li key={request.id}>
-            {request.username}
-            <button onClick={() => acceptFollowRequest(request.id)}>Accept</button>
-            <button onClick={() => rejectFollowRequest(request.id)}>Reject</button>
-          </li>
+    {followRequests.length > 0 &&
+    <div class="card" style={styles.container}>
+      <h3>Follow Requests:</h3>
+       <ul>
+       {followRequests.map((request) => (
+         <li key={request.id}>
+           {request.username}
+           <button onClick={() => acceptFollowRequest(request.id)} class="btn"><i class="fa fa-check"></i></button>
+          <button onClick={() => rejectFollowRequest(request.id)} class="btn"><i class="fa fa-close"></i></button>           
+         </li>
         ))}
       </ul>
+     </div>
+    }
+     
     </div>
   );
 }

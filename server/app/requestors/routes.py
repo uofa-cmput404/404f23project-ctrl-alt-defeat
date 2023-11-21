@@ -17,13 +17,13 @@ def register():
 
     db = get_db()
     cur = db.cursor()
-
+    print("reach")
     try:
         cur.execute("SELECT * FROM requestors WHERE username = ?", (username,))
         existing_requestor = cur.fetchone()
         cur.execute("SELECT * FROM authors WHERE username = ?", (username,))
         existing_author = cur.fetchone()
-
+       
         if existing_requestor or existing_author:
             return jsonify({'error': 'Username already exists'})
         
@@ -34,6 +34,7 @@ def register():
         print('hi',requestor_id)
         return jsonify({'message': 'Registration successful', 'requestor_id': requestor_id})
     except Exception as e:
+        print(e)
         return jsonify({'error': 'An error occurred while registering.'})
 
     finally:

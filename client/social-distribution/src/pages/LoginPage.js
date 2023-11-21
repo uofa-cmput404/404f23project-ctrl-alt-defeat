@@ -52,22 +52,18 @@ function LoginPage({ isAuthenticated, updateAuthStatus, updateUserAndAuthorId })
 
   return (
     <div style={styles.container}>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"/>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
       {currentPage === null && (
         <div style={styles.buttonSpace}>
 
         <div style={styles.buttonContainer}>
-          <button 
-            style={styles.button} 
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = styles.buttonHover.backgroundColor}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = styles.button.backgroundColor}
+          <button  type="button"  class="btn btn-primary"            
             onClick={() => setCurrentPage('login')}
           >
             Login
           </button>
-          <button 
-            style={styles.button} 
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = styles.buttonHover.backgroundColor}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = styles.button.backgroundColor}
+          <button type="button"     class="btn btn-secondary"                      
             onClick={() => setCurrentPage('register')}
           >
             Register

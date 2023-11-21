@@ -8,6 +8,9 @@ import Restrictions from './pages/Restrictions';
 import { Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Navbar from './components/Navbar';
+import SearchPage from './pages/SearchPage';
+import EditProfilePage from './pages/EditProfilePage';
 
 export const UserContext = createContext();
 
@@ -50,8 +53,9 @@ function App() {
   
   return (
     <UserContext.Provider value={{ username, authorId, setUsername, setAuthorId }}>
-      <BrowserRouter>
-        <Routes>
+      <BrowserRouter>          
+      {isAuthenticated && <Navbar/>}
+        <Routes>          
           <Route
             path="/"
             element={
@@ -69,6 +73,8 @@ function App() {
           <Route path="/manageposts" element={<ManagePosts/>}/> /* Merge with /posts? */
           <Route path="/manageposts/restrictions" element={<Restrictions/>}/> /* Merge with /posts? */
           <Route path="/newpost" element={<NewPost/>}/> /* Merge with /posts?*/
+          <Route path="/search" element={<SearchPage/>}/>
+          <Route path="/edit" element={<EditProfilePage/>}/>
         </Routes>
         <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       </BrowserRouter>
