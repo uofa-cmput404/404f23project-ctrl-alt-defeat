@@ -252,7 +252,8 @@ function ManagePosts() {
             <form method="dialog">
                 <select id="visibility" name="visibility" onChange={handleSelectChange}>
                     <option value="private">Private</option>
-                    <option value="public">Public</option>                
+                    <option value="public">Public</option>   
+                    <option value="unlisted">Unlisted</option>                
                     <option value="friends-only">Friends-Only</option>                    
                 </select>
                 {/* <p>Set this private from:</p> */}

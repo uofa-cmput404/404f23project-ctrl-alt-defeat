@@ -383,3 +383,41 @@ def edit_post(author_id, post_id):
 @bp.route('/test/')
 def categories():
     return "Test route for /posts"
+
+
+
+@bp.route("/<post_id>", methods=["GET"])
+# Gets an individual post
+def get_post(post_id):    
+    conn = get_db_connection()
+    data = ""
+    print(post_id)
+    try:
+        query = "SELECT * FROM posts " \
+                "WHERE post_id = ? " \
+                "AND (visibility = 'public' OR visibility = 'unlisted')"
+        
+        row = conn.execute(query, (post_id, )).fetchall()                                        
+        
+        post = [dict(i) for i in row][0]        
+
+        author_id = post["author_id"]
+
+        query = "SELECT username FROM authors " \
+                "WHERE author_id = ? " 
+        
+        row = conn.execute(query, (author_id, )).fetchone()
+
+        if row is not None:
+            row_values = [str(value) for value in row]
+            row_string = ', '.join(row_values)
+            post["username"] = row_string                                        
+
+        data = json.dumps(post)
+
+    except IndexError as e:
+        data = "invalid"
+
+    except Exception as e:
+        print(e)
+    return data 

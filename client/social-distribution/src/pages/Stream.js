@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import PostsList from '../components/PostsList'
 import UserSearch from '../components/UserSearch';
 import Profile from '../components/Profile';
@@ -8,18 +8,60 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
-const postsUrl = 'http://127.0.0.1:5000/posts'
+const postsUrl = 'http://127.0.0.1:5000/posts/';
+
 
 export default function Stream({ username, authorId, setUsername }) {;
     const navigate = useNavigate();
-
-    const likedPostsUrl = 'http://127.0.0.1:5000/authors/' + authorId + '/liked'
+    
+    const likedPostsUrl = 'http://127.0.0.1:5000/authors/' + authorId + '/liked';
+    const githubIdLink = 'http://127.0.0.1:5000/authors/github/' + authorId;     
+    
     const [likedPostIds, setLikedPostIds] = useState({});
     const [responseData, setResponseData] = useState([]);
     
+    const [postsLists, setPostsLists] = useState([]);
+    const [activityList, setActivityList] = useState([]);
+    const [showProfile, setShowProfile] = useState(false);     
 
-    const [postsLists, setPostsLists] = useState([])
-    const [showProfile, setShowProfile] = useState(false); 
+    const styles = {
+        container: {
+            margin: "20px"
+        }
+    }
+
+    const fetchGithubActivity = async () => {        
+        try {
+            // Make the GET request using Axios
+                axios.get(githubIdLink)
+                .then(response => {
+                    try {
+                            if (response.data !== "") {
+                                // Make the GET request using Axios
+                                    axios.get('https://api.github.com/users/' + response.data + '/events')
+                                    .then(response => {
+                                    // Handle the successful response here                
+                                    setActivityList(response.data.slice(0, 5));         
+                                    console.log(response.data);   
+                                    })
+                                    .catch(error => {
+                                    // Handle any errors that occur during the request                                    
+
+                                    console.error('Error:', error);
+                                    });                                
+                            }
+                      } catch (error) {
+                        console.error('Error:', error);
+                      }                                
+                })
+                .catch(error => {
+                // Handle any errors that occur during the request
+                console.error('Error:', error);
+                });
+          } catch (error) {
+            console.error('Error:', error);
+          }
+    }
 
     const fetchData = async () => {
         try {
@@ -44,7 +86,9 @@ export default function Stream({ username, authorId, setUsername }) {;
     useEffect(() => {
         fetchData();
         fetchLikedPosts();
-        
+        if (username !== null) {
+            fetchGithubActivity();
+        }
     }, []);
 
     useEffect(() => {
@@ -104,7 +148,7 @@ export default function Stream({ username, authorId, setUsername }) {;
     }
 
     return (
-        <div>
+        <div style={styles.container}>
           <div className="flex-container">
             <div className="search-container">
               <h1>Search:</h1>
@@ -116,6 +160,22 @@ export default function Stream({ username, authorId, setUsername }) {;
           </div>
           {showProfile && <Profile username={username} authorId={authorId} setUsername={setUsername} onClose={closeProfile} />}
           <button onClick={toggleProfile}>Edit Profile</button>
+          <h1>My Github Activity</h1>          
+          {activityList.length ? <div>
+            {activityList.map(e => {
+                return <div>
+                    <h3>{e.repo.name}</h3>
+                        <p>{e.created_at.split("T")[0]}</p>
+                        <ul>
+                            {e.payload.commits ? e.payload.commits.map(i => {
+                                return <div>{i.message}</div>
+                            }) : null}
+                        </ul>
+                    </div>
+            })}
+            
+          </div> : "You have no commits"}
+          
           <h1>Streams</h1>
           <button onClick={goToNewPost}>New post</button>
           <button onClick={goToManagePosts}>Manage my posts</button>

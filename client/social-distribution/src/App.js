@@ -8,6 +8,7 @@ import Restrictions from './pages/Restrictions';
 import { Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import IndividualPost from './pages/IndividualPost';
 
 export const UserContext = createContext();
 
@@ -66,6 +67,7 @@ function App() {
             path="/homepage"
             element={isAuthenticated ? <Stream username={username} authorId={authorId} setUsername={setUsername} /> : <Navigate to="/" />}
           />
+          <Route path="/post/:id" element={<IndividualPost/>}/> /* Merge with /posts? */
           <Route path="/manageposts" element={<ManagePosts/>}/> /* Merge with /posts? */
           <Route path="/manageposts/restrictions" element={<Restrictions/>}/> /* Merge with /posts? */
           <Route path="/newpost" element={<NewPost/>}/> /* Merge with /posts?*/
