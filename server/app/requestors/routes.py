@@ -1,5 +1,6 @@
 from app.requestors import bp
 from flask import request, jsonify, g
+from app.dbase import get_db_connection
 import sqlite3
 import uuid
 
@@ -15,7 +16,7 @@ def register():
     username = data.get('username')
     password = data.get('password')
 
-    db = get_db()
+    db = get_db_connection()
     cur = db.cursor()
 
     try:
@@ -37,4 +38,4 @@ def register():
         return jsonify({'error': 'An error occurred while registering.'})
 
     finally:
-        db.close()
+        db.close()        

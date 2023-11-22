@@ -84,9 +84,22 @@ class PostView(ModelView):
     column_labels = dict(view_content="Content Preview")
 
 
+class Node(db.Model):
+    __tablename__ = "nodes"
+    node_id = db.Column(db.Integer, primary_key=True)
+    base_url = db.Column(db.Text)
+    node_name = db.Column(db.Text)
+
+class NodeView(ModelView):
+    can_delete = True
+    form_columns = ["node_id", "base_url", "node_name"]
+    column_list = ["node_id", "base_url", "node_name"]
+    column_searchable_list = ["node_name"]
+
 admin.add_view(AuthorView(Author, db.session))
 admin.add_view(RequestorView(Requestor, db.session))
 admin.add_view(PostView(Post, db.session))
+admin.add_view(NodeView(Node, db.session))
 
 
 def create_app():
