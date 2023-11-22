@@ -170,15 +170,12 @@ def delete_post():
 
     return data # data
 
-@bp.route('/manage', methods=['POST'])
+@bp.route('/manage', methods=['GET'])
 def get_my_posts():
     data = ""
     try:
-        # Retrieve data from the request's JSON body
-        print("manage")
-        request_data = request.get_json()
-        author_id = request_data['author_id']
-                    
+        # Retrieve data from the request's JSON body         
+        author_id = request.args.get('author_id')           
         conn = get_db_connection()
         
         # Get all the posts from people who I'm following + posts who are public
@@ -200,15 +197,14 @@ def get_my_posts():
 
     return data # data
 
-@bp.route('/', methods=['POST'])
+@bp.route('/', methods=['GET'])
 def index():
     data = ""
     try:
         # Retrieve data from the request's JSON body
-        print("data")
-        request_data = request.get_json()
-        author_id = request_data['author_id']
-
+        print("data")        
+        author_id = request.args.get('author_id')        
+        # print(author_id)
         conn = get_db_connection()
         
         # Get all the posts from people who I'm following + posts who are public + posts that are mine

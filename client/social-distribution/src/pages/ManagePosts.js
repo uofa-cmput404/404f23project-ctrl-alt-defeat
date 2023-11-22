@@ -180,9 +180,7 @@ function ManagePosts() {
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
-                axios.post(managePostsUrl, {
-                    author_id: authorId // temporary
-                })
+                axios.get(managePostsUrl + `?author_id=${authorId}`)
                 .then(response => {
                 // Handle the successful response here
                 console.log('Response data:', response.data);
