@@ -180,9 +180,7 @@ function ManagePosts() {
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
-                axios.post(managePostsUrl, {
-                    author_id: authorId // temporary
-                })
+                axios.get(managePostsUrl + `?author_id=${authorId}`)
                 .then(response => {
                 // Handle the successful response here
                 console.log('Response data:', response.data);
@@ -254,7 +252,8 @@ function ManagePosts() {
             <form method="dialog">
                 <select id="visibility" name="visibility" onChange={handleSelectChange}>
                     <option value="private">Private</option>
-                    <option value="public">Public</option>                
+                    <option value="public">Public</option>   
+                    <option value="unlisted">Unlisted</option>                
                     <option value="friends-only">Friends-Only</option>                    
                 </select>
                 {/* <p>Set this private from:</p> */}
