@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import bootstrap from 'bootstrap' 
 import { useNavigate } from 'react-router-dom';
+import { UserContext } from '../App';
 
-function Navbar({ username, authorId }) {
+function Navbar() {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const navigate = useNavigate();
+    const {username, authorId} = useContext(UserContext);    
 
   const handleSearch = async (event) => {
     try {
@@ -17,7 +19,7 @@ function Navbar({ username, authorId }) {
         
         // Navigate to the new page with the data in the state
         navigate('/search', { state: filteredResults });
-        console.log("here");
+        console.log("here");        
         
         // setSearchResults(filteredResults);
       } else {
@@ -53,7 +55,7 @@ function Navbar({ username, authorId }) {
                     </li>
                 </ul>
                 <form class="d-flex">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" value={searchQuery}
+                    <input class="form-control me-2" type="search" placeholder="Search Users" aria-label="Search" value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}/>
                     <button class="btn btn-outline-success" type="submit" onClick={(event) => handleSearch(event)}>Search</button>
                 </form>
