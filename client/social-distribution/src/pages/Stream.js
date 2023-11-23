@@ -121,17 +121,17 @@ export default function Stream({ username, authorId, setUsername }) {;
     }, []);
 
     useEffect(() => {
-        labelLikedPosts();
-    }, [likedPostIds]);
+        labelLikedPosts();        
+    }, [likedPostIds, responseData]);
 
-    const labelLikedPosts = () => {
-        // Label (on front-end) which posts have been liked by the logged in author
+    const labelLikedPosts = () => {        
+        // Label (on front-end) which posts have been liked by the logged in author                
         let posts = responseData.map((item, index) => {
             let liked = false;
             for (let i = 0; i < likedPostIds.length; i++) {
                 //console.log("check post id in likedPostIds", likedPostIds[i].post_id);
-                if (likedPostIds[i].post_id === item.post_id) {
-                    liked = true;
+                if (likedPostIds[i].post_id === item.post_id) {                    
+                    liked = true;                                      
                 }
             }
 
@@ -147,10 +147,8 @@ export default function Stream({ username, authorId, setUsername }) {;
      async function fetchLikedPosts() {
         try {
             axios.get(likedPostsUrl)
-            .then(response => {
-                //console.log('liked ids:', response.data);
+            .then(response => {                
                 setLikedPostIds(response.data);
-                console.log(response.data);
             })
             .catch(error => {
                 console.error('Error:', error);
