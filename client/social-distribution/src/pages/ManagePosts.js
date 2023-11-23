@@ -78,6 +78,7 @@ function ManagePosts() {
     const [editContent, setEditContent] = useState(""); 
     const [editTitle, setEditTitle] = useState(""); 
     const [edittedContentType, setEdittedContentType] = useState("");
+    const [fetchDone, setFetchDone] = useState(false);
 
     const editRequest = async () => {
         // console.log(authorId);
@@ -188,12 +189,15 @@ function ManagePosts() {
                 .then(response => {
                 // Handle the successful response here
                 console.log('Response data:', response.data);
-                    setPostsLists(response.data)
+                    setPostsLists(response.data);
                 })
                 .catch(error => {
                 // Handle any errors that occur during the request
                 console.error('Error:', error);
-                });
+                })
+                .finally(() => {
+                    setFetchDone(true);
+                })
           } catch (error) {
             console.error('Error:', error);
           }
@@ -303,7 +307,11 @@ function ManagePosts() {
             </dialog>
         <div>
             {
-                postsLists.length ? 
+                !fetchDone ?
+                <div class="spinner-border" role="status">
+                    {/* <span class="sr-only">Loading...</span> */}
+                </div> :
+                (postsLists.length ? 
                 postsLists.map((item, index) => (
                     <ManagePostItem postLists={postsLists} 
                                     setPostsLists={setPostsLists} 
@@ -318,7 +326,7 @@ function ManagePosts() {
                                     setEditTitle={setEditTitle}                     
                                     setEdittedContentType={setEdittedContentType}
                                     />
-                )) : <div>You have no posts</div>
+                )) : <div>You have no posts</div>)
             }
         </div>
 

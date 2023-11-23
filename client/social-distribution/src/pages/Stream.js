@@ -22,6 +22,7 @@ export default function Stream({ username, authorId, setUsername }) {;
     
     const [likedPostIds, setLikedPostIds] = useState({});
     const [responseData, setResponseData] = useState([]);
+    const [fetchDone, setFetchDone] = useState(false);
     
     const [postsLists, setPostsLists] = useState([]);
     const [activityList, setActivityList] = useState([]);
@@ -107,6 +108,9 @@ export default function Stream({ username, authorId, setUsername }) {;
                 .catch(error => {
                 // Handle any errors that occur during the request
                 console.error('Error:', error);
+                })
+                .finally(() => {
+                    setFetchDone(true);
                 });
           } catch (error) {
             console.error('Error:', error);
@@ -203,9 +207,14 @@ export default function Stream({ username, authorId, setUsername }) {;
             </div>        
             <div style={styles.posts}>
                 <h1>Streams</h1>
-                <button onClick={goToNewPost} type="button" class="btn btn-primary"><i class="fa fa-comment"></i> New Post</button>                      
+                    <button onClick={goToNewPost} type="button" class="btn btn-primary"><i class="fa fa-comment"></i> New Post</button>                                      
                 <div style={styles.postsContainer}>
-                    {postsLists.length !== 0 ? <PostsList postsLists={postsLists} setPostsLists={setPostsLists} authorId={authorId} /> : <div>There are no posts</div>}
+                    {
+                        !fetchDone ?
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div> :  (postsLists.length !== 0 ? <PostsList postsLists={postsLists} setPostsLists={setPostsLists} authorId={authorId} /> : <div>There are no posts</div>)
+                    }
                 </div>
             </div>
             <div></div>         
