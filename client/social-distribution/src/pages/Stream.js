@@ -65,7 +65,8 @@ export default function Stream({ username, authorId, setUsername }) {;
         container: {
             margin: 20,
             display: "flex",
-            marginLeft: 300   
+            marginLeft: 300,
+            padding: 10   
         },
         followContainer: {            
             marginTop: 10,
@@ -84,8 +85,10 @@ export default function Stream({ username, authorId, setUsername }) {;
             position: "fixed",
             zIndex: 1,            
             left: 10,            
-            overflowX: "hidden",
-            padding: "8px 0",
+            overflowX: "hidden",            
+            overflowY:"scroll",
+            height: "90%",
+            paddingBottom: 10
         }
     }
 

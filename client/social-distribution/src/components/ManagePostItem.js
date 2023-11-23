@@ -9,7 +9,8 @@ function ManagePostItem(props) {
         button: {marginRight: 5},     
         container: {
             padding: 20,
-            maxWidth: "50%"
+            maxWidth: "50%",
+            marginTop: 10
         }   
     }
     function processDelete() {

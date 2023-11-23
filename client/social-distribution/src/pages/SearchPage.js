@@ -53,8 +53,10 @@ function SearchPage() {
         <div>          
           <ul>
             {searchResults.map((user) => (
-              <li key={user.id}>
-                {user.username}
+              <li key={user.id} style={{display: "flex", alignItems: "center", marginTop: 10}}>
+                <div style={{minWidth: 200}}>
+                  {user.username}
+                </div>
                 <button onClick={() => handleFollowRequest(user.id)} type="button" class="btn btn-primary">Follow</button>                
               </li>
             ))}

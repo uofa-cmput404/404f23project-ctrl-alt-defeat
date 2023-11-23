@@ -18,7 +18,8 @@ function ManagePosts() {
             margin: 20
         },
         dialog: {
-            position: 'fixed'
+            position: 'fixed',
+            zIndex: 2
         },
         text: {
             width: "100%",
@@ -250,7 +251,7 @@ function ManagePosts() {
   return (
     <div style={styles.container}>
         <h1>My posts:</h1>
-            <dialog open={openVisibilityDialog} style={styles.dialog}>
+            <dialog  open={openVisibilityDialog} style={styles.dialog}>
             <h1>Change visibility</h1>
             <form method="dialog">
                 <select id="visibility" name="visibility" onChange={handleSelectChange}>

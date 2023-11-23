@@ -7,6 +7,17 @@ function FollowRequests({ authorId }) {
     container: {
       padding: 20,
       minHeight: 300
+    },
+    follow: {
+      display: "flex",
+      alignItems: "center",                
+
+    },
+    username: {
+      width: 100
+    },
+    box: {
+      padding: 10
     }
   }
 
@@ -79,14 +90,18 @@ function FollowRequests({ authorId }) {
   
 
   return (
-    <div>
+    <div style={styles.box}>
     {followRequests.length > 0 ? 
        <ul>
        {followRequests.map((request) => (
          <li key={request.id}>
-           {request.username}
-           <button onClick={() => acceptFollowRequest(request.id)} class="btn"><i class="fa fa-check"></i></button>
-          <button onClick={() => rejectFollowRequest(request.id)} class="btn"><i class="fa fa-close"></i></button>           
+           <div style={styles.follow}>
+            <p style={styles.username}>{request.username}</p>   
+            <div>
+              <button onClick={() => acceptFollowRequest(request.id)} class="btn"><i style={{color: "green"}} class="fa fa-check"></i></button>
+              <button onClick={() => rejectFollowRequest(request.id)} class="btn"><i style={{color: "red"}} class="fa fa-close"></i></button>                       
+            </div>
+           </div>
          </li>
         ))}
       </ul>    
