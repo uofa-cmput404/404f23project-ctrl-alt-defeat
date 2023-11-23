@@ -1,6 +1,6 @@
 from app.main import bp
 from app.dbase import get_db_connection
-from flask import abort, request, Response
+from flask import abort, request, Response, redirect
 from werkzeug.exceptions import HTTPException
 
 @bp.route('/')
@@ -22,11 +22,19 @@ def get_image_as_base64(author_id, post_id):
     # check if post exists
     conn = get_db_connection()
     try:
-        query = "SELECT post_id, content_type, visibility,content FROM posts WHERE post_id = ? AND author_id = ?"
-        row = conn.execute(query, (post_id,author_id)).fetchone()
+        # the author_id is quite redundant as post_ids are unique.
+        if author_id != "NONE":
+            query = "SELECT post_id, content_type, visibility,content FROM posts WHERE post_id = ? AND author_id = ?"
+            row = conn.execute(query, (post_id, author_id)).fetchall()
+        else: # no author_id fallback
+            query = "SELECT post_id, content_type, visibility,content FROM posts WHERE post_id = ?"
+            row = conn.execute(query, (post_id,)).fetchall()
         print(row)
         if row is None:
             abort(404, "The post does not exist.")
+        if len(row) > 1:
+            abort(404, "Cannot disambiguate more than one post. Specify an author_id to narrow it down.")
+        row = row[0]
         if row["visibility"] != "public":
             abort(404, "This is not public.")
         if row["content_type"] not in ["image/png;base64", "image/jpeg;base64"]:
@@ -35,7 +43,7 @@ def get_image_as_base64(author_id, post_id):
         content_type = row["content_type"]
         content = row["content"]
         final_message = f"data:{content_type},{content}"
-        return final_message
+        return redirect(final_message, code=302)
     except HTTPException as e:
         final_message = str(e)
         print(final_message)
