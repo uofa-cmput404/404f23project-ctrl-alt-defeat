@@ -2,6 +2,7 @@ import axios from 'axios';
 import React from 'react'
 import Markdown from 'react-markdown';
 import './ManagePostItem.css';
+import rehypeRaw from 'rehype-raw'
 
 const deleteUrl = 'http://127.0.0.1:5000/posts/delete'
 function ManagePostItem(props) {
@@ -66,7 +67,7 @@ function get_content_as_elements(content_type, content){
         return(<p>{content}</p>);
     }
     else if (content_type === "text/markdown"){
-        return(<Markdown>{content}</Markdown>);
+        return(<Markdown rehypePlugins={[rehypeRaw]} urlTransform={(value:string) => value}>{content}</Markdown>);
     }
     else if (content_type === "image/png;base64" || content_type === "image/jpeg;base64")
     {
