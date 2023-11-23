@@ -1,6 +1,5 @@
-
-DROP TABLE IF EXISTS posts;
 DROP TABLE IF EXISTS authors;
+DROP TABLE IF EXISTS posts;
 DROP TABLE IF EXISTS requestors;
 DROP TABLE IF EXISTS admins;
 DROP TABLE IF EXISTS image_post;
@@ -28,7 +27,7 @@ CREATE TABLE posts (
 CREATE TABLE authors (
     author_id TEXT PRIMARY KEY, --TEXT
     username TEXT NOT NULL,
-    github TEXT NOT NULL,
+    github TEXT,
     password TEXT NOT NULL
 );
 

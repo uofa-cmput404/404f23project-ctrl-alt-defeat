@@ -12,20 +12,10 @@ const styles = {
     cursor: 'pointer'
   },
   
-  /*container: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: '5px 0px 5px 5px',
-    fontSize: '16px',
-    cursor: 'pointer',
-    backgroundColor: '#808080',
-    color: 'white',
-    border: 'none',
-    width: '85px',
-    borderRadius: '4px',
-    justifyCenter: 'center'
-  }*/
-
+  container: {    
+    padding: 20,
+    marginTop: 10
+  }
 }
 
 
@@ -60,13 +50,14 @@ function PostItem(props) {
   }
 
   return (
-    <li key={props.key}>
+    <div style={styles.container} class="card">
         <h3>{props.item.title}</h3>
-        <div>Posted by: {props.item.username}</div>
-        <div>{props.item.date_posted}</div>
+        <small class="text-muted">Posted by: {props.item.username}</small>        
+        <small class="text-muted">{props.item.date_posted}</small>        
+        <hr/>
         <div>{get_content_as_elements(props.item.content_type,props.item.content)}</div>
         
-        <div style={styles.container} onClick={selectToggleLike}>
+        <div onClick={selectToggleLike}>
         {// Show like icon as liked or not based on if logged in author has liked the post
         props.item.liked ?
 
@@ -76,7 +67,7 @@ function PostItem(props) {
           
         }
         </div>
-    </li>
+    </div>
   )
 }
 

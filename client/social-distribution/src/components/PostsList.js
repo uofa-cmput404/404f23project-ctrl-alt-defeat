@@ -86,7 +86,7 @@ function PostsList(props) {
   }
 
   return (
-    <ul>
+    <div>
         {
             props.postsLists.map((item, index) => (
                 <PostItem item={item} index={index} 
@@ -96,7 +96,7 @@ function PostsList(props) {
                 setPostSelectedAuthor={setPostSelectedAuthor} />
             ))
         }
-    </ul>
+    </div>
     
   )
 }

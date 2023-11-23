@@ -1,10 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { UserContext } from '../App';
+import axios from 'axios';
 
 function EditProfilePage() {
     const [newUsername, setNewUsername] = useState('');
     const [newPassword, setNewPassword] = useState('');
+    const [GithubName, setGithubName] = useState('');
     const {username, authorId} = useContext(UserContext);    
 
     const styles = {
@@ -16,7 +18,20 @@ function EditProfilePage() {
             width: "30%"
         }
     }
-    
+
+
+    const handleGithubUpdate = async () => {
+      axios.post('http://localhost:5000/authors/github', {
+        
+          author_id: authorId,
+          github: GithubName
+        
+      }).then((response) => {
+        toast.success(response.data);
+      })
+    }
+
+      
     const handleUsernameUpdate = async (e) => {
         e.preventDefault();
         if (!newUsername) {
@@ -89,6 +104,12 @@ function EditProfilePage() {
                     onChange={(e) => setNewPassword(e.target.value)}/>
                 </div>                
                 <button style={{marginTop: 1.25}} type="submit" class="btn btn-primary" onClick={(e) => handlePasswordUpdate(e)}>Update password</button>
+                <div class="form-group">
+                    <label for="exampleInputUsername1">Github</label>
+                    <input type="username" class="form-control" id="exampleInputUsername1" aria-describedby="emailHelp" placeholder="Link your github" value={GithubName}
+                    onChange={(e) => setGithubName(e.target.value)}/>                    
+                </div>
+                <button style={{marginTop: 1.25}} type="submit" class="btn btn-primary" onClick={(e) => handleGithubUpdate(e)}>Link Github</button>
             </form>
         <div/>
     </div>

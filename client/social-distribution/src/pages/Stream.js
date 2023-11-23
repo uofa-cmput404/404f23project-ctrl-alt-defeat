@@ -7,6 +7,7 @@ import axios from 'axios';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
+import './global.css';
 
 import Navbar from '../components/Navbar';
 
@@ -64,16 +65,27 @@ export default function Stream({ username, authorId, setUsername }) {;
         container: {
             margin: 20,
             display: "flex",
-            justifyContent: "space-between",                        
+            marginLeft: 300   
         },
-        followContainer: {
-            position: "sticky",            
+        followContainer: {            
+            marginTop: 10,
+            padding: 10           
         },
         contentContainer: {
             display: "flex",            
         },
         postsContainer: {
             marginTop: 20
+        },
+        card: {
+            padding: 10
+        },        
+        sidebar: {            
+            position: "fixed",
+            zIndex: 1,            
+            left: 10,            
+            overflowX: "hidden",
+            padding: "8px 0",
         }
     }
 
@@ -167,24 +179,35 @@ export default function Stream({ username, authorId, setUsername }) {;
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"/>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 
-        <div style={styles.container}>               
             {showProfile && <Profile username={username} authorId={authorId} setUsername={setUsername} onClose={closeProfile} />}          
-            <div>
+        <div style={styles.container}>       
+        <div style={styles.sidebar}>
+            <div class="card" style={styles.card}>                                  
+                    <h3>My Github Activity</h3>                          
+                    {activityList.length ? <div>
+                        {activityList.map(e => {
+                            return <div>
+                                <b>{e.repo.name}</b>
+                                    <p>{e.created_at.split("T")[0]}</p>                                
+                                </div>
+                        })}
+                    
+            </div> : "You have no commits"}
+            
+            </div>                
+            <div class="card" style={styles.followContainer}>
+                <h3>Follow Requests</h3>
+                <FollowRequests authorId={authorId} />
+            </div>
+            </div>        
+            <div style={styles.posts}>
                 <h1>Streams</h1>
                 <button onClick={goToNewPost} type="button" class="btn btn-primary"><i class="fa fa-comment"></i> New Post</button>                      
                 <div style={styles.postsContainer}>
                     {postsLists.length !== 0 ? <PostsList postsLists={postsLists} setPostsLists={setPostsLists} authorId={authorId} /> : <div>There are no posts</div>}
                 </div>
-            </div>         
-            <div>
-                <div className="search-container">
-                {/* <h1>Search:</h1> */}
-                {/* <UserSearch username={username} authorId={authorId} /> */}
-                </div>
-                <div style={styles.followContainer}>
-                    <FollowRequests authorId={authorId} />
-                </div>                
             </div>
+            <div></div>         
             </div>
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
         </div>

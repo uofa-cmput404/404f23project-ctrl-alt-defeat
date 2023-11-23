@@ -300,7 +300,7 @@ function ManagePosts() {
                 <button style={styles.cancel} onClick={() => setRestrictionsDialog(false)}>Close</button>
             </form>
             </dialog>
-        <ul>
+        <div>
             {
                 postsLists.length ? 
                 postsLists.map((item, index) => (
@@ -319,7 +319,7 @@ function ManagePosts() {
                                     />
                 )) : <div>You have no posts</div>
             }
-        </ul>
+        </div>
 
     </div>
   )

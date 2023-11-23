@@ -80,9 +80,7 @@ function FollowRequests({ authorId }) {
 
   return (
     <div>
-    {followRequests.length > 0 &&
-    <div class="card" style={styles.container}>
-      <h3>Follow Requests:</h3>
+    {followRequests.length > 0 ? 
        <ul>
        {followRequests.map((request) => (
          <li key={request.id}>
@@ -91,8 +89,8 @@ function FollowRequests({ authorId }) {
           <button onClick={() => rejectFollowRequest(request.id)} class="btn"><i class="fa fa-close"></i></button>           
          </li>
         ))}
-      </ul>
-     </div>
+      </ul>    
+      : <li>Empty! 😅</li> 
     }
      
     </div>
