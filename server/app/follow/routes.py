@@ -119,3 +119,17 @@ def reject_follow_request():
         return jsonify({'message': 'Follow request rejected'})
     else:
         return jsonify({'message': 'Follow request not found'})
+
+@bp.route('/unfollow', methods=['POST'])
+def unfollow():
+    data = request.get_json()
+    author_unfollow = data.get('author_unfollow')
+    author_unfollower = data.get('author_unfollower')
+
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute("DELETE FROM friends WHERE author_following = ? AND author_followee = ?", (author_unfollower, author_unfollow))
+    db.commit()
+
+    return jsonify({'message': 'Unfollowed successfully'})

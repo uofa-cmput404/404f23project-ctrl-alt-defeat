@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import PostsList from '../components/PostsList'
 import UserSearch from '../components/UserSearch';
 import Profile from '../components/Profile';
@@ -10,18 +10,55 @@ import { useNavigate } from 'react-router-dom';
 
 import Navbar from '../components/Navbar';
 
-const postsUrl = 'http://127.0.0.1:5000/posts/'
+const postsUrl = 'http://127.0.0.1:5000/posts/';
+
 
 export default function Stream({ username, authorId, setUsername }) {;
     const navigate = useNavigate();
-
-    const likedPostsUrl = 'http://127.0.0.1:5000/authors/' + authorId + '/liked'
+    
+    const likedPostsUrl = 'http://127.0.0.1:5000/authors/' + authorId + '/liked';
+    const githubIdLink = 'http://127.0.0.1:5000/authors/github/' + authorId;     
+    
     const [likedPostIds, setLikedPostIds] = useState({});
     const [responseData, setResponseData] = useState([]);
     
+    const [postsLists, setPostsLists] = useState([]);
+    const [activityList, setActivityList] = useState([]);
+    const [showProfile, setShowProfile] = useState(false);     
 
-    const [postsLists, setPostsLists] = useState([])
-    const [showProfile, setShowProfile] = useState(false); 
+
+    const fetchGithubActivity = async () => {        
+        try {
+            // Make the GET request using Axios
+                axios.get(githubIdLink)
+                .then(response => {
+                    try {
+                            if (response.data !== "") {
+                                // Make the GET request using Axios
+                                    axios.get('https://api.github.com/users/' + response.data + '/events')
+                                    .then(response => {
+                                    // Handle the successful response here                
+                                    setActivityList(response.data.slice(0, 5));         
+                                    console.log(response.data);   
+                                    })
+                                    .catch(error => {
+                                    // Handle any errors that occur during the request                                    
+
+                                    console.error('Error:', error);
+                                    });                                
+                            }
+                      } catch (error) {
+                        console.error('Error:', error);
+                      }                                
+                })
+                .catch(error => {
+                // Handle any errors that occur during the request
+                console.error('Error:', error);
+                });
+          } catch (error) {
+            console.error('Error:', error);
+          }
+    }
 
     const styles = {
         container: {
@@ -43,9 +80,7 @@ export default function Stream({ username, authorId, setUsername }) {;
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
-                axios.post(postsUrl, {
-                    author_id: authorId
-                })
+                axios.get(postsUrl + `?author_id=${authorId}`)
                 .then(response => {
                 // Handle the successful response here
                 //console.log('Response data:', response.data);
@@ -65,7 +100,9 @@ export default function Stream({ username, authorId, setUsername }) {;
     useEffect(() => {
         fetchData();
         fetchLikedPosts();
-        
+        if (username !== null) {
+            fetchGithubActivity();
+        }
     }, []);
 
     useEffect(() => {

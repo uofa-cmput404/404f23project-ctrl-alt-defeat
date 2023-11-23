@@ -95,7 +95,12 @@ function get_content_as_elements(content_type, content){
             <h3>{props.item.title}</h3>
             <div>{props.item.date_posted}</div>
             <div>Visibility: {props.item.visibility}</div>
-        </div>                        
+            {props.item.visibility !== "private" && <a href={'http://127.0.0.1:3000/post/'+ props.item.post_id}>{'http://127.0.0.1:3000/post/'+ props.item.post_id}</a>}
+        </div>
+        <button onClick={selectEdit}>Edit</button>
+        <button onClick={processDelete}>Delete this post</button>
+        <button onClick={selectVisibility}>Change visibility</button>
+        <button onClick={selectRestriction}>Restrictions</button>
         <div>{get_content_as_elements(props.item.content_type,props.item.content)}</div>
         
         <button style={styles.button} onClick={selectEdit} type="button" class="btn btn-primary"><i class="fa fa-edit"></i> Edit</button>

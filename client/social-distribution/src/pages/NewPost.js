@@ -172,6 +172,7 @@ export default function NewPost(props) {
           <option value="public">Public</option>
           <option value="private">Private</option>
           <option value="friends-only">Friends-Only</option>
+          <option value="unlisted">Unlisted</option>
         </select>
       </form>
 

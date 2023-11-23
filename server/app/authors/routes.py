@@ -173,3 +173,57 @@ def delete_like(author_id):
         print("liked error: ", e)
         data = "error"
     return data
+
+
+# Get Github username of author
+@bp.route('/github/<author_id>', methods=['GET'])
+def get_github(author_id):
+    # TODO: Check specification regarding private posts, right now the spec specifies "public things AUTHOR_ID liked"
+    # Currently, this function pulls ALL post_id's of the posts that AUTHOR_ID has liked 
+    # POSSIBLE SECURITY ISSUE
+
+    data = ""
+    try:
+        conn = get_db_connection()
+
+        query = "SELECT github " \
+                "FROM authors WHERE " \
+                "author_id = ?"
+        
+        row = conn.execute(query, (author_id,)).fetchone();
+        # print(str(github_username))
+        if row is not None:
+            row_values = [str(value) for value in row]
+            row_string = ', '.join(row_values)
+            data = row_string
+
+    except Exception as e:
+        print("Getting github username error: ", e)
+        data = "error"
+    
+    return data
+
+
+@bp.route('/github', methods=['POST'])
+# Set Github username
+def update_github():
+    request_data = request.get_json()    
+    github = request_data["github"]
+    author_id = request_data["author_id"]
+    
+    data = ""
+    try:
+        conn = get_db_connection()        
+        query = "UPDATE authors SET github = ? " \
+                "WHERE author_id = ?"
+        
+        conn.execute(query, (github,author_id))
+
+        data = "success"
+
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print("Error trying to update github username: ", e)
+        data = "error"
+    return data

@@ -28,6 +28,7 @@ CREATE TABLE posts (
 CREATE TABLE authors (
     author_id TEXT PRIMARY KEY, --TEXT
     username TEXT NOT NULL,
+    github TEXT NOT NULL,
     password TEXT NOT NULL
 );
 
@@ -98,3 +99,10 @@ CREATE TABLE post_restrictions (
     FOREIGN KEY (restricted_author_id) REFERENCES authors (author_id)
     UNIQUE (post_id, restricted_author_id) -- Unique constraint
 );
+
+CREATE TABLE nodes (
+    node_id INTEGER,
+    node_name TEXT,
+    base_url TEXT NOT NULL    
+);
+
