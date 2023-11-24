@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import PostsList from '../components/PostsList'
 import UserSearch from '../components/UserSearch';
 import Profile from '../components/Profile';
@@ -11,9 +11,8 @@ import { useNavigate } from 'react-router-dom';
 const postsUrl = 'http://127.0.0.1:5000/posts/';
 
 
-export default function Stream({ username, authorId, setUsername }) {;
+export default function Stream({ username, authorId, setUsername, updateAuthStatus, updateUserAndAuthorId }) {;
     const navigate = useNavigate();
-    
     const likedPostsUrl = 'http://127.0.0.1:5000/authors/' + authorId + '/liked';
     const githubIdLink = 'http://127.0.0.1:5000/authors/github/' + authorId;     
     
@@ -147,6 +146,16 @@ export default function Stream({ username, authorId, setUsername }) {;
         navigate("/newpost")
     }
 
+    const handleLogout = () => {
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('username');
+        localStorage.removeItem('authorId');
+    
+        updateAuthStatus(false);
+        updateUserAndAuthorId(null,null);
+        navigate('/');
+      };
+
     return (
         <div style={styles.container}>
           <div className="flex-container">
@@ -157,6 +166,7 @@ export default function Stream({ username, authorId, setUsername }) {;
             <div className="follow-requests-container">
               <FollowRequests authorId={authorId} />
             </div>
+            <button onClick={handleLogout}>Logout</button>
           </div>
           {showProfile && <Profile username={username} authorId={authorId} setUsername={setUsername} onClose={closeProfile} />}
           <button onClick={toggleProfile}>Edit Profile</button>
