@@ -1,4 +1,4 @@
-from app.follow import bp
+from . import bp
 from flask import request, g, jsonify
 import sqlite3
 

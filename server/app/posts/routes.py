@@ -1,7 +1,7 @@
-from app.posts import bp
+from . import bp
 import json
 
-from app.dbase import get_db_connection
+from .dbase import get_db_connection
 
 from flask import request, abort
 from werkzeug.exceptions import HTTPException
