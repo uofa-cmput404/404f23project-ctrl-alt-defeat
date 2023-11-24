@@ -123,17 +123,17 @@ def create_app():
 
 
      # Register blueprints here
-    from app.main import bp as main_bp
+    from .app.main import bp as main_bp
     app.register_blueprint(main_bp)
-    from app.requestors import bp as requestors_bp
+    from .app.requestors import bp as requestors_bp
     app.register_blueprint(requestors_bp, url_prefix='/requestors')   
-    from app.authors import bp as authors_bp
+    from .app.authors import bp as authors_bp
     app.register_blueprint(authors_bp, url_prefix='/authors')   
 
-    from app.follow import bp as follow_bp
+    from .app.follow import bp as follow_bp
     app.register_blueprint(follow_bp, url_prefix='/follow') 
 
-    from app.posts import bp as posts_bp
+    from .app.posts import bp as posts_bp
     app.register_blueprint(posts_bp, url_prefix='/posts')
     
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///../database.db"
