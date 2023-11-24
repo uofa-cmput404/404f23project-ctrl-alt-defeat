@@ -2,7 +2,7 @@ from . import bp
 import json
 from flask import request, g, jsonify
 import sqlite3
-from .dbase import get_db_connection
+from ..dbase import get_db_connection
 from random import randrange
 
 def get_db():
