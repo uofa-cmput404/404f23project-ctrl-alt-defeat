@@ -8,6 +8,12 @@ from werkzeug.exceptions import HTTPException
 
 from random import randrange
 import sqlite3
+from datetime import datetime, timezone
+
+import uuid
+
+# Hard coded for now
+HOST = "http://127.0.0.1:5000"
 
 @bp.route("/restricted", methods=["GET"])
 def get_restricted_users():    
@@ -246,8 +252,7 @@ def new_post():
         visibility = request_data["visibility"]
         content_type = request_data["content_type"]
 
-        # Assign random post ID - TODO: change method of randomization
-        post_id = str(randrange(0, 100000))
+        post_id = str(uuid.uuid4()) # Changed it so its a uuid instead
 
         # validate the content_type is of the following,
         try:
@@ -384,11 +389,9 @@ def edit_post(author_id, post_id):
 def categories():
     return "Test route for /posts"
 
-
-
-@bp.route("/<post_id>", methods=["GET"])
+@bp.route("/authors/<author_id>/posts/<post_id>", methods=["GET"])
 # Gets an individual post
-def get_post(post_id):    
+def get_post(author_id,post_id):    
     conn = get_db_connection()
     data = ""
     print(post_id)
@@ -401,23 +404,128 @@ def get_post(post_id):
         
         post = [dict(i) for i in row][0]        
 
-        author_id = post["author_id"]
-
-        query = "SELECT username FROM authors " \
+        query = "SELECT * FROM authors " \
                 "WHERE author_id = ? " 
         
-        row = conn.execute(query, (author_id, )).fetchone()
+        row = conn.execute(query, (author_id, )).fetchone()                 
 
-        if row is not None:
-            row_values = [str(value) for value in row]
-            row_string = ', '.join(row_values)
-            post["username"] = row_string                                        
+        item = dict()
+        item["type"] = "post"
+        item["id"] = HOST + "/authors/" + post["author_id"] + "/posts/" + post["post_id"]
+        
+        # No idea what these are, skip for now
+        item["source"] = None
+        item["origin"] = None
+        item["description"] = None
+        item["contentType"] = post["content_type"]        
+        
+        author_item = dict()
+        author_item["type"] = "author"
+        author_item["host"] = HOST
+        author_item["id"] = HOST + row["author_id"]
+        author_item["url"] = HOST + row["author_id"]
+        author_item["displayName"] = row["username"]
+        author_item["github"] = row["github"]
+        author_item["profileImage"] = None
 
-        data = json.dumps(post)
+        item["author"] = author_item
+
+        # We don't have these rn
+        item["categories"] = None
+        item["comments"] = None
+        item["commentsSrc"] = None
+
+        input_datetime = datetime.strptime(post["date_posted"], "%Y-%m-%d %H:%M:%S")
+        
+        # Convert datetime object to ISO 8601 format with UTC offset
+        item["published"] = input_datetime.replace(tzinfo=timezone.utc).isoformat()
+
+        item["visibility"] = post["visibility"].upper()
+        item["unlisted"] = True if post["visibility"] == "unlisted" else False
+
+        data = json.dumps(item)
+        print(data)
 
     except IndexError as e:
+        print(e)
         data = "invalid"
 
     except Exception as e:
         print(e)
+        data = "error"
+    
+    return data 
+
+@bp.route("/authors/<author_id>/posts/", methods=["GET"])
+# Gets most recent post from author AUTHOR_ID
+def get_posts(author_id):    
+    conn = get_db_connection()
+    data = ""
+    try:
+        query = "SELECT * FROM posts " \
+                "WHERE author_id = ? " \
+                "AND (visibility = 'public') " \
+                "ORDER BY date_posted " \
+        
+        row = conn.execute(query, (author_id, )).fetchall()                                        
+        
+        posts = [dict(i) for i in row]    
+
+        payload = dict()
+        payload["type"] = "authors"
+        payload["items"] = []
+
+        query = "SELECT * FROM authors " \
+                "WHERE author_id = ? " 
+        
+        author = conn.execute(query, (author_id, )).fetchone()            
+
+        for post in posts:
+            item = dict()
+            item["type"] = "post"
+            item["id"] = HOST + "/authors/" + post["author_id"] + "/posts/" + post["post_id"]
+            
+            # No idea what these are, skip for now
+            item["source"] = None
+            item["origin"] = None
+            item["description"] = None
+            item["contentType"] = post["content_type"]        
+            
+            author_item = dict()
+            author_item["type"] = "author"
+            author_item["host"] = HOST
+            print(post)
+            author_item["id"] = HOST + "/" + post["author_id"]
+            author_item["url"] = HOST + "/" + post["author_id"]
+            author_item["displayName"] = author["username"]
+            author_item["github"] = HOST + "/" + author["github"]
+            author_item["profileImage"] = None
+
+            item["author"] = author_item
+
+            # We don't have these rn
+            item["categories"] = None
+            item["comments"] = None
+            item["commentsSrc"] = None
+
+            input_datetime = datetime.strptime(post["date_posted"], "%Y-%m-%d %H:%M:%S")
+            
+            # Convert datetime object to ISO 8601 format with UTC offset
+            item["published"] = input_datetime.replace(tzinfo=timezone.utc).isoformat()
+
+            item["visibility"] = post["visibility"].upper()
+            item["unlisted"] = True if post["visibility"] == "unlisted" else False
+
+            payload["items"].append(item)
+
+        data = json.dumps(payload)        
+
+    except IndexError as e:
+        print(e)
+        data = "invalid"
+
+    except Exception as e:
+        print(e)
+        data = "error"
+    
     return data 

@@ -5,11 +5,95 @@ import sqlite3
 from app.dbase import get_db_connection
 from random import randrange
 
+# Hard coded for now
+HOST = "http://127.0.0.1:5000"
+
 def get_db():
     if 'db' not in g:
         g.db = sqlite3.connect('database.db')
         g.db.row_factory = sqlite3.Row
     return g.db
+
+# Get all authors
+@bp.route('/authors', methods=['GET'])
+def get_authors():    
+    page = request.args.get('page') 
+    size = request.args.get('size') 
+    data = ""
+    try:
+        conn = get_db_connection()
+
+
+        query = "SELECT * " \
+                "FROM authors " \
+                "ORDER BY author_id " \
+        
+        if page is not None and size is not None:
+            offset = (page - 1) * size
+            query += "LIMIT ? OFFSET ?"
+
+            row = conn.execute(query, (page, offset)).fetchall();
+        
+        else: row = conn.execute(query).fetchall();
+        
+        # res = json.dumps([dict(i) for i in row])
+        res = [dict(i) for i in row]
+
+        data = dict()
+        data["type"] = "authors"
+        data["items"] = []
+        print(type(res))
+        for r in res:
+            item = dict()
+            item["type"] = "author"
+            item["id"] = HOST + "/authors/" + r["author_id"] 
+            item["url"] = HOST + "/authors/" + r["author_id"] 
+            item["host"] = HOST
+            item["displayName"] = r["username"]
+            item["profileImage"] = None # TODO: implement profile pics
+            data["items"].append(item)
+        
+        data = json.dumps(data)
+
+    except Exception as e:
+        print("Error getting authors: ", e)
+        data = "error"
+    
+    return data
+
+# Get a specific author
+@bp.route('/authors/<author_id>', methods=['GET'])
+def get_author(author_id):
+    data = ""
+    try:
+        conn = get_db_connection()
+
+
+        query = "SELECT * " \
+                "FROM authors " \
+                "WHERE author_id = ? " \
+        
+        print(query)
+        row = conn.execute(query, (author_id,)).fetchall()
+        
+        res = [dict(i) for i in row][0]
+        item = dict()
+        item["type"] = "author"
+        item["host"] = HOST
+        item["id"] = HOST + res["author_id"]
+        item["url"] = HOST + res["author_id"]
+        item["displayName"] = res["username"]
+        item["github"] = res["github"]
+        item["profileImage"] = None
+
+        data = item
+        data = json.dumps(data)
+
+    except Exception as e:
+        print("Error getting authors: ", e)
+        data = "error"
+    
+    return data
 
 @bp.route('/login', methods=['POST'])
 def login():
