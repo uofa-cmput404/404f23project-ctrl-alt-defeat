@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS likes;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS shares;
 DROP TABLE IF EXISTS post_restrictions;
+DROP TABLE IF EXISTS nodes;
 
 CREATE TABLE posts (
     post_id TEXT PRIMARY KEY,

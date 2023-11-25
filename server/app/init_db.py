@@ -2,7 +2,7 @@ import sqlite3
 import os
 
 # Path to the database
-db_path = '../database.db'
+db_path = 'server/database.db'
 
 # Delete the database file if it exists
 if os.path.exists(db_path):
