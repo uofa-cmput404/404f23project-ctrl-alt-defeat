@@ -6,9 +6,60 @@
       "description": "API for our backend"
     },
     "paths": {
-      "/login": {
+      "/api/authors": {
+        "get": {
+          "summary": "Get all authors (REMOTE)",
+          "parameters": [
+            {
+              "name": "page",
+              "in": "query",
+              "type": "integer",
+              "description": "Page number",
+              "required": false
+            },
+            {
+              "name": "size",
+              "in": "query",
+              "type": "integer",
+              "description": "Number of items per page",
+              "required": false
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "schema": {
+                "type": "object"
+              }
+            }
+          },
+          "tags": ["Author"]
+        }
+      },
+      "/api/authors/{author_id}": {
+        "get": {
+          "summary": "Get a specific author (REMOTE)",
+          "parameters": [
+            {
+              "name": "author_id",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "schema": {
+                "type": "object"
+              }
+            }
+          },
+          "tags": ["Author"]
+        }
+      },
+      "/api/authors/login": {
         "post": {
-            "tags": ["Author"],
           "summary": "Login",
           "parameters": [
             {
@@ -30,37 +81,18 @@
           ],
           "responses": {
             "200": {
-              "description": "Login successful",
+              "description": "Successful response",
               "schema": {
-                "type": "object",
-                "properties": {
-                  "message": {
-                    "type": "string"
-                  },
-                  "author_id": {
-                    "type": "integer"
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Wrong Password or User not found",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "message": {
-                    "type": "string"
-                  }
-                }
+                "type": "object"
               }
             }
-          }
+          },
+          "tags": ["Author"]
         }
       },
-      "/update_username": {
+      "/api/authors/update_username": {
         "post": {
-            "tags": ["Author"],
-          "summary": "Update Username",
+          "summary": "Update username",
           "parameters": [
             {
               "name": "body",
@@ -73,7 +105,7 @@
                     "type": "string"
                   },
                   "authorId": {
-                    "type": "integer"
+                    "type": "string"
                   }
                 }
               }
@@ -81,34 +113,18 @@
           ],
           "responses": {
             "200": {
-              "description": "Username updated successfully",
+              "description": "Successful response",
               "schema": {
-                "type": "object",
-                "properties": {
-                  "message": {
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Username already exists or An error occurred",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "error": {
-                    "type": "string"
-                  }
-                }
+                "type": "object"
               }
             }
-          }
+          },
+          "tags": ["Author"]
         }
       },
-      "/update_password": {
+      "/api/authors/update_password": {
         "post": {
-                        "tags": ["Author"],
-          "summary": "Update Password",
+          "summary": "Update password",
           "parameters": [
             {
               "name": "body",
@@ -121,7 +137,7 @@
                     "type": "string"
                   },
                   "authorId": {
-                    "type": "integer"
+                    "type": "string"
                   }
                 }
               }
@@ -129,81 +145,46 @@
           ],
           "responses": {
             "200": {
-              "description": "Password updated successfully",
+              "description": "Successful response",
               "schema": {
-                "type": "object",
-                "properties": {
-                  "message": {
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "An error occurred while updating the password",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "error": {
-                    "type": "string"
-                  }
-                }
+                "type": "object"
               }
             }
-          }
+          },
+          "tags": ["Author"]
         }
       },
-      "/{author_id}/liked": {
+      "/api/authors/{author_id}/liked": {
         "get": {
-                        "tags": ["Author"],
-          "summary": "Get liked posts by author",
+          "summary": "Get liked posts for a specific author (REMOTE)",
           "parameters": [
             {
               "name": "author_id",
               "in": "path",
               "required": true,
-              "type": "integer"
+              "type": "string"
             }
           ],
           "responses": {
             "200": {
-              "description": "List of liked posts",
+              "description": "Successful response",
               "schema": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "post_id": {
-                      "type": "integer"
-                    }
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "An error occurred",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "error": {
-                    "type": "string"
-                  }
-                }
+                "type": "object"
               }
             }
-          }
+          },
+          "tags": ["Author"]
         }
       },
-      "/{author_id}/inbox": {
+      "/api/authors/{author_id}/inbox": {
         "post": {
-                        "tags": ["Author"],
-          "summary": "Send like to the author_id of the post",
+          "summary": "Send a like to the author_id of the post (REMOTE)",
           "parameters": [
             {
               "name": "author_id",
               "in": "path",
               "required": true,
-              "type": "integer"
+              "type": "string"
             },
             {
               "name": "body",
@@ -213,10 +194,10 @@
                 "type": "object",
                 "properties": {
                   "like_author_id": {
-                    "type": "integer"
+                    "type": "string"
                   },
                   "post_id": {
-                    "type": "integer"
+                    "type": "string"
                   }
                 }
               }
@@ -224,35 +205,24 @@
           ],
           "responses": {
             "200": {
-              "description": "Like sent successfully",
+              "description": "Successful response",
               "schema": {
-                "type": "string"
-              }
-            },
-            "400": {
-              "description": "An error occurred",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "error": {
-                    "type": "string"
-                  }
-                }
+                "type": "object"
               }
             }
-          }
+          },
+          "tags": ["Author"]
         }
       },
-      "/{author_id}/inbox/unlike": {
+      "/api/{author_id}/inbox/unlike": {
         "post": {
-                        "tags": ["Author"],
           "summary": "Delete like",
           "parameters": [
             {
               "name": "author_id",
               "in": "path",
               "required": true,
-              "type": "integer"
+              "type": "string"
             },
             {
               "name": "body",
@@ -262,10 +232,10 @@
                 "type": "object",
                 "properties": {
                   "like_author_id": {
-                    "type": "integer"
+                    "type": "string"
                   },
                   "post_id": {
-                    "type": "integer"
+                    "type": "string"
                   }
                 }
               }
@@ -273,61 +243,39 @@
           ],
           "responses": {
             "200": {
-              "description": "Like deleted successfully",
+              "description": "Successful response",
               "schema": {
-                "type": "string"
-              }
-            },
-            "400": {
-              "description": "An error occurred",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "error": {
-                    "type": "string"
-                  }
-                }
+                "type": "object"
               }
             }
-          }
+          },
+          "tags": ["Author"]
         }
       },
-      "/github/{author_id}": {
+      "/api/authors/github/{author_id}": {
         "get": {
-                        "tags": ["Author"],
           "summary": "Get Github username of author",
           "parameters": [
             {
               "name": "author_id",
               "in": "path",
               "required": true,
-              "type": "integer"
+              "type": "string"
             }
           ],
           "responses": {
             "200": {
-              "description": "Github username",
+              "description": "Successful response",
               "schema": {
-                "type": "string"
-              }
-            },
-            "400": {
-              "description": "An error occurred",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "error": {
-                    "type": "string"
-                  }
-                }
+                "type": "object"
               }
             }
-          }
+          },
+          "tags": ["Author"]
         }
       },
-      "/github": {
+      "/api/authors/github": {
         "post": {
-                        "tags": ["Author"],
           "summary": "Set Github username",
           "parameters": [
             {
@@ -341,7 +289,7 @@
                     "type": "string"
                   },
                   "author_id": {
-                    "type": "integer"
+                    "type": "string"
                   }
                 }
               }
@@ -349,26 +297,17 @@
           ],
           "responses": {
             "200": {
-              "description": "Github username updated successfully",
+              "description": "Successful response",
               "schema": {
-                "type": "string"
-              }
-            },
-            "400": {
-              "description": "An error occurred",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "error": {
-                    "type": "string"
-                  }
-                }
+                "type": "object"
               }
             }
-          }
+          },
+          "tags": ["Author"]
         }
+      
       },
-          "/restricted": {
+          "/api/restricted": {
             "get": {
               "tags": ["Posts"],
               "summary": "Get restricted users",
@@ -391,230 +330,241 @@
               }
             }
           },
-          "/restrict": {
-            "post": {
-              "tags": ["Posts"],
-              "summary": "Restrict user",
-              "responses": {
-                "200": {
-                  "description": "Successful operation",
-                  "schema": {
-                    "type": "string"
-                  }
-                },
-                "default": {
-                  "description": "Error",
-                  "schema": {
-                    "type": "object"
-                  }
-                }
-              }
-            }
-          },
-          "/unrestrict/{post_id}/{username}": {
-            "delete": {
-              "tags": ["Posts"],
-              "summary": "Unrestrict user",
-              "responses": {
-                "200": {
-                  "description": "Successful operation",
-                  "schema": {
-                    "type": "string"
-                  }
-                },
-                "default": {
-                  "description": "Error",
-                  "schema": {
-                    "type": "object"
-                  }
-                }
-              }
-            }
-          },
-          "/visibility": {
-            "post": {
-              "tags": ["Posts"],
-              "summary": "Change visibility",
-              "responses": {
-                "200": {
-                  "description": "Successful operation",
-                  "schema": {
-                    "type": "string"
-                  }
-                },
-                "default": {
-                  "description": "Error",
-                  "schema": {
-                    "type": "object"
-                  }
-                }
-              }
-            }
-          },
-          "/delete/{post_id}": {
-            "delete": {
-              "tags": ["Posts"],
-              "summary": "Delete post",
-              "responses": {
-                "200": {
-                  "description": "Successful operation",
-                  "schema": {
-                    "type": "string"
-                  }
-                },
-                "default": {
-                  "description": "Error",
-                  "schema": {
-                    "type": "object"
-                  }
-                }
-              }
-            }
-          },
-          "/manage": {
+          "/api/posts/restricted": {
             "get": {
-              "tags": ["Posts"],
-              "summary": "Get my posts",
+              "summary": "Get restricted users for a post (REMOTE)",
+              "parameters": [
+                {
+                  "name": "post_id",
+                  "in": "query",
+                  "type": "string",
+                  "description": "ID of the post",
+                  "required": true
+                }
+              ],
               "responses": {
                 "200": {
-                  "description": "Successful operation",
-                  "schema": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  }
-                },
-                "default": {
-                  "description": "Error",
+                  "description": "Successful response",
                   "schema": {
                     "type": "object"
                   }
                 }
-              }
+              },
+              "tags": ["Posts"]
             }
           },
-          "/": {
-            "get": {
-              "tags": ["Posts"],
-              "summary": "Get posts",
-              "responses": {
-                "200": {
-                  "description": "Successful operation",
-                  "schema": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  }
-                },
-                "default": {
-                  "description": "Error",
-                  "schema": {
-                    "type": "object"
-                  }
-                }
-              }
-            }
-          },
-          "/new": {
+          "/api/posts/restrict": {
             "post": {
-              "tags": ["Posts"],
+              "summary": "Restrict user from a post",
+              "responses": {
+                "200": {
+                  "description": "Successful response",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              },
+              "tags": ["Posts"]
+            }
+          },
+          "/api/posts/unrestrict/{post_id}/{username}": {
+            "delete": {
+              "summary": "Unrestrict user from a post",
+              "parameters": [
+                {
+                  "name": "post_id",
+                  "in": "path",
+                  "type": "string",
+                  "description": "ID of the post",
+                  "required": true
+                },
+                {
+                  "name": "username",
+                  "in": "path",
+                  "type": "string",
+                  "description": "Username of the user to unrestrict",
+                  "required": true
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Successful response",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              },
+              "tags": ["Posts"]
+            }
+          },
+          "/api/posts/visibility": {
+            "post": {
+              "summary": "Change post visibility",
+              "responses": {
+                "200": {
+                  "description": "Successful response",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              },
+              "tags": ["Posts"]
+            }
+          },
+          "/api/posts/delete": {
+            "post": {
+              "summary": "Delete a post",
+              "responses": {
+                "200": {
+                  "description": "Successful response",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              },
+              "tags": ["Posts"]
+            }
+          },
+          "/api/posts/manage": {
+            "get": {
+              "summary": "Get posts managed by the user",
+              "parameters": [
+                {
+                  "name": "author_id",
+                  "in": "query",
+                  "type": "string",
+                  "description": "ID of the user",
+                  "required": true
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Successful response",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              },
+              "tags": ["Posts"]
+            }
+          },
+          "/api/posts": {
+            "get": {
+              "summary": "Get posts (REMOTE)",
+              "parameters": [
+                {
+                  "name": "author_id",
+                  "in": "query",
+                  "type": "string",
+                  "description": "ID of the user",
+                  "required": true
+                },
+                {
+                  "name": "page",
+                  "in": "query",
+                  "type": "integer",
+                  "description": "Page number",
+                  "required": false
+                },
+                {
+                  "name": "size",
+                  "in": "query",
+                  "type": "integer",
+                  "description": "Number of items per page",
+                  "required": false
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Successful response",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              },
+              "tags": ["Posts"]
+            },
+            "post": {
               "summary": "Create a new post",
               "responses": {
                 "200": {
-                  "description": "Successful operation",
-                  "schema": {
-                    "type": "string"
-                  }
-                },
-                "default": {
-                  "description": "Error",
+                  "description": "Successful response",
                   "schema": {
                     "type": "object"
                   }
                 }
-              }
+              },
+              "tags": ["Posts"]
             }
           },
-          "/authors/{author_id}/{post_id}/image/": {
-            "get": {
-              "tags": ["Posts"],
-              "summary": "Get image",
-              "responses": {
-                "200": {
-                  "description": "Successful operation",
-                  "schema": {
-                    "type": "string"
-                  }
-                },
-                "default": {
-                  "description": "Error",
-                  "schema": {
-                    "type": "object"
-                  }
-                }
-              }
-            }
-          },
-          "/authors/{author_id}/{post_id}/edit/": {
+          "/api/posts/new": {
             "post": {
-              "tags": ["Posts"],
-              "summary": "Edit post",
+              "summary": "Create a new post",
               "responses": {
                 "200": {
-                  "description": "Successful operation",
-                  "schema": {
-                    "type": "string"
-                  }
-                },
-                "default": {
-                  "description": "Error",
+                  "description": "Successful response",
                   "schema": {
                     "type": "object"
                   }
                 }
-              }
+              },
+              "tags": ["Posts"]
             }
           },
-          "/test/": {
+          "/api/authors/{author_id}/image/{post_id}": {
             "get": {
-              "tags": ["Posts"],
-              "summary": "Test route",
+              "summary": "Get image for a post (REMOTE)",
               "responses": {
                 "200": {
-                  "description": "Successful operation",
-                  "schema": {
-                    "type": "string"
-                  }
-                },
-                "default": {
-                  "description": "Error",
+                  "description": "Successful response",
                   "schema": {
                     "type": "object"
                   }
                 }
-              }
+              },
+              "tags": ["Posts"]
             }
           },
-          "/{post_id}": {
-            "get": {
-              "tags": ["Posts"],
-              "summary": "Get individual post",
+          "/api/authors/{author_id}/{post_id}/edit/": {
+            "post": {
+              "summary": "Edit a post",
               "responses": {
                 "200": {
-                  "description": "Successful operation",
-                  "schema": {
-                    "type": "string"
-                  }
-                },
-                "default": {
-                  "description": "Error",
+                  "description": "Successful response",
                   "schema": {
                     "type": "object"
                   }
                 }
-              }
+              },
+              "tags": ["Posts"]
+            }
+          },
+          "/api/authors/{author_id}/posts/{post_id}": {
+            "get": {
+              "summary": "Get an individual post (REMOTE)",
+              "responses": {
+                "200": {
+                  "description": "Successful response",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              },
+              "tags": ["Posts"]
+            }
+          },
+          "/api/authors/{author_id}/posts/": {
+            "get": {
+              "summary": "Get most recent post from an author (REMOTE)",
+              "responses": {
+                "200": {
+                  "description": "Successful response",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              },
+              "tags": ["Posts"]
             }
           },
           "/usersearch": {

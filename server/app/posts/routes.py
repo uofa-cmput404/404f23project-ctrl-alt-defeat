@@ -323,8 +323,8 @@ def new_post():
 
     return data  # data
 
-
-@bp.route('/authors/<author_id>/<post_id>/image/', methods=['GET'])
+# (REMOTE) 
+@bp.route('/authors/<author_id>/image/<post_id>', methods=['GET'])
 def get_image(author_id, post_id):
     conn = get_db_connection()
     final_message = "Nothing happened."
@@ -422,6 +422,7 @@ def edit_post(author_id, post_id):
 def categories():
     return "Test route for /posts"
 
+# (REMOTE) 
 @bp.route("/authors/<author_id>/posts/<post_id>", methods=["GET"])
 # Gets an individual post
 def get_post(author_id,post_id):    
@@ -489,6 +490,7 @@ def get_post(author_id,post_id):
     
     return data 
 
+# (REMOTE) 
 @bp.route("/authors/<author_id>/posts/", methods=["GET"])
 # Gets most recent post from author AUTHOR_ID
 def get_posts(author_id):    

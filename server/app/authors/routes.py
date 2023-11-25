@@ -14,7 +14,7 @@ def get_db():
         g.db.row_factory = sqlite3.Row
     return g.db
 
-# Get all authors
+# Get all authors (REMOTE)
 @bp.route('/authors', methods=['GET'])
 def get_authors():    
     page = request.args.get('page') 
@@ -61,7 +61,7 @@ def get_authors():
     
     return data
 
-# Get a specific author
+# Get a specific author (REMOTE)
 @bp.route('/authors/<author_id>', methods=['GET'])
 def get_author(author_id):
     data = ""
@@ -166,7 +166,7 @@ def update_password():
         db.close()
 
 
-# Get posts that the logged in author has liked
+# Get posts that the logged in author has liked (REMOTE)
 @bp.route('/authors/<author_id>/liked', methods=['GET'])
 def get_liked_posts(author_id):
     # TODO: Check specification regarding private posts, right now the spec specifies "public things AUTHOR_ID liked"
@@ -197,7 +197,7 @@ def get_liked_posts(author_id):
     
     return data
 
-# SEND LIKE TO THE author_id OF THE POST
+# SEND LIKE TO THE author_id OF THE POST (REMOTE)
 @bp.route('/authors/<author_id>/inbox', methods=['POST'])
 def send_like(author_id):
     # Get attributes from HTTP body
