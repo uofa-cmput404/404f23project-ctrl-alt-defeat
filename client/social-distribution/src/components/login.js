@@ -45,7 +45,7 @@ function Login(props) {
       password: password.toLowerCase(), 
     };
   
-    fetch('http://localhost:5000/authors/login', {
+    fetch('http://localhost:5000/api/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

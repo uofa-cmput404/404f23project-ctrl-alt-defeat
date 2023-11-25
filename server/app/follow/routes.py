@@ -133,3 +133,109 @@ def unfollow():
     db.commit()
 
     return jsonify({'message': 'Unfollowed successfully'})
+
+@bp.route('/authors/<string:author_id>/followers', methods=['GET'])
+def get_followers(author_id):
+    try:
+        db = get_db()
+        cursor = db.cursor()
+
+        query = """
+            SELECT A.*
+            FROM authors A
+            JOIN friends F ON A.author_id = F.author_following
+            WHERE F.author_followee = ?
+        """
+        followers = cursor.execute(query, (author_id,)).fetchall()
+
+        followers_list = [
+            {
+                "type": "author",
+                "id": follower['author_id'],
+                "url": f"http://127.0.0.1:5000/authors/{follower['author_id']}",
+                "host": "http://127.0.0.1:5000/",
+                "displayName": follower['username'],
+                "github": follower['github'],
+            }
+            for follower in followers
+        ]
+
+        response_data = {"type": "followers", "items": followers_list}
+
+        return jsonify(response_data), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Internal Server Error"}), 500
+    finally:
+        db.close()
+
+@bp.route('/authors/<string:author_id>/followers/<string:foreign_author_id>', methods=['PUT'])
+def add_follower(author_id, foreign_author_id):
+    db = get_db()
+    cursor = db.cursor()
+
+    # Check if the authors exist
+    cursor.execute("SELECT * FROM authors WHERE author_id = ? OR author_id = ?", (author_id, foreign_author_id))
+    authors_exist = cursor.fetchall()
+
+    if len(authors_exist) != 2:
+        return jsonify({'message': 'One or both authors do not exist'}), 404
+
+    # Check if the friendship already exists
+    cursor.execute("SELECT * FROM friends WHERE author_following = ? AND author_followee = ?", (foreign_author_id, author_id))
+    existing_friendship = cursor.fetchone()
+
+    if existing_friendship:
+        return jsonify({'message': 'The foreign author is already a follower'}), 400
+
+    # Insert the new friendship
+    cursor.execute("INSERT INTO friends (author_following, author_followee) VALUES (?, ?)", (foreign_author_id, author_id))
+    db.commit()
+
+    return jsonify({'message': f'{foreign_author_id} is now a follower of {author_id}'}), 200
+
+@bp.route('/authors/<string:author_id>/followers/<string:foreign_author_id>', methods=['GET'])
+def check_follower(author_id, foreign_author_id):
+    db = get_db()
+    cursor = db.cursor()
+
+    # Check if the authors exist
+    cursor.execute("SELECT * FROM authors WHERE author_id = ? OR author_id = ?", (author_id, foreign_author_id))
+    authors_exist = cursor.fetchall()
+
+    if len(authors_exist) != 2:
+        return jsonify({'message': 'One or both authors do not exist'}), 404
+
+    # Check if the friendship exists
+    cursor.execute("SELECT * FROM friends WHERE author_following = ? AND author_followee = ?", (foreign_author_id, author_id))
+    existing_friendship = cursor.fetchone()
+
+    if existing_friendship:
+        return jsonify({'is_follower': True}), 200
+    else:
+        return jsonify({'is_follower': False}), 200
+
+@bp.route('/authors/<string:author_id>/followers/<string:foreign_author_id>', methods=['DELETE'])
+def remove_follower(author_id, foreign_author_id):
+    db = get_db()
+    cursor = db.cursor()
+
+    # Check if the authors exist
+    cursor.execute("SELECT * FROM authors WHERE author_id = ? OR author_id = ?", (author_id, foreign_author_id))
+    authors_exist = cursor.fetchall()
+
+    if len(authors_exist) != 2:
+        return jsonify({'message': 'One or both authors do not exist'}), 404
+
+    # Check if the friendship exists
+    cursor.execute("SELECT * FROM friends WHERE author_following = ? AND author_followee = ?", (foreign_author_id, author_id))
+    existing_friendship = cursor.fetchone()
+
+    if existing_friendship:
+        # Remove the friendship
+        cursor.execute("DELETE FROM friends WHERE author_following = ? AND author_followee = ?", (foreign_author_id, author_id))
+        db.commit()
+
+        return jsonify({'message': f'{foreign_author_id} is no longer a follower of {author_id}'}), 200
+    else:
+        return jsonify({'message': 'The foreign author is not a follower'}), 400
