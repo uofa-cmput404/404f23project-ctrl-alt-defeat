@@ -12,9 +12,7 @@ function ManagePostItem(props) {
 
             try {
                 // Make the GET request using Axios
-                    axios.post(deleteUrl, {
-                        post_id: props.item.post_id
-                    })
+                    axios.delete(deleteUrl + "/" + props.item.post_id)
                     .then(response => {
                         props.setPostsLists(oldValues => {                
                             return oldValues.filter(item => item.post_id !== props.item.post_id);

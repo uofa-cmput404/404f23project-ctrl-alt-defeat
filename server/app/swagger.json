@@ -1,0 +1,917 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "Social Distribution - Ctrl + Alt + Defeat API",
+      "description": "API for our backend"
+    },
+    "paths": {
+      "/login": {
+        "post": {
+            "tags": ["Author"],
+          "summary": "Login",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Login successful",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "author_id": {
+                    "type": "integer"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Wrong Password or User not found",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/update_username": {
+        "post": {
+            "tags": ["Author"],
+          "summary": "Update Username",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "new_username": {
+                    "type": "string"
+                  },
+                  "authorId": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Username updated successfully",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Username already exists or An error occurred",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/update_password": {
+        "post": {
+                        "tags": ["Author"],
+          "summary": "Update Password",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "new_password": {
+                    "type": "string"
+                  },
+                  "authorId": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Password updated successfully",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "An error occurred while updating the password",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{author_id}/liked": {
+        "get": {
+                        "tags": ["Author"],
+          "summary": "Get liked posts by author",
+          "parameters": [
+            {
+              "name": "author_id",
+              "in": "path",
+              "required": true,
+              "type": "integer"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "List of liked posts",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "post_id": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "An error occurred",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{author_id}/inbox": {
+        "post": {
+                        "tags": ["Author"],
+          "summary": "Send like to the author_id of the post",
+          "parameters": [
+            {
+              "name": "author_id",
+              "in": "path",
+              "required": true,
+              "type": "integer"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "like_author_id": {
+                    "type": "integer"
+                  },
+                  "post_id": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Like sent successfully",
+              "schema": {
+                "type": "string"
+              }
+            },
+            "400": {
+              "description": "An error occurred",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{author_id}/inbox/unlike": {
+        "post": {
+                        "tags": ["Author"],
+          "summary": "Delete like",
+          "parameters": [
+            {
+              "name": "author_id",
+              "in": "path",
+              "required": true,
+              "type": "integer"
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "like_author_id": {
+                    "type": "integer"
+                  },
+                  "post_id": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Like deleted successfully",
+              "schema": {
+                "type": "string"
+              }
+            },
+            "400": {
+              "description": "An error occurred",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/github/{author_id}": {
+        "get": {
+                        "tags": ["Author"],
+          "summary": "Get Github username of author",
+          "parameters": [
+            {
+              "name": "author_id",
+              "in": "path",
+              "required": true,
+              "type": "integer"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Github username",
+              "schema": {
+                "type": "string"
+              }
+            },
+            "400": {
+              "description": "An error occurred",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/github": {
+        "post": {
+                        "tags": ["Author"],
+          "summary": "Set Github username",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "github": {
+                    "type": "string"
+                  },
+                  "author_id": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Github username updated successfully",
+              "schema": {
+                "type": "string"
+              }
+            },
+            "400": {
+              "description": "An error occurred",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+          "/restricted": {
+            "get": {
+              "tags": ["Posts"],
+              "summary": "Get restricted users",
+              "responses": {
+                "200": {
+                  "description": "Successful operation",
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "/restrict": {
+            "post": {
+              "tags": ["Posts"],
+              "summary": "Restrict user",
+              "responses": {
+                "200": {
+                  "description": "Successful operation",
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "/unrestrict/{post_id}/{username}": {
+            "delete": {
+              "tags": ["Posts"],
+              "summary": "Unrestrict user",
+              "responses": {
+                "200": {
+                  "description": "Successful operation",
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "/visibility": {
+            "post": {
+              "tags": ["Posts"],
+              "summary": "Change visibility",
+              "responses": {
+                "200": {
+                  "description": "Successful operation",
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "/delete/{post_id}": {
+            "delete": {
+              "tags": ["Posts"],
+              "summary": "Delete post",
+              "responses": {
+                "200": {
+                  "description": "Successful operation",
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "/manage": {
+            "get": {
+              "tags": ["Posts"],
+              "summary": "Get my posts",
+              "responses": {
+                "200": {
+                  "description": "Successful operation",
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "/": {
+            "get": {
+              "tags": ["Posts"],
+              "summary": "Get posts",
+              "responses": {
+                "200": {
+                  "description": "Successful operation",
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "/new": {
+            "post": {
+              "tags": ["Posts"],
+              "summary": "Create a new post",
+              "responses": {
+                "200": {
+                  "description": "Successful operation",
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "/authors/{author_id}/{post_id}/image/": {
+            "get": {
+              "tags": ["Posts"],
+              "summary": "Get image",
+              "responses": {
+                "200": {
+                  "description": "Successful operation",
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "/authors/{author_id}/{post_id}/edit/": {
+            "post": {
+              "tags": ["Posts"],
+              "summary": "Edit post",
+              "responses": {
+                "200": {
+                  "description": "Successful operation",
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "/test/": {
+            "get": {
+              "tags": ["Posts"],
+              "summary": "Test route",
+              "responses": {
+                "200": {
+                  "description": "Successful operation",
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "/{post_id}": {
+            "get": {
+              "tags": ["Posts"],
+              "summary": "Get individual post",
+              "responses": {
+                "200": {
+                  "description": "Successful operation",
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "/usersearch": {
+            "get": {
+              "tags": ["Follow"],
+              "summary": "Search for users",
+              "parameters": [
+                {
+                  "name": "query",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Successful operation",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "users": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "username": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "/follow_request": {
+            "post": {
+              "tags": ["Follow"],
+              "summary": "Send follow request",
+              "parameters": [
+                {
+                  "name": "body",
+                  "in": "body",
+                  "required": true,
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "author_send": {
+                        "type": "string"
+                      },
+                      "author_receive": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["author_send", "author_receive"]
+                  }
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Follow request sent",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "/show_requests": {
+            "get": {
+              "tags": ["Follow"],
+              "summary": "Get follow requests",
+              "parameters": [
+                {
+                  "name": "authorId",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Successful operation",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "followRequests": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "username": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "/accept_request": {
+            "post": {
+              "tags": ["Follow"],
+              "summary": "Accept follow request",
+              "parameters": [
+                {
+                  "name": "body",
+                  "in": "body",
+                  "required": true,
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "author_followee": {
+                        "type": "string"
+                      },
+                      "author_following": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["author_followee", "author_following"]
+                  }
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Follow request accepted",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "/reject_request": {
+            "post": {
+              "tags": ["Follow"],
+              "summary": "Reject follow request",
+              "parameters": [
+                {
+                  "name": "body",
+                  "in": "body",
+                  "required": true,
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "author_followee": {
+                        "type": "string"
+                      },
+                      "author_following": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["author_followee", "author_following"]
+                  }
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Follow request rejected",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "/unfollow": {
+            "post": {
+              "tags": ["Follow"],
+              "summary": "Unfollow user",
+              "parameters": [
+                {
+                  "name": "body",
+                  "in": "body",
+                  "required": true,
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "author_unfollow": {
+                        "type": "string"
+                      },
+                      "author_unfollower": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["author_unfollow", "author_unfollower"]
+                  }
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Unfollowed successfully",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "default": {
+                  "description": "Error",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+        }
+      }
+    }
+  }
+}
+      
+        
