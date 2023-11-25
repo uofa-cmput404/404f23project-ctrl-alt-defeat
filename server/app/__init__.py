@@ -125,8 +125,10 @@ def create_app():
      # Register blueprints here
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
+    
     from app.requestors import bp as requestors_bp
-    app.register_blueprint(requestors_bp, url_prefix='/api')   
+    app.register_blueprint(requestors_bp, url_prefix='/api/requestors')  # The only route that doesn't get affect is requestors
+    
     from app.authors import bp as authors_bp
     app.register_blueprint(authors_bp, url_prefix='/api')   
 

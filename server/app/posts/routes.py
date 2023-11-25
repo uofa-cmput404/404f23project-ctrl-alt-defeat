@@ -6,10 +6,12 @@ from app.dbase import get_db_connection
 from flask import request, abort
 from werkzeug.exceptions import HTTPException
 
+from requests.auth import HTTPBasicAuth
+
 from random import randrange
 import sqlite3
 from datetime import datetime, timezone
-
+import requests
 import uuid
 
 # Hard coded for now
@@ -225,11 +227,42 @@ def index():
                     "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  ?) " \
                 "ORDER BY date_posted DESC; " 
         
-        posts = conn.execute(query, (author_id, author_id, author_id)).fetchall()                                
-        conn.commit()
-        conn.close()
+        row = conn.execute(query, (author_id, author_id, author_id)).fetchall()                                
+        posts = [dict(i) for i in row]
 
-        data = json.dumps([dict(i) for i in posts])
+        try:
+            url = "https://cmput-average-21-b54788720538.herokuapp.com/api/posts"
+
+            # Replace 'your_username' and 'your_password' with your actual credentials
+            response = requests.get(url, auth=HTTPBasicAuth('CtrlAltDefeat', 'string'))
+        
+            # Check if the request was successful (status code 200)
+            if response.status_code == 200:
+                # Print the response content
+                res = response.json()
+                print(res["results"])
+                # Convert api spec to our format
+                for r in res["results"]:
+                    item = dict()
+                    item["author_id"] = r["author"]["id"]
+                    item["username"] = r["displayName"] if "displayName" in r else None
+                    item["post_id"] = r["id"]
+                    item["title"] = r["title"]
+                    item["content_type"] = r["contentType"]
+                    item["content"] = r["content"]
+                    item["date_posted"] = r["published"]
+                    item["visibility"] = r["visibility"]
+
+                    posts.append(item)
+            else:
+                # Print an error message if the request was not successful
+                print(f"Error: {response.status_code}")
+        
+        except Exception as e:
+            print(e)
+            data = str(e)
+
+        data = posts
 
     except Exception as e:
         print(e)
