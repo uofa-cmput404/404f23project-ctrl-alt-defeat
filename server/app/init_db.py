@@ -11,7 +11,7 @@ if os.path.exists(db_path):
 # Now create a new database connection
 connection = sqlite3.connect(db_path)
 
-with open('schema.sql') as f:
+with open('server/app/schema.sql') as f:
     connection.executescript(f.read())
 
 cur = connection.cursor()
