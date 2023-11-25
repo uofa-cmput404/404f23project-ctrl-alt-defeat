@@ -13,7 +13,7 @@ import Markdown from "react-markdown";
 import notLikedImgUrl from "../notLiked_black_24dp.svg";
 import likedImgUrl from "../liked_black_24dp.svg";
 
-const postsUrl = 'http://127.0.0.1:5000/posts/';
+const postsUrl = 'http://127.0.0.1:5000/api/posts/';
 
 
 export default function IndividualPost({ username, authorId, setUsername }) {;    

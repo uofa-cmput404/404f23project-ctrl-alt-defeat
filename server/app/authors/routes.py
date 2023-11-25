@@ -95,7 +95,7 @@ def get_author(author_id):
     
     return data
 
-@bp.route('/login', methods=['POST'])
+@bp.route('/authors/login', methods=['POST'])
 def login():
     data = request.get_json()
     username = data.get('username')
@@ -120,7 +120,7 @@ def login():
     return jsonify(result)
 
 
-@bp.route('/update_username', methods=['POST'])
+@bp.route('/authors/update_username', methods=['POST'])
 def update_username():
     data = request.get_json()
     new_username = data.get('new_username')
@@ -146,7 +146,7 @@ def update_username():
         db.close()
 
 
-@bp.route('/update_password', methods=['POST'])
+@bp.route('/authors/update_password', methods=['POST'])
 def update_password():
     data = request.get_json()
     new_password = data.get('new_password')
@@ -167,7 +167,7 @@ def update_password():
 
 
 # Get posts that the logged in author has liked
-@bp.route('/<author_id>/liked', methods=['GET'])
+@bp.route('/authors/<author_id>/liked', methods=['GET'])
 def get_liked_posts(author_id):
     # TODO: Check specification regarding private posts, right now the spec specifies "public things AUTHOR_ID liked"
     # Currently, this function pulls ALL post_id's of the posts that AUTHOR_ID has liked 
@@ -198,7 +198,7 @@ def get_liked_posts(author_id):
     return data
 
 # SEND LIKE TO THE author_id OF THE POST
-@bp.route('/<author_id>/inbox', methods=['POST'])
+@bp.route('/authors/<author_id>/inbox', methods=['POST'])
 def send_like(author_id):
     # Get attributes from HTTP body
     request_data = request.get_json()
@@ -260,7 +260,7 @@ def delete_like(author_id):
 
 
 # Get Github username of author
-@bp.route('/github/<author_id>', methods=['GET'])
+@bp.route('/authors/github/<author_id>', methods=['GET'])
 def get_github(author_id):
     # TODO: Check specification regarding private posts, right now the spec specifies "public things AUTHOR_ID liked"
     # Currently, this function pulls ALL post_id's of the posts that AUTHOR_ID has liked 
@@ -288,7 +288,7 @@ def get_github(author_id):
     return data
 
 
-@bp.route('/github', methods=['POST'])
+@bp.route('/authors/github', methods=['POST'])
 # Set Github username
 def update_github():
     request_data = request.get_json()    

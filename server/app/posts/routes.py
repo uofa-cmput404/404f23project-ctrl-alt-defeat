@@ -15,7 +15,7 @@ import uuid
 # Hard coded for now
 HOST = "http://127.0.0.1:5000"
 
-@bp.route("/restricted", methods=["GET"])
+@bp.route("/posts/restricted", methods=["GET"])
 def get_restricted_users():    
     post_id = request.args.get('post_id')
     
@@ -44,7 +44,7 @@ def get_restricted_users():
 
 
 
-@bp.route("/restrict", methods=["POST"])
+@bp.route("/posts/restrict", methods=["POST"])
 def restrict_user():
     request_data = request.get_json()
     post_id = request_data['post_id']
@@ -93,7 +93,7 @@ def restrict_user():
     return data # data
 
 
-@bp.route("/unrestrict/<post_id>/<username>", methods=["DELETE"])
+@bp.route("/posts/unrestrict/<post_id>/<username>", methods=["DELETE"])
 def unrestrict_user(post_id, username):    
     print(post_id, username)
     data = ""
@@ -128,7 +128,7 @@ def unrestrict_user(post_id, username):
 
     return data # data
 
-@bp.route("/visibility", methods=["POST"])
+@bp.route("/posts/visibility", methods=["POST"])
 def change_visibility():
     request_data = request.get_json()
     post_id = request_data['post_id']
@@ -154,7 +154,7 @@ def change_visibility():
 
     return data # data
 
-@bp.route("/delete", methods=["POST"])
+@bp.route("/posts/delete", methods=["POST"])
 def delete_post():
     request_data = request.get_json()
     post_id = request_data['post_id']
@@ -176,7 +176,7 @@ def delete_post():
 
     return data # data
 
-@bp.route('/manage', methods=['GET'])
+@bp.route('/posts/manage', methods=['GET'])
 def get_my_posts():
     data = ""
     try:
@@ -203,7 +203,7 @@ def get_my_posts():
 
     return data # data
 
-@bp.route('/', methods=['GET'])
+@bp.route('/posts', methods=['GET'])
 def index():
     data = ""
     try:
@@ -238,7 +238,7 @@ def index():
     return data # data
 
 # MAKE POSTS
-@bp.route('/new', methods=['POST'])
+@bp.route('/posts/new', methods=['POST'])
 def new_post():
     data = ""
     try:

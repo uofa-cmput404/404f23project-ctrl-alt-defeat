@@ -32,7 +32,7 @@ npm install --save react-markdown
 - **Run inside server:**\
       python3 -m flask run
 - **Admin page:**\
-      http://127.0.0.1:5000/admin/ 
+      http://127.0.0.1:5000/api/admin/ 
 
 **Testing HTTP requests**
 - Editing posts (POST)

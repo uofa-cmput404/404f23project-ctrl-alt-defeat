@@ -8,7 +8,7 @@ def get_db():
         g.db.row_factory = sqlite3.Row
     return g.db
 
-@bp.route('/usersearch', methods=['GET'])
+@bp.route('/follow/usersearch', methods=['GET'])
 def user_search():
     search_query = request.args.get('query')
     if not search_query:
@@ -26,7 +26,7 @@ def user_search():
     else:
         return jsonify({'users': []})
     
-@bp.route('/follow_request', methods=['POST'])
+@bp.route('/follow/follow_request', methods=['POST'])
 def follow_request():
     data = request.get_json()
     author_send = data.get('author_send')
@@ -52,7 +52,7 @@ def follow_request():
     
     return jsonify({'message': 'Follow request sent'})
 
-@bp.route('/show_requests', methods=['GET'])
+@bp.route('/follow/show_requests', methods=['GET'])
 def get_follow_requests():
     author_id = request.args.get('authorId')
     if not author_id:
@@ -77,7 +77,7 @@ def get_follow_requests():
     else:
         return jsonify({'followRequests': []})
 
-@bp.route('/accept_request', methods=['POST'])
+@bp.route('/follow/accept_request', methods=['POST'])
 def accept_follow_request():
     data = request.get_json()
     author_followee = data.get('author_followee')  # The user who is accepting the request
@@ -99,7 +99,7 @@ def accept_follow_request():
     else:
         return jsonify({'message': 'Follow request not found'})
 
-@bp.route('/reject_request', methods=['POST'])
+@bp.route('/follow/reject_request', methods=['POST'])
 def reject_follow_request():
     data = request.get_json()
     author_followee = data.get('author_followee')  # The user who is rejecting the request
@@ -120,7 +120,7 @@ def reject_follow_request():
     else:
         return jsonify({'message': 'Follow request not found'})
 
-@bp.route('/unfollow', methods=['POST'])
+@bp.route('/follow/unfollow', methods=['POST'])
 def unfollow():
     data = request.get_json()
     author_unfollow = data.get('author_unfollow')
