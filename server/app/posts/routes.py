@@ -206,7 +206,6 @@ def get_my_posts():
     return data # data
 
 @bp.route('/', methods=['GET'])
-@basic_auth.login_required
 def index():
     data = ""
     try:
@@ -244,6 +243,7 @@ def index():
 
 # MAKE POSTS
 @bp.route('/new', methods=['POST'])
+@basic_auth.login_required
 def new_post():
     data = ""
     try:

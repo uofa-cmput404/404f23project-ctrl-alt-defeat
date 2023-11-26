@@ -14,7 +14,7 @@ from flask_httpauth import HTTPBasicAuth
 import urllib.parse as urlparse
 import os
 from dotenv import load_dotenv
-from .dbase import get_db_connection # Used in authentication
+from .dbase import get_db_connection # Used in verify_baclend_access
 
 
 db = SQLAlchemy()
