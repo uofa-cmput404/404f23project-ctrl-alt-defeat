@@ -93,7 +93,8 @@ function PostsList(props) {
                 setChangeLike = {setChangeLike} 
                 setPostSelected = {setPostSelected}
                 setPostSelectedLiked={setPostSelectedLiked}
-                setPostSelectedAuthor={setPostSelectedAuthor} />
+                setPostSelectedAuthor={setPostSelectedAuthor} 
+                loginUser = {props.authorId}/>
             ))
         }
     </ul>

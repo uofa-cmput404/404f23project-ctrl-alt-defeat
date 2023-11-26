@@ -6,5 +6,5 @@ from werkzeug.exceptions import HTTPException
 
 @bp.route('/')
 def index():
-    return 'This is The Main Blueprint'
+    return "/admin for admin dashboard.<br>/author_id/friends_posts for getting the posts of an author's friends."
 

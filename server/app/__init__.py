@@ -1,5 +1,5 @@
 
-from flask import Flask, redirect, url_for, render_template
+from flask import Flask, redirect, url_for, render_template, jsonify
 from flask_cors import CORS, cross_origin
 
 from flask_sqlalchemy import SQLAlchemy
@@ -12,7 +12,9 @@ from markupsafe import Markup
 from flask_cors import CORS, cross_origin
 
 from flask_basicauth import BasicAuth
+from flask_bcrypt import Bcrypt
 
+bcrypt = Bcrypt()
 
 db = SQLAlchemy()
 basic_auth = BasicAuth()
@@ -29,8 +31,13 @@ class Author(db.Model):
 class AuthorView(ModelView):
     can_delete = True
     form_columns = ["author_id", "username", "password"]
-    column_list = ["author_id", "username", "password"]
-    column_searchable_list = ['username']  
+    column_list = ["author_id", "username"]
+    column_searchable_list = ['username'] 
+
+    def on_model_change(self, form, model, is_created):
+        # Hash the password
+        hashed_password = bcrypt.generate_password_hash(model.password).decode('utf-8')
+        model.password = hashed_password 
 
 class Requestor(db.Model):
     __tablename__ = "requestors"
@@ -42,7 +49,12 @@ class Requestor(db.Model):
 class RequestorView(ModelView):
     can_delete = True
     form_columns = ["requestor_id", "username", "password"]
-    column_list = ["requestor_id", "username", "password"]
+    column_list = ["requestor_id", "username"]
+
+    def on_model_change(self, form, model, is_created):
+        # Hash the password
+        hashed_password = bcrypt.generate_password_hash(model.password).decode('utf-8')
+        model.password = hashed_password
 
     @action('approve', 'Approve', 'Are you sure you want to approve selected requesters?')
     def action_approve(self, ids):
@@ -92,6 +104,10 @@ class ImageView(ModelView):
         'view_button': view_button
     }
     column_labels = dict(view_button='View Image')
+class Friend(db.Model):
+    __tablename__ = 'friends'
+    author_followee = db.Column(db.Text, db.ForeignKey('authors.author_id'), primary_key=True)
+    author_following = db.Column(db.Text, db.ForeignKey('authors.author_id'), primary_key=True)
 
 class Node(db.Model):
     __tablename__ = "nodes"
@@ -138,6 +154,23 @@ def create_app():
     
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///../database.db"
     app.config["SECRET_KEY"] = "mysecret"
+
+    # New route for fetching friends' posts
+    @app.route('/<author_id>/friends_posts')
+    def get_friends_posts(author_id):
+        # Fetch friends of the given author
+        friends_ids = db.session.query(Friend.author_following).filter(Friend.author_followee == author_id).all()
+        friends_ids += db.session.query(Friend.author_followee).filter(Friend.author_following == author_id).all()
+
+        # Flatten the list of tuples to a list of IDs
+        friends_ids = [fid[0] for fid in friends_ids]
+
+        # Fetch posts made by friends
+        friends_posts = db.session.query(Post).filter(Post.author_id.in_(friends_ids)).all()
+
+        # Format and return the posts
+        posts_data = [{'post_id': post.post_id, 'title': post.title, 'content': post.content} for post in friends_posts]
+        return jsonify(posts_data)
 
     db.init_app(app)
     admin.init_app(app)

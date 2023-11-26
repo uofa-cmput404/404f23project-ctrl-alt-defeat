@@ -31,8 +31,9 @@ npm install --save react-markdown
       pip3 install jinja2
 - **Run inside server:**\
       python3 -m flask run
-- **Admin page:**\
-      http://127.0.0.1:5000/admin/ 
+- **Admin:**\
+      Admin dashboard: http://127.0.0.1:5000/admin/
+      To get author's friend posts: /<author_id>/friends_posts
 
 **Testing HTTP requests**
 - Editing posts (POST)
