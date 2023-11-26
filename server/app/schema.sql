@@ -28,7 +28,7 @@ CREATE TABLE posts (
 CREATE TABLE authors (
     author_id TEXT PRIMARY KEY, --TEXT
     username TEXT NOT NULL,
-    github TEXT NOT NULL,
+    github TEXT ,
     password TEXT NOT NULL
 );
 
