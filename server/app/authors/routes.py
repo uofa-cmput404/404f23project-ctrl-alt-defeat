@@ -5,22 +5,18 @@ import sqlite3
 from app.dbase import get_db_connection
 from random import randrange
 
-def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect('database.db')
-        g.db.row_factory = sqlite3.Row
-    return g.db
+
 
 @bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
-    db = get_db()
-    cur = db.cursor()
+    conn, cur = get_db_connection()
 
-    cur.execute("SELECT author_id, password FROM authors WHERE username = ?", (username,))
+    cur.execute("SELECT author_id, password FROM authors WHERE username = %s", (username,))
     author = cur.fetchone()
+    print(author)
 
     if author:
         stored_password = author['password']
@@ -31,7 +27,7 @@ def login():
     else:
         result = {'message': 'User not found'}
 
-    db.close()
+    conn.close()
 
     return jsonify(result)
 
@@ -42,24 +38,23 @@ def update_username():
     new_username = data.get('new_username')
     author_id = data.get('authorId')
 
-    db = get_db()
-    cur = db.cursor()
+    conn, curr = get_db_connection()
 
     try:
-        cur.execute("SELECT author_id FROM authors WHERE username = ?", (new_username,))
-        existing_username = cur.fetchone()
+        curr.execute("SELECT author_id FROM authors WHERE username = %s", (new_username,))
+        existing_username = curr.fetchone()
 
         if existing_username:
             return jsonify({'error': 'Username already exists'})
 
-        cur.execute("UPDATE authors SET username = ? WHERE author_id = ?", (new_username, author_id))
-        db.commit()
+        curr.execute("UPDATE authors SET username = %s WHERE author_id = %s", (new_username, author_id))
+        conn.commit()
 
         return jsonify({'message': 'Username updated successfully'})
     except Exception as e:
         return jsonify({'error': 'An error occurred while updating the username.'})
     finally:
-        db.close()
+        conn.close()
 
 
 @bp.route('/update_password', methods=['POST'])
@@ -68,18 +63,17 @@ def update_password():
     new_password = data.get('new_password')
     author_id = data.get('authorId') 
 
-    db = get_db()
-    cur = db.cursor()
+    conn, curr = get_db_connection()    
 
     try:
-        cur.execute("UPDATE authors SET password = ? WHERE author_id = ?", (new_password, author_id))
-        db.commit()
+        curr.execute("UPDATE authors SET password = %s WHERE author_id = %s", (new_password, author_id))
+        conn.commit()
 
         return jsonify({'message': 'Password updated successfully'})
     except Exception as e:
         return jsonify({'error': 'An error occurred while updating the password.'})
     finally:
-        db.close()
+        conn.close()
 
 
 # Get posts that the logged in author has liked
@@ -91,13 +85,14 @@ def get_liked_posts(author_id):
 
     data = ""
     try:
-        conn = get_db_connection()
+        conn, curr = get_db_connection()
 
         query = "SELECT post_id " \
                 "FROM likes WHERE " \
-                "like_author_id = ?"
+                "like_author_id = %s"
         
-        likes = conn.execute(query, (author_id,)).fetchall()
+        curr.execute(query, (author_id,))
+        likes = curr.fetchall()
 
 
         data = json.dumps([dict(i) for i in likes])
@@ -127,15 +122,15 @@ def send_like(author_id):
 
     data = ""
     try:
-        conn = get_db_connection()
+        conn, curr = get_db_connection()
 
         query = "INSERT INTO likes " \
                 "(like_id, like_author_id, " \
                 "post_id, time_liked) " \
-                "VALUES (?, ?, ?, " \
+                "VALUES (%s, %s, %s, " \
                 "CURRENT_TIMESTAMP)"
         
-        conn.execute(query, (like_id, like_author_id, post_id))
+        curr.execute(query, (like_id, like_author_id, post_id))
 
         data = "success"
 
@@ -158,12 +153,12 @@ def delete_like(author_id):
     
     data = ""
     try:
-        conn = get_db_connection()
+        conn, curr = get_db_connection()
 
         query = "DELETE FROM likes " \
-                "WHERE like_author_id = ? AND post_id = ?"
+                "WHERE like_author_id = %s AND post_id = %s"
         
-        conn.execute(query, (like_author_id, post_id))
+        curr.execute(query, (like_author_id, post_id))
 
         data = "success"
 
@@ -184,13 +179,15 @@ def get_github(author_id):
 
     data = ""
     try:
-        conn = get_db_connection()
+        conn, curr = get_db_connection()
 
         query = "SELECT github " \
                 "FROM authors WHERE " \
-                "author_id = ?"
+                "author_id = %s"
         
-        row = conn.execute(query, (author_id,)).fetchone();
+        curr.execute(query, (author_id,))
+        row = curr.fetchone()
+        
         # print(str(github_username))
         if row is not None:
             row_values = [str(value) for value in row]
@@ -213,11 +210,11 @@ def update_github():
     
     data = ""
     try:
-        conn = get_db_connection()        
-        query = "UPDATE authors SET github = ? " \
-                "WHERE author_id = ?"
+        conn, curr = get_db_connection()        
+        query = "UPDATE authors SET github = %s " \
+                "WHERE author_id = %s"
         
-        conn.execute(query, (github,author_id))
+        curr.execute(query, (github,author_id))
 
         data = "success"
 

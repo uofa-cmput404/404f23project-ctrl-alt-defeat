@@ -136,7 +136,7 @@ def create_app():
     from app.posts import bp as posts_bp
     app.register_blueprint(posts_bp, url_prefix='/posts')
     
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///../database.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://hueygonzales:password@localhost:5432/flask_db"
     app.config["SECRET_KEY"] = "mysecret"
 
     db.init_app(app)

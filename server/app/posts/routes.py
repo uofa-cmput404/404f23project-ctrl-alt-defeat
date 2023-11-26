@@ -14,14 +14,15 @@ def get_restricted_users():
     post_id = request.args.get('post_id')
     
     try:
-        conn = get_db_connection()   
+        conn, curr = get_db_connection()   
         # print(post_id)
         query = "SELECT username " \
                 "FROM post_restrictions " \
                 "INNER JOIN authors on post_restrictions.restricted_author_id = authors.author_id " \
-                "WHERE post_id = ?"
+                "WHERE post_id = %s"
         
-        posts = conn.execute(query, (post_id, )).fetchall()                                        
+        curr.execute(query, (post_id, ))
+        posts = curr.fetchall()                                        
 
         data = json.dumps([dict(i) for i in posts])
         print(data)
@@ -48,14 +49,15 @@ def restrict_user():
 
     try:
         # print(post_id, privacy)
-        conn = get_db_connection()        
+        conn, curr = get_db_connection()        
         
         # Grab the username first
-        query = "SELECT author_id FROM authors WHERE username = ?"
+        query = "SELECT author_id FROM authors WHERE username = %s"
 
         # Use a parameterized query to insert values safely
-        result = conn.execute(query,
-                    (username, )).fetchall()
+        curr.execute(query,
+                    (username, ))
+        result = curr.fetchall()
 
         if len([dict(i) for i in result]) == 0:
             print("User not exist")
@@ -64,10 +66,10 @@ def restrict_user():
         author_id = [dict(i) for i in result][0]['author_id']
         
         query = "INSERT INTO post_restrictions (post_id, restricted_author_id) " \
-                    "VALUES (?, ?)"
+                    "VALUES (%s, %s)"
         
         # # Use a parameterized query to insert values safely
-        conn.execute(query,
+        curr.execute(query,
                     (post_id, author_id))
 
         conn.commit()
@@ -93,13 +95,14 @@ def unrestrict_user(post_id, username):
     data = ""
 
     try:
-        query = "SELECT author_id FROM authors WHERE username = ?"
+        query = "SELECT author_id FROM authors WHERE username = %s"
         # # print(post_id, privacy)
-        conn = get_db_connection()        
+        conn, curr = get_db_connection()        
 
         # Use a parameterized query to insert values safely
-        result = conn.execute(query,
-                    (username, )).fetchall()
+        curr.execute(query,
+                    (username, ))
+        result = curr.fetchall()
 
         if len([dict(i) for i in result]) == 0:
             print("User not exist")
@@ -108,10 +111,10 @@ def unrestrict_user(post_id, username):
         author_id = [dict(i) for i in result][0]['author_id']
         
         query = "DELETE FROM post_restrictions " \
-                "WHERE post_id = ? AND restricted_author_id = ?"
+                "WHERE post_id = %s AND restricted_author_id = %s"
 
         # Use a parameterized query to insert values safely
-        result = conn.execute(query, (post_id, author_id))
+        result = curr.execute(query, (post_id, author_id))
         
         conn.commit()
         conn.close()                
@@ -132,11 +135,11 @@ def change_visibility():
 
     try:
         # print(post_id, privacy)
-        conn = get_db_connection()
+        conn, curr = get_db_connection()
         query = "UPDATE posts " \
-                "SET visibility = ? " \
-                "WHERE post_id = ? "
-        conn.execute(query, (visibility, post_id))
+                "SET visibility = %s " \
+                "WHERE post_id = %s "
+        curr.execute(query, (visibility, post_id))
         
         conn.commit()
         conn.close()
@@ -155,10 +158,10 @@ def delete_post():
     data = ""
 
     try:
-        conn = get_db_connection()
+        conn, curr = get_db_connection()
         query = f"DELETE FROM posts " \
-                f"WHERE post_id = ? "
-        conn.execute(query, (post_id, ))
+                f"WHERE post_id = %s "
+        curr.execute(query, (post_id, ))
         
         conn.commit()
         conn.close()
@@ -176,14 +179,15 @@ def get_my_posts():
     try:
         # Retrieve data from the request's JSON body         
         author_id = request.args.get('author_id')           
-        conn = get_db_connection()
+        conn, curr = get_db_connection()
         
         # Get all the posts from people who I'm following + posts who are public
         query = "SELECT * FROM posts " \
-                "WHERE posts.author_id = ? " \
+                "WHERE posts.author_id = %s " \
                 "ORDER by date_posted DESC"
         
-        posts = conn.execute(query, (author_id, )).fetchall()                                
+        curr.execute(query, (author_id, ))
+        posts = curr.fetchall()                                
         print(posts)
         conn.commit()
         conn.close()
@@ -205,7 +209,7 @@ def index():
         print("data")        
         author_id = request.args.get('author_id')        
         # print(author_id)
-        conn = get_db_connection()
+        conn, curr = get_db_connection()
         
         # Get all the posts from people who I'm following + posts who are public + posts that are mine
         # Do not include posts that I'm restricted from
@@ -214,12 +218,13 @@ def index():
                 "INNER JOIN authors ON posts.author_id = authors.author_id " \
                 "WHERE " \
                     "(posts.visibility = 'public' " \
-                    "OR posts.author_id = ? " \
-					 "OR(posts.visibility = 'friends-only' AND posts.author_id IN (SELECT author_followee FROM friends WHERE author_following = ?))) " \
-                    "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  ?) " \
+                    "OR posts.author_id = %s " \
+					 "OR(posts.visibility = 'friends-only' AND posts.author_id IN (SELECT author_followee FROM friends WHERE author_following = %s))) " \
+                    "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  %s) " \
                 "ORDER BY date_posted DESC; " 
         
-        posts = conn.execute(query, (author_id, author_id, author_id)).fetchall()                                
+        curr.execute(query, (author_id, author_id, author_id))
+        posts = curr.fetchall()                                
         conn.commit()
         conn.close()
 
@@ -264,13 +269,13 @@ def new_post():
         if image_id == None:  # JSON `null` turns into Python `None`
             image_id = "NULL"  # Change for SQL syntax
 
-        conn = get_db_connection()
+        conn, curr = get_db_connection()
 
         query = "INSERT INTO posts (post_id, author_id, title, content_type, content, image_id, visibility) " \
-                "VALUES (?, ?, ?, ?, ?, ?, ?)"
+                "VALUES (%s, %s, %s, %s, %s, %s, %s)"
 
         # Use a parameterized query to insert values safely
-        conn.execute(query,
+        curr.execute(query,
                      (post_id, author_id, title, content_type, content, image_id, visibility))
 
         conn.commit()
@@ -288,21 +293,21 @@ def new_post():
 
 @bp.route('/authors/<author_id>/<post_id>/image/', methods=['GET'])
 def get_image(author_id, post_id):
-    conn = get_db_connection()
+    conn, curr = get_db_connection()
     final_message = "Nothing happened."
     # check if image exists
     try:
-        query = "SELECT img_id, content_type from posts WHERE (post_id = ? AND img_id IS NOT NULL AND author_id = ?);"
+        query = "SELECT img_id, content_type from posts WHERE (post_id = %s AND img_id IS NOT NULL AND author_id = %s);"
         cursor = conn.cursor()
-        conn.execute(query, (post_id, author_id))
+        curr.execute(query, (post_id, author_id))
         img_id = cursor.fetchone()
         if img_id[0] is None:
             abort(404, "The post with this image id does not exist.")
         print("Successfully found the post with this image id.")
 
-        query = "SELECT img_url,visibility FROM image_post WHERE img_id = ?;"
+        query = "SELECT img_url,visibility FROM image_post WHERE img_id = %s;"
 
-        conn.execute(query, (img_id[0],))
+        curr.execute(query, (img_id[0],))
         img_visibility = cursor.fetchone()
         if img_visibility is None:
             abort(404, "The post exists, but the image it references does not exist.")
@@ -324,15 +329,16 @@ def get_image(author_id, post_id):
 @bp.route('/authors/<author_id>/<post_id>/edit/', methods=['POST'])
 def edit_post(author_id, post_id):
     final_message = ""
-    conn = get_db_connection()
+    conn, curr = get_db_connection()
     try:
         # check if the post exists
         to_find = (post_id,)
-        print(f"Attempting to find post with {post_id}")
-        cursor = conn.cursor()
-        query = "SELECT * FROM posts WHERE post_id = ?;"
-        conn.execute(query, to_find)
-        exists = cursor.fetchall()
+        print(f"Attempting to find post with {post_id}")        
+        
+        query = "SELECT * FROM posts WHERE post_id = %s;"
+        curr.execute(query, to_find)
+        
+        exists = curr.fetchall()
         if exists is None:
             abort(404, "The post_id cannot be found.")
 
@@ -363,8 +369,8 @@ def edit_post(author_id, post_id):
         # Overwrite the entry with the new data.
         # TODO: Only update what has changed. Comparison with old vs. new data needed.
 
-        query = "UPDATE posts SET title = ?, content_type = ?,content = ?, image_id = ?, visibility = ? WHERE post_id = ? AND author_id = ?;"
-        conn.execute(query, (title, content_type, content, image_id, visibility, post_id, author_id))
+        query = "UPDATE posts SET title = %s, content_type = %s,content = %s, image_id = %s, visibility = %s WHERE post_id = %s AND author_id = %s;"
+        curr.execute(query, (title, content_type, content, image_id, visibility, post_id, author_id))
         final_message = "Post Updated Successfully"
         conn.commit()
     except HTTPException as e:
@@ -389,24 +395,26 @@ def categories():
 @bp.route("/<post_id>", methods=["GET"])
 # Gets an individual post
 def get_post(post_id):    
-    conn = get_db_connection()
+    conn, curr = get_db_connection()
     data = ""
     print(post_id)
     try:
         query = "SELECT * FROM posts " \
-                "WHERE post_id = ? " \
+                "WHERE post_id = %s " \
                 "AND (visibility = 'public' OR visibility = 'unlisted')"
-        
-        row = conn.execute(query, (post_id, )).fetchall()                                        
+                
+        curr.execute(query, (post_id, ))
+        row = curr.fetchall()
         
         post = [dict(i) for i in row][0]        
 
         author_id = post["author_id"]
 
         query = "SELECT username FROM authors " \
-                "WHERE author_id = ? " 
+                "WHERE author_id = %s " 
         
-        row = conn.execute(query, (author_id, )).fetchone()
+        curr.execute(query, (author_id, ))
+        row = curr.fetchone()
 
         if row is not None:
             row_values = [str(value) for value in row]

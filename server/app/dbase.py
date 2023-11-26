@@ -1,6 +1,13 @@
-import sqlite3
+import psycopg2
+from psycopg2.extras import DictCursor
 
 def get_db_connection():
-    conn = sqlite3.connect('database.db')
-    conn.row_factory = sqlite3.Row
-    return conn
+    connection = psycopg2.connect(
+        host="localhost",
+        database="flask_db",
+        user="hueygonzales",
+        password="password")
+
+    # conn.row_factory = sqlite3.Row
+
+    return connection, connection.cursor(cursor_factory=DictCursor)
