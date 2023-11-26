@@ -5,9 +5,6 @@ import sqlite3
 from app.dbase import get_db_connection
 from random import randrange
 
-# Hard coded for now
-HOST = "http://127.0.0.1:5000"
-
 def get_db():
     if 'db' not in g:
         g.db = sqlite3.connect('database.db')
@@ -17,8 +14,8 @@ def get_db():
 # Get all authors (REMOTE)
 @bp.route('/authors', methods=['GET'])
 def get_authors():    
-    page = request.args.get('page') 
-    size = request.args.get('size') 
+    page = int(request.args.get('page'))
+    size = int(request.args.get('size') )
     data = ""
     try:
         conn = get_db_connection()
@@ -32,7 +29,7 @@ def get_authors():
             offset = (page - 1) * size
             query += "LIMIT ? OFFSET ?"
 
-            row = conn.execute(query, (page, offset)).fetchall();
+            row = conn.execute(query, (size, offset)).fetchall();
         
         else: row = conn.execute(query).fetchall();
         
@@ -42,18 +39,19 @@ def get_authors():
         data = dict()
         data["type"] = "authors"
         data["items"] = []
-        print(type(res))
+        
         for r in res:
             item = dict()
             item["type"] = "author"
-            item["id"] = HOST + "/authors/" + r["author_id"] 
-            item["url"] = HOST + "/authors/" + r["author_id"] 
-            item["host"] = HOST
+            item["id"] = request.url_root + "api/authors/" + r["author_id"] 
+            item["url"] = request.url_root + "api/authors/" + r["author_id"] 
+            item["host"] = request.url_root
             item["displayName"] = r["username"]
             item["profileImage"] = None # TODO: implement profile pics
             data["items"].append(item)
         
-        data = json.dumps(data)
+        data = json.dumps(data, indent=2)
+        
 
     except Exception as e:
         print("Error getting authors: ", e)
@@ -79,15 +77,15 @@ def get_author(author_id):
         res = [dict(i) for i in row][0]
         item = dict()
         item["type"] = "author"
-        item["host"] = HOST
-        item["id"] = HOST + res["author_id"]
-        item["url"] = HOST + res["author_id"]
+        item["host"] = request.url_root
+        item["id"] = request.url_root + "api/" + res["author_id"]
+        item["url"] = request.url_root + "api/" + res["author_id"]
         item["displayName"] = res["username"]
-        item["github"] = res["github"]
+        item["github"] = "http://github.com/" + res["github"] if res["github"] is not None else None
         item["profileImage"] = None
 
         data = item
-        data = json.dumps(data)
+        data = json.dumps(data, indent=2)
 
     except Exception as e:
         print("Error getting authors: ", e)
@@ -166,9 +164,9 @@ def update_password():
         db.close()
 
 
-# Get posts that the logged in author has liked (REMOTE)
+# Get posts that the logged in author has liked 
 @bp.route('/authors/<author_id>/liked', methods=['GET'])
-def get_liked_posts(author_id):
+def get_posts_liked(author_id):
     # TODO: Check specification regarding private posts, right now the spec specifies "public things AUTHOR_ID liked"
     # Currently, this function pulls ALL post_id's of the posts that AUTHOR_ID has liked 
     # POSSIBLE SECURITY ISSUE
@@ -186,6 +184,61 @@ def get_liked_posts(author_id):
 
         data = json.dumps([dict(i) for i in likes])
         print(data)
+
+        conn.commit()
+        conn.close()
+
+
+    except Exception as e:
+        print("Getting likes error: ", e)
+        data = "error"
+    
+    return data
+
+# Get a list of likes from other authors on AUTHOR_ID’s post POST_ID (REMOTE)
+@bp.route('/authors/<author_id>/posts/<post_id>/likes', methods=['GET'])
+def get_liked_posts(author_id, post_id):
+    # TODO: Check specification regarding private posts, right now the spec specifies "public things AUTHOR_ID liked"
+    # Currently, this function pulls ALL post_id's of the posts that AUTHOR_ID has liked 
+    # POSSIBLE SECURITY ISSUE
+
+    data = ""
+    try:
+        conn = get_db_connection()
+
+        query = "SELECT * " \
+                "FROM likes l " \
+                "JOIN authors a " \
+                "ON l.like_author_id = a.author_id " \
+                "WHERE " \
+                "l.post_id = ?"
+        
+        likes = conn.execute(query, (post_id,)).fetchall()        
+
+        res = [dict(i) for i in likes]
+    
+        data = dict()
+        data["count"] = len(res)
+        data["results"] = []
+        
+        for r in res:
+            item = dict()
+
+            item["@context"] = None # What is this?
+            item["summary"] = r["username"] + " Likes this post"
+            item["type"] = "Like"
+            item["author"] = dict()
+            item["author"]["type"] = "author"
+            item["author"]["id"] = request.root_url + "api/authors/" + r["author_id"]
+            item["author"]["host"] = request.root_url
+            item["author"]["displayName"] = r["username"]
+            item["author"]["profileImage"] = None
+            item["author"]["github"] = "http://github.com/" + r["github"] if r["github"] is not None else None
+
+            r["object"] = request.root_url + "api/" + author_id + "/posts/" + post_id             
+            data["results"].append(item)
+
+        data = json.dumps(data, indent=2)
 
         conn.commit()
         conn.close()

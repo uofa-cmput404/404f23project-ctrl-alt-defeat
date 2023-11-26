@@ -29,7 +29,49 @@
             "200": {
               "description": "Successful response",
               "schema": {
-                "type": "object"
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "authors"
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "author"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471"
+                        },
+                        "url": {
+                          "type": "string",
+                          "example": "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471"
+                        },
+                        "host": {
+                          "type": "string",
+                          "example": "http://127.0.0.1:5454/"
+                        },
+                        "displayName": {
+                          "type": "string",
+                          "example": "Greg Johnson"
+                        },
+                        "github": {
+                          "type": "string",
+                          "example": "http://github.com/gjohnson"
+                        },
+                        "profileImage": {
+                          "type": "string",
+                          "example": "https://i.imgur.com/k7XVwpB.jpeg"
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -51,7 +93,37 @@
             "200": {
               "description": "Successful response",
               "schema": {
-                "type": "object"
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "author"
+                  },
+                  "id": {
+                    "type": "string",
+                    "example": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e"
+                  },
+                  "host": {
+                    "type": "string",
+                    "example": "http://127.0.0.1:5454/"
+                  },
+                  "displayName": {
+                    "type": "string",
+                    "example": "Lara Croft"
+                  },
+                  "url": {
+                    "type": "string",
+                    "example": "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e"
+                  },
+                  "github": {
+                    "type": "string",
+                    "example": "http://github.com/laracroft"
+                  },
+                  "profileImage": {
+                    "type": "string",
+                    "example": "https://i.imgur.com/k7XVwpB.jpeg"
+                  }
+                }
               }
             }
           },
@@ -332,7 +404,7 @@
           },
           "/api/posts/restricted": {
             "get": {
-              "summary": "Get restricted users for a post (REMOTE)",
+              "summary": "Get restricted users for a post",
               "parameters": [
                 {
                   "name": "post_id",
@@ -514,6 +586,22 @@
           "/api/authors/{author_id}/image/{post_id}": {
             "get": {
               "summary": "Get image for a post (REMOTE)",
+              "parameters": [
+                {
+                  "name": "author_id",
+                  "in": "path",
+                  "type": "string",
+                  "description": "Author ID",
+                  "required": true
+                },
+                {
+                  "name": "post_id",
+                  "in": "path",
+                  "type": "string",
+                  "description": "Post ID",
+                  "required": true
+                }
+              ],
               "responses": {
                 "200": {
                   "description": "Successful response",
@@ -542,6 +630,22 @@
           "/api/authors/{author_id}/posts/{post_id}": {
             "get": {
               "summary": "Get an individual post (REMOTE)",
+              "parameters": [
+                {
+                  "name": "author_id",
+                  "in": "path",
+                  "type": "string",
+                  "description": "Author ID",
+                  "required": true
+                },
+                {
+                  "name": "post_id",
+                  "in": "path",
+                  "type": "string",
+                  "description": "Post ID",
+                  "required": true
+                }
+              ],
               "responses": {
                 "200": {
                   "description": "Successful response",
@@ -555,7 +659,16 @@
           },
           "/api/authors/{author_id}/posts/": {
             "get": {
-              "summary": "Get most recent post from an author (REMOTE)",
+              "summary": "Get most recent posts from an author (REMOTE)",
+              "parameters": [
+                {
+                  "name": "author_id",
+                  "in": "path",
+                  "type": "string",
+                  "description": "Author ID",
+                  "required": true
+                }
+              ],
               "responses": {
                 "200": {
                   "description": "Successful response",
@@ -567,7 +680,7 @@
               "tags": ["Posts"]
             }
           },
-          "/usersearch": {
+          "/api/follow/usersearch": {
             "get": {
               "tags": ["Follow"],
               "summary": "Search for users",
@@ -575,13 +688,14 @@
                 {
                   "name": "query",
                   "in": "query",
-                  "required": true,
-                  "type": "string"
+                  "type": "string",
+                  "description": "Search query",
+                  "required": true
                 }
               ],
               "responses": {
                 "200": {
-                  "description": "Successful operation",
+                  "description": "Successful response",
                   "schema": {
                     "type": "object",
                     "properties": {
@@ -601,25 +715,14 @@
                       }
                     }
                   }
-                },
-                "default": {
-                  "description": "Error",
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "error": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
           },
-          "/follow_request": {
+          "/api/follow/follow_request": {
             "post": {
               "tags": ["Follow"],
-              "summary": "Send follow request",
+              "summary": "Send follow request (REMOTE)",
               "parameters": [
                 {
                   "name": "body",
@@ -634,8 +737,7 @@
                       "author_receive": {
                         "type": "string"
                       }
-                    },
-                    "required": ["author_send", "author_receive"]
+                    }
                   }
                 }
               ],
@@ -650,22 +752,11 @@
                       }
                     }
                   }
-                },
-                "default": {
-                  "description": "Error",
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "error": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
           },
-          "/show_requests": {
+          "/api/follow/show_requests": {
             "get": {
               "tags": ["Follow"],
               "summary": "Get follow requests",
@@ -673,13 +764,14 @@
                 {
                   "name": "authorId",
                   "in": "query",
-                  "required": true,
-                  "type": "string"
+                  "type": "string",
+                  "description": "Author ID",
+                  "required": true
                 }
               ],
               "responses": {
                 "200": {
-                  "description": "Successful operation",
+                  "description": "Successful response",
                   "schema": {
                     "type": "object",
                     "properties": {
@@ -699,22 +791,11 @@
                       }
                     }
                   }
-                },
-                "default": {
-                  "description": "Error",
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "error": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
           },
-          "/accept_request": {
+          "/api/follow/accept_request": {
             "post": {
               "tags": ["Follow"],
               "summary": "Accept follow request",
@@ -732,8 +813,7 @@
                       "author_following": {
                         "type": "string"
                       }
-                    },
-                    "required": ["author_followee", "author_following"]
+                    }
                   }
                 }
               ],
@@ -748,22 +828,11 @@
                       }
                     }
                   }
-                },
-                "default": {
-                  "description": "Error",
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "error": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
           },
-          "/reject_request": {
+          "/api/follow/reject_request": {
             "post": {
               "tags": ["Follow"],
               "summary": "Reject follow request",
@@ -781,8 +850,7 @@
                       "author_following": {
                         "type": "string"
                       }
-                    },
-                    "required": ["author_followee", "author_following"]
+                    }
                   }
                 }
               ],
@@ -797,25 +865,14 @@
                       }
                     }
                   }
-                },
-                "default": {
-                  "description": "Error",
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "error": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
           },
-          "/unfollow": {
+          "/api/follow/unfollow": {
             "post": {
               "tags": ["Follow"],
-              "summary": "Unfollow user",
+              "summary": "Unfollow a user",
               "parameters": [
                 {
                   "name": "body",
@@ -830,8 +887,7 @@
                       "author_unfollower": {
                         "type": "string"
                       }
-                    },
-                    "required": ["author_unfollow", "author_unfollower"]
+                    }
                   }
                 }
               ],
@@ -846,22 +902,166 @@
                       }
                     }
                   }
-                },
-                "default": {
-                  "description": "Error",
+                }
+              }
+            }
+          },
+          "/api/authors/{author_id}/followers": {
+            "get": {
+              "tags": ["Follow"],
+              "summary": "Get followers (REMOTE)",
+              "parameters": [
+                {
+                  "name": "author_id",
+                  "in": "path",
+                  "type": "string",
+                  "description": "Author ID",
+                  "required": true
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Successful response",
                   "schema": {
                     "type": "object",
                     "properties": {
-                      "error": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "id": {
+                              "type": "string"
+                            },
+                            "url": {
+                              "type": "string"
+                            },
+                            "host": {
+                              "type": "string"
+                            },
+                            "displayName": {
+                              "type": "string"
+                            },
+                            "github": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "/api/authors/{author_id}/followers/{foreign_author_id}": {
+            "put": {
+              "tags": ["Follow"],
+              "summary": "Add follower (REMOTE)",
+              "parameters": [
+                {
+                  "name": "author_id",
+                  "in": "path",
+                  "type": "string",
+                  "description": "Author ID",
+                  "required": true
+                },
+                {
+                  "name": "foreign_author_id",
+                  "in": "path",
+                  "type": "string",
+                  "description": "Foreign Author ID",
+                  "required": true
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Follower added",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
                         "type": "string"
                       }
                     }
                   }
                 }
+              }
+            },
+            "get": {
+              "tags": ["Follow"],
+              "summary": "Check if user is a follower (REMOTE)",
+              "parameters": [
+                {
+                  "name": "author_id",
+                  "in": "path",
+                  "type": "string",
+                  "description": "Author ID",
+                  "required": true
+                },
+                {
+                  "name": "foreign_author_id",
+                  "in": "path",
+                  "type": "string",
+                  "description": "Foreign Author ID",
+                  "required": true
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Successful response",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "is_follower": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "delete": {
+              "tags": ["Follow"],
+              "summary": "Remove follower",
+              "parameters": [
+                {
+                  "name": "author_id",
+                  "in": "path",
+                  "type": "string",
+                  "description": "Author ID",
+                  "required": true
+                },
+                {
+                  "name": "foreign_author_id",
+                  "in": "path",
+                  "type": "string",
+                  "description": "Foreign Author ID",
+                  "required": true
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Follower removed",
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
         }
       }
     }
   }
-}
-      
-        
+
+          

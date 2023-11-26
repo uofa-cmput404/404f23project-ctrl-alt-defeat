@@ -2,6 +2,9 @@ from app.follow import bp
 from flask import request, g, jsonify
 import sqlite3
 
+# Hard coded for now
+HOST = "http://127.0.0.1:5000"
+
 def get_db():
     if 'db' not in g:
         g.db = sqlite3.connect('database.db')
@@ -134,6 +137,8 @@ def unfollow():
 
     return jsonify({'message': 'Unfollowed successfully'})
 
+
+# REMOTE
 @bp.route('/authors/<string:author_id>/followers', methods=['GET'])
 def get_followers(author_id):
     try:
@@ -152,10 +157,10 @@ def get_followers(author_id):
             {
                 "type": "author",
                 "id": follower['author_id'],
-                "url": f"http://127.0.0.1:5000/authors/{follower['author_id']}",
-                "host": "http://127.0.0.1:5000/",
+                "url": f"{HOST}/authors/{follower['author_id']}",
+                "host": HOST,
                 "displayName": follower['username'],
-                "github": follower['github'],
+                "github": f"{{HOST}}/{follower['github']}",
             }
             for follower in followers
         ]
@@ -169,6 +174,7 @@ def get_followers(author_id):
     finally:
         db.close()
 
+# REMOTE
 @bp.route('/authors/<string:author_id>/followers/<string:foreign_author_id>', methods=['PUT'])
 def add_follower(author_id, foreign_author_id):
     db = get_db()
@@ -194,6 +200,7 @@ def add_follower(author_id, foreign_author_id):
 
     return jsonify({'message': f'{foreign_author_id} is now a follower of {author_id}'}), 200
 
+# REMOTE
 @bp.route('/authors/<string:author_id>/followers/<string:foreign_author_id>', methods=['GET'])
 def check_follower(author_id, foreign_author_id):
     db = get_db()
