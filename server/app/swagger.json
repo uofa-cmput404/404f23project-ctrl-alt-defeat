@@ -483,12 +483,12 @@
               "tags": ["Posts"]
             }
           },
-          "/api/posts/delete": {
-            "post": {
+          "/api/posts/{post_id}": {
+            "delete": {
               "summary": "Delete a post",
               "responses": {
                 "200": {
-                  "description": "Successful response",
+                  "description": "Delete success",
                   "schema": {
                     "type": "object"
                   }
