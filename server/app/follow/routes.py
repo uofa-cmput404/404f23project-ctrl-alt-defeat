@@ -160,7 +160,7 @@ def get_followers(author_id):
                 "url": f"{HOST}/authors/{follower['author_id']}",
                 "host": HOST,
                 "displayName": follower['username'],
-                "github": f"https://github.com/{follower['github']}",
+                "github": f"https://github.com/{follower['github']}" if follower['github'] is not None else None,
             }
             for follower in followers
         ]
