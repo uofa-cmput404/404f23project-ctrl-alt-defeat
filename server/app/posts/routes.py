@@ -492,13 +492,25 @@ def get_post(author_id,post_id):
 def get_posts(author_id):    
     conn = get_db_connection()
     data = ""
+    page = request.args.get('page')
+    size = request.args.get('size')
     try:
         query = "SELECT * FROM posts " \
                 "WHERE author_id = ? " \
                 "AND (visibility = 'public') " \
-                "ORDER BY date_posted " \
+                "ORDER BY date_posted LIMIT ? OFFSET ? "
         
-        row = conn.execute(query, (author_id, )).fetchall()                                        
+        if page is not None:
+            page = int(page)
+        else: page = 1 # Set default 1
+        
+        if size is not None:
+            size = int(size)
+        else: size = 20 # Set default 20
+
+        offset = (page - 1) * size
+        
+        row = conn.execute(query, (author_id, size, offset)).fetchall()                                        
         
         posts = [dict(i) for i in row]    
 

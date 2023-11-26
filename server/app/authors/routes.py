@@ -24,17 +24,20 @@ def get_authors():
         query = "SELECT * " \
                 "FROM authors " \
                 "ORDER BY author_id " \
+                "LIMIT ? OFFSET ?"
         
-        if page is not None and size is not None:
+        if page is not None:
             page = int(page)
-            size = int(size)
-
-            offset = (page - 1) * size
-            query += "LIMIT ? OFFSET ?"
-
-            row = conn.execute(query, (size, offset)).fetchall();
+        else: page = 1 # Set default 1
         
-        else: row = conn.execute(query).fetchall();
+        if size is not None:
+            size = int(size)
+        else: size = 20 # Set default 20
+
+        offset = (page - 1) * size
+        row = conn.execute(query, (size, offset)).fetchall();
+        
+        # else: row = conn.execute(query).fetchall();
         
         # res = json.dumps([dict(i) for i in row])
         res = [dict(i) for i in row]
