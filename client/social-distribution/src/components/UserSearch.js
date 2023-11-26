@@ -51,6 +51,31 @@ function UserSearch({ username, authorId }) {
     }
   };
 
+  const handleUnfollow = async (unfollowUserId) => {
+    try {
+      const response = await fetch('http://localhost:5000/follow/unfollow', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          author_unfollow: unfollowUserId,
+          author_unfollower: authorId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Unfollowed');
+      } else {
+        console.error('Unfollow failed');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   return (
     <div>
       <input
@@ -69,6 +94,7 @@ function UserSearch({ username, authorId }) {
               <li key={user.id}>
                 {user.username}
                 <button onClick={() => handleFollowRequest(user.id)}>Follow Request</button>
+                <button onClick={() => handleUnfollow(user.id)}>Unfollow</button>
               </li>
             ))}
           </ul>

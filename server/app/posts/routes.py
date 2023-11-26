@@ -170,15 +170,12 @@ def delete_post():
 
     return data # data
 
-@bp.route('/manage', methods=['POST'])
+@bp.route('/manage', methods=['GET'])
 def get_my_posts():
     data = ""
     try:
-        # Retrieve data from the request's JSON body
-        print("manage")
-        request_data = request.get_json()
-        author_id = request_data['author_id']
-                    
+        # Retrieve data from the request's JSON body         
+        author_id = request.args.get('author_id')           
         conn = get_db_connection()
         
         # Get all the posts from people who I'm following + posts who are public
@@ -200,15 +197,14 @@ def get_my_posts():
 
     return data # data
 
-@bp.route('/', methods=['POST'])
+@bp.route('/', methods=['GET'])
 def index():
     data = ""
     try:
         # Retrieve data from the request's JSON body
-        print("data")
-        request_data = request.get_json()
-        author_id = request_data['author_id']
-
+        print("data")        
+        author_id = request.args.get('author_id')        
+        # print(author_id)
         conn = get_db_connection()
         
         # Get all the posts from people who I'm following + posts who are public + posts that are mine
@@ -387,3 +383,41 @@ def edit_post(author_id, post_id):
 @bp.route('/test/')
 def categories():
     return "Test route for /posts"
+
+
+
+@bp.route("/<post_id>", methods=["GET"])
+# Gets an individual post
+def get_post(post_id):    
+    conn = get_db_connection()
+    data = ""
+    print(post_id)
+    try:
+        query = "SELECT * FROM posts " \
+                "WHERE post_id = ? " \
+                "AND (visibility = 'public' OR visibility = 'unlisted')"
+        
+        row = conn.execute(query, (post_id, )).fetchall()                                        
+        
+        post = [dict(i) for i in row][0]        
+
+        author_id = post["author_id"]
+
+        query = "SELECT username FROM authors " \
+                "WHERE author_id = ? " 
+        
+        row = conn.execute(query, (author_id, )).fetchone()
+
+        if row is not None:
+            row_values = [str(value) for value in row]
+            row_string = ', '.join(row_values)
+            post["username"] = row_string                                        
+
+        data = json.dumps(post)
+
+    except IndexError as e:
+        data = "invalid"
+
+    except Exception as e:
+        print(e)
+    return data 

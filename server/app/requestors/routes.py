@@ -1,5 +1,6 @@
 from app.requestors import bp
 from flask import request, jsonify, g
+from app.dbase import get_db_connection
 import sqlite3
 import uuid
 from flask_bcrypt import Bcrypt
@@ -20,7 +21,7 @@ def register():
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
 
-    db = get_db()
+    db = get_db_connection()
     cur = db.cursor()
 
     try:
@@ -42,4 +43,4 @@ def register():
         return jsonify({'error': 'An error occurred while registering.'})
 
     finally:
-        db.close()
+        db.close()        
