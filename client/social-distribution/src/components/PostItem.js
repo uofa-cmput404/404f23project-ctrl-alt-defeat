@@ -89,6 +89,19 @@ function PostItem(props) {
       console.error('Error fetching comments:', error);
     }
   };
+
+  //now like all comment in same post
+  const toggleLikeComment = (commentId) => {
+    const updatedComments = comments.map(comment => {
+      if (comment.comment_id === commentId) {
+        // Toggle only the clicked comment's liked status
+        return { ...comment, liked: !comment.liked };
+      }
+      return comment;
+    });
+
+    setComments(updatedComments);
+  };
   
   useEffect(() => {
     fetchComments();
@@ -148,14 +161,28 @@ function PostItem(props) {
             <button onClick={handleSendComment}>Send</button>
         </div>
 
-        {/* Display comments with commenter's name and text */}
-        <div>
-          {comments.map((comment, index) => (
-            <div key={`${comment.comment_name}-${index}`}>
-              <strong>{comment.comment_name}:</strong> {comment.comment_text}
+         {/* Display comments with commenter's name, text, and like button */}
+         <div>
+        {comments.map((comment, index) => (
+          <div key={`${comment.comment_id}-${index}`} 
+               style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <div>
+              <span style={{ fontWeight: 'bold' }}>{comment.comment_name}:</span>
+              <span style={{ marginLeft: '8px' }}>{comment.comment_text}</span>
             </div>
-          ))}
-        </div>
+            <button 
+              onClick={() => toggleLikeComment(comment.comment_id)}
+              style={{ border: 'none', background: 'none', cursor: 'pointer' }}
+            >
+              <img 
+                src={comment.liked ? likedImgUrl : notLikedImgUrl} 
+                alt="Like" 
+                style={{ width: '24px', height: '24px' }}
+              />
+            </button>
+          </div>
+        ))}
+      </div>
     </li>
   );
 }
