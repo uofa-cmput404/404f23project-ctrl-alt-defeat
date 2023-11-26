@@ -23,7 +23,7 @@ connection = psycopg2.connect(
 with connection.cursor() as cursor:
     # printopen("schema.sql", "r").read()
     # Note this must be run from server/app ! Do not run from heroku
-    cursor.execute(open("schema2.sql", "r").read())
+    cursor.execute(open("server/app/schema2.sql", "r").read())
 
 connection.commit()
 connection.close()
