@@ -178,3 +178,90 @@ def delete_like(author_id):
         print("liked error: ", e)
         data = "error"
     return data
+
+
+
+@bp.route('/<author_id>/posts/<post_id>/comments', methods=['GET'])
+
+
+def get_post_comments(author_id, post_id):
+    comment_author_id = request.args.get('comment_author_id')
+    if not comment_author_id:
+        return jsonify({'comments': []})
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT a.username, c.comment_text
+            FROM comments c
+            INNER JOIN authors a ON c.comment_author_id = a.author_id
+            WHERE c.post_id = ?
+            AND c.author_id = ?
+            AND (
+                (c.status = 'public') OR
+                (c.status = 'private' AND c.comment_author_id = ?) OR
+                (c.status = 'private' AND c.author_id = ?)
+                
+            )
+        """
+
+        cursor.execute(query, (post_id, author_id, comment_author_id, comment_author_id ))
+        comment_info = cursor.fetchall()
+        conn.close()
+
+        comments_list = [{'comment_name':comment[0],'comment_text': comment[1]} for comment in comment_info]
+        return jsonify({'comments': comments_list})
+
+    except Exception as e:
+        print("Getting comments error: ", e)
+        return jsonify({'error': str(e)}), 500
+
+
+
+@bp.route('/<author_id>/posts/<post_id>/comments', methods=['POST'])
+def send_comments(author_id, post_id):
+    # Get attributes from HTTP body
+    request_data = request.get_json()
+    comment_author_id = request_data["comment_author_id"]
+    comment_text = request_data["comment_text"]
+
+
+    # Create comment_id ID
+    # TODO: change method of randomization
+    comment_id = str(randrange(0, 100000))
+
+    data = ""
+    try:
+        conn = get_db_connection()
+
+        # Check if the authors are friends
+        check_friends_query = "SELECT COUNT(*) FROM friends " \
+                              "WHERE author_followee = ? AND author_following = ? " \
+                              "UNION " \
+                              "SELECT COUNT(*) FROM friends " \
+                              "WHERE author_followee = ? AND author_following = ?"
+        friends_count = conn.execute(check_friends_query, (author_id, comment_author_id, comment_author_id, author_id)).fetchall()
+
+        # Determine the status based on friendship
+        status = 'private' if all(count[0] > 0 for count in friends_count) else 'public'
+
+        query = "INSERT INTO comments " \
+                "(comment_id, comment_author_id, " \
+                "post_id, author_id, comment_text, status, date_commented) " \
+                "VALUES (?, ?, ?, ?, ?, ? ,CURRENT_TIMESTAMP)" 
+        
+        conn.execute(query, (comment_id, comment_author_id, post_id, author_id, comment_text, status))
+
+        data = "success"
+
+        conn.commit()
+        conn.close()
+
+
+    except Exception as e:
+        print("comment error: ", e)
+        data = "error"
+    
+    return data
+

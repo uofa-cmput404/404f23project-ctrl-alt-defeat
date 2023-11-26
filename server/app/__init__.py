@@ -31,7 +31,7 @@ class Author(db.Model):
 class AuthorView(ModelView):
     can_delete = True
     form_columns = ["author_id", "username", "password"]
-    column_list = ["author_id", "username", "password"]
+    column_list = ["author_id", "username"]
     column_searchable_list = ['username'] 
 
     def on_model_change(self, form, model, is_created):
@@ -49,7 +49,7 @@ class Requestor(db.Model):
 class RequestorView(ModelView):
     can_delete = True
     form_columns = ["requestor_id", "username", "password"]
-    column_list = ["requestor_id", "username","password"]
+    column_list = ["requestor_id", "username"]
 
     def on_model_change(self, form, model, is_created):
         # Hash the password
