@@ -96,13 +96,14 @@ class ImageView(ModelView):
 class Node(db.Model):
     __tablename__ = "nodes"
     node_id = db.Column(db.Integer, primary_key=True)
-    base_url = db.Column(db.Text)
     node_name = db.Column(db.Text)    
+    username = db.Column(db.Text, nullable=False)
+    password = db.Column(db.Text, nullable=False)
 
 class NodeView(ModelView):
     can_delete = True
-    form_columns = ["node_id", "base_url", "node_name"]
-    column_list = ["node_id", "base_url", "node_name"]
+    form_columns = ["node_id", "node_name", "username", "password"]
+    column_list = ["node_id", "node_name", "username"]
     column_searchable_list = ["node_name"]  
 
 admin.add_view(AuthorView(Author, db.session))
@@ -136,7 +137,7 @@ def create_app():
     from app.posts import bp as posts_bp
     app.register_blueprint(posts_bp, url_prefix='/posts')
     
-    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://hueygonzales:password@localhost:5432/flask_db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://markm8:password@localhost:5432/flask_db"
     app.config["SECRET_KEY"] = "mysecret"
 
     db.init_app(app)

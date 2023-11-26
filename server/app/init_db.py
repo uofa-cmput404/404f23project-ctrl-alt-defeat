@@ -4,7 +4,7 @@ import psycopg2
 connection = psycopg2.connect(
         host="localhost",
         database="flask_db",
-        user="hueygonzales",
+        user="markm8",
         password="password")
         # user=os.environ['DB_USERNAME'],
         # password=os.environ['DB_PASSWORD'])

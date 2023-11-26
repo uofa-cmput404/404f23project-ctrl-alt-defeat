@@ -5,7 +5,7 @@ def get_db_connection():
     connection = psycopg2.connect(
         host="localhost",
         database="flask_db",
-        user="hueygonzales",
+        user="markm8",
         password="password")
 
     # conn.row_factory = sqlite3.Row

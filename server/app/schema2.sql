@@ -92,7 +92,8 @@ CREATE TABLE post_restrictions (
 );
 
 CREATE TABLE nodes (
-    node_id INTEGER,
+    node_id INTEGER PRIMARY KEY,
     node_name TEXT,
-    base_url TEXT NOT NULL    
+    username TEXT NOT NULL,
+    password TEXT NOT NULL   
 );
