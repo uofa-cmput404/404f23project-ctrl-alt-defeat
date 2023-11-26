@@ -206,6 +206,7 @@ def get_my_posts():
     return data # data
 
 @bp.route('/', methods=['GET'])
+@basic_auth.login_required
 def index():
     data = ""
     try:

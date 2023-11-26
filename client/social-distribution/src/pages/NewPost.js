@@ -80,6 +80,7 @@ export default function NewPost(props) {
     
       try {
         console.log(JSON.stringify({author_id: authorId, content_type: contentType, title: title, content: content, visibility: visibility, image_id: imageId}));
+
         axios.post(newPostUrl, {
           author_id: authorId,
           content_type: contentType,
@@ -87,6 +88,10 @@ export default function NewPost(props) {
           content: content,
           visibility: visibility,
           image_id: imageId
+        }, {
+          headers: {
+            'Authorization': 'Basic Q3RybEFsdERlZmVhdDpmcm9udGVuZA=='
+          }
         })
         .then(response => {
           if (response.data === "success") {
