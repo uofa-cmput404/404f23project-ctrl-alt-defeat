@@ -177,26 +177,45 @@ def get_posts_liked(author_id):
     # TODO: Use this query to actually match the spec requirement
     #       can't do it rn because its going to mess the front end a lot
 
-    '''SELECT l.post_id, p.author_id 
-    FROM likes l 
-    JOIN posts p
-    ON p.post_id = l.post_id
-    WHERE 
-    like_author_id = "ae58521a-9aaf-4df3-89a7-ab52757f7f63'''
 
     data = ""
     try:
         conn = get_db_connection()
 
-        query = "SELECT post_id " \
-                "FROM likes WHERE " \
-                "like_author_id = ?"
+        query = "SELECT l.post_id, p.author_id,  a.username, a.github " \
+                "FROM likes l " \
+                "JOIN posts p " \
+                "ON p.post_id = l.post_id " \
+                "JOIN authors a " \
+                "ON a.author_id = l.like_author_id " \
+                "WHERE " \
+                "like_author_id = ? "
         
         likes = conn.execute(query, (author_id,)).fetchall()
+        likes = [dict(i) for i in likes]
+        
+        payload = dict()
+        payload["type"] = "liked"
+        payload["items"] = []
 
+        for like in likes:
+            item = dict()
+            item["context"] = None
+            item["summary"] = like["username"] + " Likes your post"
+            item["type"] = "Like"
+            item["author"] = dict()
+                                    
+            item["author"]["type"] = "author"
+            item["author"]["id"] = request.root_url + "api/authors/" + like["author_id"]
+            item["author"]["host"] = request.root_url
+            item["author"]["displayName"] = like["username"]
+            item["author"]["profileImage"] = None
+            item["author"]["github"] = "http://github.com/" + like["github"] if like["github"] is not None else None
 
-        data = json.dumps([dict(i) for i in likes], indent=2)
-        print(data)
+            item["object"] = request.root_url + "authors/" + like["author_id"] + "posts/" + like["post_id"]
+            payload["items"].append(item)
+
+        data = json.dumps(payload, indent=2)
 
         conn.commit()
         conn.close()
@@ -267,6 +286,7 @@ def get_liked_posts(author_id, post_id):
 @bp.route('/authors/<author_id>/inbox', methods=['POST'])
 def send_like(author_id):
     # Get attributes from HTTP body
+    
     request_data = request.get_json()
     like_author_id = request_data["like_author_id"]
     post_id = request_data["post_id"]
