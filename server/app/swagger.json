@@ -522,28 +522,14 @@
           },
           "/api/posts": {
             "get": {
-              "summary": "Get posts (REMOTE)",
+              "summary": "Get posts",
               "parameters": [
                 {
                   "name": "author_id",
-                  "in": "query",
+                  "in": "path",
                   "type": "string",
                   "description": "ID of the user",
                   "required": true
-                },
-                {
-                  "name": "page",
-                  "in": "query",
-                  "type": "integer",
-                  "description": "Page number",
-                  "required": false
-                },
-                {
-                  "name": "size",
-                  "in": "query",
-                  "type": "integer",
-                  "description": "Number of items per page",
-                  "required": false
                 }
               ],
               "responses": {
@@ -583,7 +569,7 @@
               "tags": ["Posts"]
             }
           },
-          "/api/authors/{author_id}/image/{post_id}": {
+          "/api/authors/{author_id}/posts/{post_id}/image": {
             "get": {
               "summary": "Get image for a post (REMOTE)",
               "parameters": [
@@ -667,6 +653,20 @@
                   "type": "string",
                   "description": "Author ID",
                   "required": true
+                },
+                {
+                  "name": "page",
+                  "in": "query",
+                  "type": "integer",
+                  "description": "Page number",
+                  "required": false
+                },
+                {
+                  "name": "size",
+                  "in": "query",
+                  "type": "integer",
+                  "description": "Number of items per page",
+                  "required": false
                 }
               ],
               "responses": {
@@ -722,7 +722,7 @@
           "/api/follow/follow_request": {
             "post": {
               "tags": ["Follow"],
-              "summary": "Send follow request (REMOTE)",
+              "summary": "Send follow request",
               "parameters": [
                 {
                   "name": "body",
@@ -963,7 +963,7 @@
           "/api/authors/{author_id}/followers/{foreign_author_id}": {
             "put": {
               "tags": ["Follow"],
-              "summary": "Add follower (REMOTE)",
+              "summary": "Add follower",
               "parameters": [
                 {
                   "name": "author_id",

@@ -174,6 +174,16 @@ def get_posts_liked(author_id):
     # Currently, this function pulls ALL post_id's of the posts that AUTHOR_ID has liked 
     # POSSIBLE SECURITY ISSUE
 
+    # TODO: Use this query to actually match the spec requirement
+    #       can't do it rn because its going to mess the front end a lot
+
+    '''SELECT l.post_id, p.author_id 
+    FROM likes l 
+    JOIN posts p
+    ON p.post_id = l.post_id
+    WHERE 
+    like_author_id = "ae58521a-9aaf-4df3-89a7-ab52757f7f63'''
+
     data = ""
     try:
         conn = get_db_connection()
@@ -185,7 +195,7 @@ def get_posts_liked(author_id):
         likes = conn.execute(query, (author_id,)).fetchall()
 
 
-        data = json.dumps([dict(i) for i in likes])
+        data = json.dumps([dict(i) for i in likes], indent=2)
         print(data)
 
         conn.commit()
