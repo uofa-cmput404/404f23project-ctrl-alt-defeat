@@ -445,7 +445,9 @@ def get_post(author_id,post_id):
         item["source"] = None
         item["origin"] = None
         item["description"] = None
-        item["contentType"] = post["content_type"]        
+        item["contentType"] = post["content_type"]   
+        item["content"] = post["content"]        
+        item["title"] = post["title"]        
         
         author_item = dict()
         author_item["type"] = "author"
@@ -471,7 +473,7 @@ def get_post(author_id,post_id):
         item["visibility"] = post["visibility"].upper()
         item["unlisted"] = True if post["visibility"] == "unlisted" else False
 
-        data = json.dumps(item)
+        data = json.dumps(item, indent=2)
         print(data)
 
     except IndexError as e:
