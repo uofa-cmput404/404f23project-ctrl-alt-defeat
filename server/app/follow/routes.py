@@ -19,9 +19,12 @@ def user_search():
 
     cursor.execute("SELECT author_id, username FROM authors WHERE username LIKE %s", ('%' + search_query + '%',))
     users = cursor.fetchall()
+    users = [dict(row) for row in users]
 
-    if users:
-        user_list = [{'id': user[0], 'username': user[1]} for user in users]
+    print(users)
+
+    if users:        
+        user_list = [{'id': user["author_id"], 'username': user["username"]} for user in users]
         return jsonify({'users': user_list})
     else:
         return jsonify({'users': []})
@@ -67,10 +70,12 @@ def get_follow_requests():
     )
 
     follow_requests = cursor.fetchall()
+    follow_requests = [dict(row) for row in follow_requests]
+
     connection.close()
 
     if follow_requests:
-        follow_requests_list = [{'id': request[0], 'username': request[1]} for request in follow_requests]
+        follow_requests_list = [{'id': request["author_send"], 'username': request["username"]} for request in follow_requests]
         return jsonify({'followRequests': follow_requests_list})
     else:
         return jsonify({'followRequests': []})

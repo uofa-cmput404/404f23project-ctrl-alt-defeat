@@ -93,9 +93,10 @@ def get_liked_posts(author_id):
         
         curr.execute(query, (author_id,))
         likes = curr.fetchall()
+        likes = [dict(row) for row in likes]
 
-
-        data = json.dumps([dict(i) for i in likes])
+        data = json.dumps(likes, indent=4, sort_keys=True, default=str)
+        print("likes:")
         print(data)
 
         conn.commit()
@@ -188,11 +189,14 @@ def get_github(author_id):
         curr.execute(query, (author_id,))
         row = curr.fetchone()
         
-        # print(str(github_username))
-        if row is not None:
-            row_values = [str(value) for value in row]
-            row_string = ', '.join(row_values)
-            data = row_string
+        # row = [dict(row) for row in row]
+
+        data = json.dumps(row, indent=4, sort_keys=True, default=str)
+        print(data)
+        # if row is not None:
+        #     row_values = [str(value) for value in row]
+        #     row_string = ', '.join(row_values)
+        #     data = row_string
 
     except Exception as e:
         print("Getting github username error: ", e)

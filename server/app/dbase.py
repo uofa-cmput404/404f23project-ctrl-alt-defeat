@@ -1,5 +1,5 @@
 import psycopg2
-from psycopg2.extras import DictCursor
+from psycopg2.extras import RealDictCursor
 
 def get_db_connection():
     connection = psycopg2.connect(
@@ -10,4 +10,4 @@ def get_db_connection():
 
     # conn.row_factory = sqlite3.Row
 
-    return connection, connection.cursor(cursor_factory=DictCursor)
+    return connection, connection.cursor(cursor_factory=RealDictCursor)

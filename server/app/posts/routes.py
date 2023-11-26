@@ -22,10 +22,11 @@ def get_restricted_users():
                 "WHERE post_id = %s"
         
         curr.execute(query, (post_id, ))
-        posts = curr.fetchall()                                        
+        posts = curr.fetchall()           
+                          
 
         data = json.dumps([dict(i) for i in posts])
-        print(data)
+        # print(data)
 
         conn.commit()
         conn.close()
@@ -187,12 +188,13 @@ def get_my_posts():
                 "ORDER by date_posted DESC"
         
         curr.execute(query, (author_id, ))
-        posts = curr.fetchall()                                
-        print(posts)
-        conn.commit()
-        conn.close()
+        
+        posts = curr.fetchall()                             
 
-        data = json.dumps([dict(i) for i in posts])
+        posts = [dict(row) for row in posts]
+        print(posts)       
+
+        data = json.dumps(posts, indent=4, sort_keys=True, default=str)
         
     except Exception as e:
         print("Something went wrong")
@@ -224,11 +226,12 @@ def index():
                 "ORDER BY date_posted DESC; " 
         
         curr.execute(query, (author_id, author_id, author_id))
-        posts = curr.fetchall()                                
-        conn.commit()
-        conn.close()
+        posts = curr.fetchall()                             
 
-        data = json.dumps([dict(i) for i in posts])
+        posts = [dict(row) for row in posts]        
+
+        print(posts)
+        data = json.dumps(posts, indent=4, sort_keys=True, default=str)
 
     except Exception as e:
         print(e)
@@ -271,12 +274,12 @@ def new_post():
 
         conn, curr = get_db_connection()
 
-        query = "INSERT INTO posts (post_id, author_id, title, content_type, content, image_id, visibility) " \
-                "VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        query = "INSERT INTO posts (post_id, author_id, title, content_type, content, visibility) " \
+                "VALUES (%s, %s, %s, %s, %s, %s)"
 
         # Use a parameterized query to insert values safely
         curr.execute(query,
-                     (post_id, author_id, title, content_type, content, image_id, visibility))
+                     (post_id, author_id, title, content_type, content, visibility))
 
         conn.commit()
         conn.close()
