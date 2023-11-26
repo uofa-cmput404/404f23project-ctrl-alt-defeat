@@ -12,6 +12,9 @@ from markupsafe import Markup
 from flask_cors import CORS, cross_origin
 
 from flask_basicauth import BasicAuth
+import urllib.parse as urlparse
+import os
+from dotenv import load_dotenv
 
 
 db = SQLAlchemy()
@@ -116,6 +119,15 @@ admin.add_view(NodeView(Node, db.session))
 def create_app():
     app = Flask(__name__)
 
+    load_dotenv()
+
+    url = urlparse.urlparse(os.environ['DATABASE_URL'])
+    dbname = url.path[1:]
+    user = url.username
+    password = url.password
+    host = url.hostname
+    port = url.port
+
   
     # HUGE SECURITY ISSUE - DO NOT KEEP THIS IN PRODUCTION
     # Need this so that the API allows all urls to make requests.
@@ -124,23 +136,26 @@ def create_app():
 
 
      # Register blueprints here
-    from app.main import bp as main_bp
+    from .main import bp as main_bp
     app.register_blueprint(main_bp)
-    from app.requestors import bp as requestors_bp
+    from .requestors import bp as requestors_bp
     app.register_blueprint(requestors_bp, url_prefix='/requestors')   
-    from app.authors import bp as authors_bp
+    from .authors import bp as authors_bp
     app.register_blueprint(authors_bp, url_prefix='/authors')   
 
-    from app.follow import bp as follow_bp
+    from .follow import bp as follow_bp
     app.register_blueprint(follow_bp, url_prefix='/follow') 
 
-    from app.posts import bp as posts_bp
+    from .posts import bp as posts_bp
     app.register_blueprint(posts_bp, url_prefix='/posts')
     
-    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://markm8:password@localhost:5432/flask_db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://%s:%s@%s:%d/%s" % (user, password, host, port, dbname)
     app.config["SECRET_KEY"] = "mysecret"
 
     db.init_app(app)
     admin.init_app(app)
     return app
 
+if __name__ == '__main__':
+    app = create_app()
+    app.run(debug=True)
