@@ -3,7 +3,7 @@ import json
 
 from app.dbase import get_db_connection
 
-from flask import request, abort
+from flask import request, abort, send_file, Response
 from werkzeug.exceptions import HTTPException
 
 from requests.auth import HTTPBasicAuth
@@ -13,6 +13,7 @@ import sqlite3
 from datetime import datetime, timezone
 import requests
 import uuid
+import io,base64
 
 @bp.route("/posts/restricted", methods=["GET"])
 def get_restricted_users():    
@@ -321,33 +322,29 @@ def new_post():
     return data  # data
 
 # (REMOTE) 
-@bp.route('/authors/<author_id>/image/<post_id>', methods=['GET'])
+@bp.route('/authors/<author_id>/posts/<post_id>/image', methods=['GET'])
 def get_image(author_id, post_id):
     conn = get_db_connection()
-    final_message = "Nothing happened."
-    # check if image exists
+    final_message = Response(500,"Nothing happened.")
     try:
-        query = "SELECT image_id, content_type from posts WHERE (post_id = ? AND image_id IS NOT NULL AND author_id = ?);"
-        cursor = conn.cursor()
+        query = "SELECT content, content_type,visibility from posts WHERE post_id = ? AND author_id = ?;"
         conn.execute(query, (post_id, author_id))
-        img_id = cursor.fetchone()
-        if img_id[0] is None:
-            abort(404, "The post with this image id does not exist.")
-        print("Successfully found the post with this image id.")
+        row = conn.execute(query, (post_id, author_id)).fetchone()
+        if row is None:
+            abort(404, "The post with this post_id does not exist.")
+        print("Successfully found post.")
 
-        query = "SELECT img_url,visibility FROM image_post WHERE image_id = ?;"
-
-        conn.execute(query, (img_id[0],))
-        img_visibility = cursor.fetchone()
-        if img_visibility is None:
-            abort(404, "The post exists, but the image it references does not exist.")
-        elif img_visibility["visibility"] != "public":
+        if row["content_type"] == "text/plain" or row["content_type"] == "text/markdown":
+            abort(404, "This is not an image.")
+        if row["visibility"] != "public":
             abort(403, "This post exists, but the image contained is only visible to specific users.")
 
-        content_type = img_id["content_type"]
-        content = img_visibility["img_url"]
-        final_message = f"data:{content_type},{content}"
-        return final_message
+        content_type = row["content_type"]
+        content = row["content"]
+
+        image_bytes = io.BytesIO(base64.b64decode(content))
+        #final_message = f"data:{content_type},{content}"
+        final_message = send_file(image_bytes, mimetype=content_type[:-7], max_age=30)
     except HTTPException as e:
         final_message = str(e)
         print(final_message)
