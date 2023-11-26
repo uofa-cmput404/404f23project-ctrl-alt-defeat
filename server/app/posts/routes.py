@@ -3,7 +3,7 @@ import json
 
 from app.dbase import get_db_connection
 
-from flask import request, abort
+from flask import request, abort,Response
 from werkzeug.exceptions import HTTPException
 
 from random import randrange
@@ -286,31 +286,35 @@ def new_post():
     return data  # data
 
 
-@bp.route('/authors/<author_id>/<post_id>/image/', methods=['GET'])
-def get_image(author_id, post_id):
+# adhering to API spec in requirements
+@bp.route("/authors/<author_id>/posts/<post_id>/image",methods=["GET"])
+def get_image_as_base64(author_id, post_id):
+    """
+    An endpoint to retrieve an base64 encoded image.
+    This is ready to be embedded in a <img> tag, such as in HTML or Markdown.
+    :param author_id: A unique identifier for the author.
+    :param post_id: A unique identifier for the post.
+    :return: A base64 encoded JPEG/PNG, with data: URI.
+    """
     conn = get_db_connection()
-    final_message = "Nothing happened."
-    # check if image exists
+    final_message = Response(response="Nothing happened",status=500)
+    # check if post exists
     try:
-        query = "SELECT img_id, content_type from posts WHERE (post_id = ? AND img_id IS NOT NULL AND author_id = ?);"
+        query = "SELECT post_id, content_type,visibility from posts WHERE (post_id = ? AND author_id = ?);"
         cursor = conn.cursor()
         conn.execute(query, (post_id, author_id))
-        img_id = cursor.fetchone()
-        if img_id[0] is None:
+        row = cursor.fetchone()
+        if row is None:
             abort(404, "The post with this image id does not exist.")
-        print("Successfully found the post with this image id.")
+        print("Found post. Checking if image.")
 
-        query = "SELECT img_url,visibility FROM image_post WHERE img_id = ?;"
+        if row["visibility"] != "public":
+            abort(404, "This is not public.")
+        if row["content_type"] not in ["image/png;base64", "image/jpeg;base64"]:
+            abort(404,"This is not a base64 encoded JPEG/PNG image.")
 
-        conn.execute(query, (img_id[0],))
-        img_visibility = cursor.fetchone()
-        if img_visibility is None:
-            abort(404, "The post exists, but the image it references does not exist.")
-        elif img_visibility["visibility"] != "public":
-            abort(403, "This post exists, but the image contained is only visible to specific users.")
-
-        content_type = img_id["content_type"]
-        content = img_visibility["img_url"]
+        content_type = row["content_type"]
+        content = row["content"]
         final_message = f"data:{content_type},{content}"
         return final_message
     except HTTPException as e:

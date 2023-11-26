@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { UserContext } from '../App';
+import MarkdownEditor from '../components/MarkdownEditor'
+import rehypeRaw from 'rehype-raw'
 
 const newPostUrl = 'http://127.0.0.1:5000/posts/new'
 
@@ -168,6 +170,8 @@ export default function NewPost(props) {
     navigate("/homepage");
   }
 
+
+
   return (
     <div style={styles.container}>
       <h2>New Post</h2>
@@ -204,9 +208,10 @@ export default function NewPost(props) {
       />
 
       <p>Content</p>
-      {contentType === 'text/plain' || contentType === 'text/markdown' ? <textarea id="freeform" type="text" placeholder="What's on your mind?" name="freeform" rows="4" cols="50" style={styles.content} value={content} onChange={(e) => setContent(e.target.value)}/> 
-      
-      : <input type="file" id="img" name="img" accept="image/jpeg, image/png" onChange={handleImageChange}></input>} 
+      {contentType === 'text/plain' || contentType === 'text/markdown' ?
+          (contentType === 'text/plain' ? <textarea id="freeform" type="text" placeholder="What's on your mind?" name="freeform" rows="4" cols="50" style={styles.content} value={content} onChange={(e) => setContent(e.target.value)}/>
+            : <MarkdownEditor style={styles.content} content={content} onChange={setContent}/>)
+      : <input type="file" id="img" name="img" accept="image/jpeg, image/png" onChange={handleImageChange}></input>}
 
       <button style={styles.button_post} 
       onClick={handleNewPost}

@@ -3,7 +3,6 @@ DROP TABLE IF EXISTS posts;
 DROP TABLE IF EXISTS authors;
 DROP TABLE IF EXISTS requestors;
 DROP TABLE IF EXISTS admins;
-DROP TABLE IF EXISTS image_post;
 DROP TABLE IF EXISTS friends;
 DROP TABLE IF EXISTS follow_requests;
 DROP TABLE IF EXISTS likes;
@@ -18,9 +17,8 @@ CREATE TABLE posts (
     title TEXT NOT NULL,
     content_type TEXT NOT NULL DEFAULT "text/plain",
     content TEXT NOT NULL,
-    image_id TEXT,
     visibility TEXT NOT NULL DEFAULT "public",
-    FOREIGN KEY (image_id) REFERENCES image_post(img_id) ON DELETE SET NULL,
+    unlisted INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY (author_id) REFERENCES authors(author_id) ON DELETE CASCADE
 );
 
@@ -43,14 +41,6 @@ CREATE TABLE admins (
     password TEXT NOT NULL
 );
 
-CREATE TABLE image_post (
-    img_id TEXT PRIMARY KEY,
-    author_id INTEGER NOT NULL,
-    img_url TEXT NOT NULL,
-    visibility TEXT NOT NULL DEFAULT "public",
-    date_posted TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
-    FOREIGN KEY (author_id) REFERENCES authors(author_id) ON DELETE CASCADE
-);
 
 CREATE TABLE friends (
     author_followee INTEGER NOT NULL,
@@ -100,10 +90,10 @@ CREATE TABLE post_restrictions (
 );
 
 
-INSERT INTO posts (post_id, author_id, date_posted, title, content_type, content, image_id, visibility) VALUES
-('post1', 1, '2023-10-29 22:31:02', 'First Post', 'text/plain', 'This is the first post.', 'img1', 'public'),
-('post2', 2, '2023-10-30 08:15:30', 'Second Post', 'text/plain', 'This is the second post.', NULL, 'private'),
-('post3', 1, '2023-10-30 12:45:00', 'Third Post', 'text/markdown', '# This is the third post.', 'img2', 'public');
+INSERT INTO posts (post_id, author_id, date_posted, title, content_type, content, visibility, unlisted) VALUES
+('post1', 1, '2023-10-29 22:31:02', 'First Post', 'text/plain', 'This is the first post.', 'img1', 'public',0),
+('post2', 2, '2023-10-30 08:15:30', 'Second Post', 'text/plain', 'This is the second post.', NULL, 'private',0),
+('post3', 1, '2023-10-30 12:45:00', 'Third Post', 'text/markdown', '# This is the third post.', 'img2', 'public',0);
 
 INSERT INTO authors (author_id, username, password) VALUES
 (1, 'techgeek5000', 'password1'),
