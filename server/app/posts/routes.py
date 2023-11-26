@@ -14,9 +14,6 @@ from datetime import datetime, timezone
 import requests
 import uuid
 
-# Hard coded for now
-HOST = "http://127.0.0.1:5000"
-
 @bp.route("/posts/restricted", methods=["GET"])
 def get_restricted_users():    
     post_id = request.args.get('post_id')
@@ -330,7 +327,7 @@ def get_image(author_id, post_id):
     final_message = "Nothing happened."
     # check if image exists
     try:
-        query = "SELECT img_id, content_type from posts WHERE (post_id = ? AND img_id IS NOT NULL AND author_id = ?);"
+        query = "SELECT image_id, content_type from posts WHERE (post_id = ? AND image_id IS NOT NULL AND author_id = ?);"
         cursor = conn.cursor()
         conn.execute(query, (post_id, author_id))
         img_id = cursor.fetchone()
@@ -338,7 +335,7 @@ def get_image(author_id, post_id):
             abort(404, "The post with this image id does not exist.")
         print("Successfully found the post with this image id.")
 
-        query = "SELECT img_url,visibility FROM image_post WHERE img_id = ?;"
+        query = "SELECT img_url,visibility FROM image_post WHERE image_id = ?;"
 
         conn.execute(query, (img_id[0],))
         img_visibility = cursor.fetchone()
@@ -354,6 +351,8 @@ def get_image(author_id, post_id):
     except HTTPException as e:
         final_message = str(e)
         print(final_message)
+    except Exception as e:
+        print(e)
     finally:
         conn.close()
         return final_message
@@ -445,7 +444,7 @@ def get_post(author_id,post_id):
 
         item = dict()
         item["type"] = "post"
-        item["id"] = HOST + "/authors/" + post["author_id"] + "/posts/" + post["post_id"]
+        item["id"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
         
         # No idea what these are, skip for now
         item["source"] = None
@@ -455,9 +454,9 @@ def get_post(author_id,post_id):
         
         author_item = dict()
         author_item["type"] = "author"
-        author_item["host"] = HOST
-        author_item["id"] = HOST + row["author_id"]
-        author_item["url"] = HOST + row["author_id"]
+        author_item["host"] = request.root_url
+        author_item["id"] = request.root_url + row["author_id"]
+        author_item["url"] = request.root_url + row["author_id"]
         author_item["displayName"] = row["username"]
         author_item["github"] = row["github"]
         author_item["profileImage"] = None
@@ -514,26 +513,27 @@ def get_posts(author_id):
                 "WHERE author_id = ? " 
         
         author = conn.execute(query, (author_id, )).fetchone()            
-
+        # print(author)
         for post in posts:
             item = dict()
             item["type"] = "post"
-            item["id"] = HOST + "/authors/" + post["author_id"] + "/posts/" + post["post_id"]
+            item["id"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
             
             # No idea what these are, skip for now
             item["source"] = None
             item["origin"] = None
             item["description"] = None
             item["contentType"] = post["content_type"]        
+            item["content"] = post["content"]        
             
             author_item = dict()
             author_item["type"] = "author"
-            author_item["host"] = HOST
-            print(post)
-            author_item["id"] = HOST + "/" + post["author_id"]
-            author_item["url"] = HOST + "/" + post["author_id"]
+            author_item["host"] = request.root_url
+            
+            author_item["id"] = request.root_url + post["author_id"]
+            author_item["url"] = request.root_url + post["author_id"]
             author_item["displayName"] = author["username"]
-            author_item["github"] = HOST + "/" + author["github"]
+            author_item["github"] = (request.root_url + author["github"]) if author["github"] != None else None
             author_item["profileImage"] = None
 
             item["author"] = author_item
@@ -553,7 +553,7 @@ def get_posts(author_id):
 
             payload["items"].append(item)
 
-        data = json.dumps(payload)        
+        data = json.dumps(payload, indent=2)        
 
     except IndexError as e:
         print(e)

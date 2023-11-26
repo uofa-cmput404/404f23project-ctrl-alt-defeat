@@ -14,8 +14,8 @@ def get_db():
 # Get all authors (REMOTE)
 @bp.route('/authors', methods=['GET'])
 def get_authors():    
-    page = int(request.args.get('page'))
-    size = int(request.args.get('size') )
+    page = request.args.get('page')
+    size = request.args.get('size')
     data = ""
     try:
         conn = get_db_connection()
@@ -26,6 +26,9 @@ def get_authors():
                 "ORDER BY author_id " \
         
         if page is not None and size is not None:
+            page = int(page)
+            size = int(size)
+
             offset = (page - 1) * size
             query += "LIMIT ? OFFSET ?"
 
