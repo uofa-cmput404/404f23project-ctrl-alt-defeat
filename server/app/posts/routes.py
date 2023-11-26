@@ -154,10 +154,8 @@ def change_visibility():
 
     return data # data
 
-@bp.route("/posts/delete", methods=["POST"])
-def delete_post():
-    request_data = request.get_json()
-    post_id = request_data['post_id']
+@bp.route("/posts/<post_id>", methods=["DELETE"])
+def delete_post(post_id):    
     data = ""
 
     try:
@@ -168,7 +166,7 @@ def delete_post():
         
         conn.commit()
         conn.close()
-        
+        data = "Delete success"
     except Exception as e:
         print("Something went wrong")
         print(e)
