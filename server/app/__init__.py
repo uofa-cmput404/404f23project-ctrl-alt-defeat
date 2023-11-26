@@ -1,4 +1,3 @@
-
 from flask import Flask, redirect, url_for, render_template
 from flask_cors import CORS, cross_origin
 
@@ -11,15 +10,38 @@ from markupsafe import Markup
 
 from flask_cors import CORS, cross_origin
 
-from flask_basicauth import BasicAuth
+from flask_httpauth import HTTPBasicAuth
 import urllib.parse as urlparse
 import os
 from dotenv import load_dotenv
+from .dbase import get_db_connection # Used in authentication
 
 
 db = SQLAlchemy()
-basic_auth = BasicAuth()
+basic_auth = HTTPBasicAuth()
 admin = Admin()
+
+# This is to verify back-end access for nodes.
+@basic_auth.verify_password
+def verify_backend_access(username, password):
+    print("verifying...")
+    response = None # equivalent to 401 Unauthorized
+    conn, cur = get_db_connection()
+
+    if username == "front-end": # TODO: remove this in future
+        return {'message': 'Authenticated through origin front-end'}
+
+    query = "SELECT node_id, password FROM nodes WHERE username = %s"
+    cur.execute(query, (username,))
+    node = cur.fetchone()
+
+    if node:
+        stored_password = node['password']
+        if password == stored_password:
+            response = {'message': "Authenticated", 'node_id': node['node_id']}
+    conn.close()
+
+    return response
 
 class Author(db.Model):
     __tablename__ = "authors"

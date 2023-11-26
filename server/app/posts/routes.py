@@ -9,6 +9,8 @@ from werkzeug.exceptions import HTTPException
 from random import randrange
 import sqlite3
 
+from .. import basic_auth
+
 @bp.route("/restricted", methods=["GET"])
 def get_restricted_users():    
     post_id = request.args.get('post_id')
@@ -204,6 +206,7 @@ def get_my_posts():
     return data # data
 
 @bp.route('/', methods=['GET'])
+@basic_auth.login_required
 def index():
     data = ""
     try:
