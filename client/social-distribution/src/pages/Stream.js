@@ -180,7 +180,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
             <div className="follow-requests-container">
               <FollowRequests authorId={authorId} />
             </div>
-            <button onClick={handleLogout}>Logout</button>
+            <button onClick={handleLogout}>Logout {username}</button>
           </div>
           {showProfile && <Profile username={username} authorId={authorId} setUsername={setUsername} onClose={closeProfile} />}
           <button onClick={toggleProfile}>Edit Profile</button>
