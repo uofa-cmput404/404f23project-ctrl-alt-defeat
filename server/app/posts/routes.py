@@ -229,7 +229,8 @@ def index():
                     "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  %s) " \
                 "ORDER BY date_posted DESC; " 
         
-        row = curr.execute(query, (author_id, author_id, author_id)).fetchall()                                
+        curr.execute(query, (author_id, author_id, author_id))
+        row = curr.fetchall()                                
         posts = [dict(i) for i in row]
 
         try:

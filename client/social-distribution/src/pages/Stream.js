@@ -35,9 +35,10 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
                 axios.get(githubIdLink)
                 .then(response => {
                     try {
-                            if (response.data !== "") {
+                            if (response.data !== "" && response.data.github !== null) {
+                                
                                 // Make the GET request using Axios
-                                    axios.get('https://api.github.com/users/' + response.data + '/events')
+                                    axios.get('https://api.github.com/users/' + response.data.github + '/events')
                                     .then(response => {
                                     // Handle the successful response here                
                                     setActivityList(response.data.slice(0, 5));         
@@ -92,7 +93,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
 
     useEffect(() => {
         labelLikedPosts();
-    }, [likedPostIds]);
+    }, [likedPostIds, responseData]);
 
     const labelLikedPosts = () => {
         // Label (on front-end) which posts have been liked by the logged in author

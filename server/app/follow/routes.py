@@ -59,6 +59,7 @@ def follow_request():
 
 @bp.route('/follow/show_requests', methods=['GET'])
 def get_follow_requests():
+    print("here")
     author_id = request.args.get('authorId')
     if not author_id:
         return jsonify({'followRequests': []})

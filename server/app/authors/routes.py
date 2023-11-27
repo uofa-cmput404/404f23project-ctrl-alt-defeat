@@ -14,13 +14,13 @@ def get_authors():
     size = request.args.get('size')
     data = ""
     try:
-        conn = get_db_connection()
+        conn, cur = get_db_connection()
 
 
         query = "SELECT * " \
                 "FROM authors " \
                 "ORDER BY author_id " \
-                "LIMIT ? OFFSET ?"
+                "LIMIT %s OFFSET %s"
         
         if page is not None:
             page = int(page)
@@ -31,7 +31,8 @@ def get_authors():
         else: size = 20 # Set default 20
 
         offset = (page - 1) * size
-        row = conn.execute(query, (size, offset)).fetchall();
+        cur.execute(query, (size, offset))
+        row = cur.fetchall();
         
         # else: row = conn.execute(query).fetchall();
         
@@ -66,16 +67,16 @@ def get_authors():
 def get_author(author_id):
     data = ""
     try:
-        conn = get_db_connection()
+        conn, cur = get_db_connection()
 
 
         query = "SELECT * " \
                 "FROM authors " \
-                "WHERE author_id = ? " \
-        
-        print(query)
-        row = conn.execute(query, (author_id,)).fetchall()
-        
+                "WHERE author_id = %s " \
+                
+        cur.execute(query, (author_id,))
+        row = cur.fetchall()
+        print(row)
         res = [dict(i) for i in row][0]
         item = dict()
         item["type"] = "author"
@@ -186,9 +187,10 @@ def get_posts_liked(author_id):
                 "JOIN authors a " \
                 "ON a.author_id = l.like_author_id " \
                 "WHERE " \
-                "like_author_id = % "
+                "like_author_id = %s "
         
-        likes = curr.execute(query, (author_id,)).fetchall()
+        curr.execute(query, (author_id,))
+        likes = curr.fetchall()
         likes = [dict(i) for i in likes]
         
         payload = dict()
@@ -209,7 +211,7 @@ def get_posts_liked(author_id):
             item["author"]["profileImage"] = None
             item["author"]["github"] = "http://github.com/" + like["github"] if like["github"] is not None else None
 
-            item["object"] = request.root_url + "authors/" + like["author_id"] + "posts/" + like["post_id"]
+            item["object"] = request.root_url + "authors/" + like["author_id"] + "/posts/" + like["post_id"]
             payload["items"].append(item)
 
         data = json.dumps(payload, indent=2)

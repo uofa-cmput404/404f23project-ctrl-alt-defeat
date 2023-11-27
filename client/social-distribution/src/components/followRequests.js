@@ -7,7 +7,7 @@ function FollowRequests({ authorId }) {
     // Fetch follow requests for the current user (authorId)
     const fetchFollowRequests = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/show_requests?authorId=${authorId}`);
+        const response = await fetch(`http://localhost:5000/api/follow/show_requests?authorId=${authorId}`);
         if (response.ok) {
           const data = await response.json();
           setFollowRequests(data.followRequests);
@@ -23,7 +23,7 @@ function FollowRequests({ authorId }) {
   }, [authorId]);
 
   const acceptFollowRequest = (requestId) => {
-    fetch('http://localhost:5000/api/accept_request', {
+    fetch('http://localhost:5000/api/follow/accept_request', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
