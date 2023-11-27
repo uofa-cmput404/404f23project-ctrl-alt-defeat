@@ -1,6 +1,9 @@
 import os
 import psycopg2
 import urllib.parse as urlparse
+from dotenv import load_dotenv
+
+load_dotenv()
 
 url = urlparse.urlparse(os.environ['DATABASE_URL'])
 dbname = url.path[1:]
@@ -21,9 +24,17 @@ connection = psycopg2.connect(
 # cur = connection.cursor()
 
 with connection.cursor() as cursor:
-    # printopen("schema.sql", "r").read()
-    # Note this must be run from server/app ! Do not run from heroku
-    cursor.execute(open("server/app/schema2.sql", "r").read())
+    # Depending if this file is opened from the root folder,
+    # `server`, or `server/app` folder, it will get 
+    # the appropiate schema path.
+    if os.path.exists(os.path.join(os.getcwd(), 'server/app')):
+        schema_path = "server/app/schema2.sql"
+    elif os.path.exists(os.path.join(os.getcwd(), 'app')):
+        schema_path = "app/schema2.sql"
+    else:
+        schema_path = "schema2.sql"
+
+    cursor.execute(open(schema_path, "r").read())
 
 connection.commit()
 connection.close()
