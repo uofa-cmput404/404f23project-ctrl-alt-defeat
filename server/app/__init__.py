@@ -158,7 +158,7 @@ def create_app():
     CORS(app, resources={r"/*": {"origins": "*"}})
 
     SWAGGER_URL = '/api/docs'  # URL for exposing Swagger UI (without trailing '/')
-    API_URL = 'http://localhost:5000/swagger'  # Our API url (can of course be a local resource)
+    API_URL = '/api/docs'  # Our API url (can of course be a local resource)
 
     # Call factory function to create our blueprint
     swaggerui_blueprint = get_swaggerui_blueprint(
