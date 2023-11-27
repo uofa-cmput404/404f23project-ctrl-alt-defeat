@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { UserContext } from '../App';
 
-const newPostUrl = 'http://127.0.0.1:5000/posts/new'
+const newPostUrl = process.env.HOSTNAME + '/api/posts/new'
 
 export default function NewPost(props) {
 

@@ -6,11 +6,11 @@ import SetVisibilityDialog from '../components/SetVisibilityDialog';
 import RestrictedUser from '../components/RestrictedUser';
 import { UserContext } from '../App';
 
-const managePostsUrl = 'http://127.0.0.1:5000/posts/manage'
-const updateVisibilityUrl = 'http://127.0.0.1:5000/posts/visibility'
-const restrictUrl = 'http://127.0.0.1:5000/posts/restrict'
-const restrictionListUrl = 'http://127.0.0.1:5000/posts/restricted/'
-const editUrl = 'http://127.0.0.1:5000/posts/authors/'
+const managePostsUrl = process.env.HOSTNAME + '/api/posts/manage'
+const updateVisibilityUrl = process.env.HOSTNAME + '/api/posts/visibility'
+const restrictUrl = process.env.HOSTNAME + '/api/posts/restrict'
+const restrictionListUrl = process.env.HOSTNAME + '/api/posts/restricted/'
+const editUrl = process.env.HOSTNAME + '/posts/authors/'
 
 function ManagePosts() {
     const styles = {
@@ -182,6 +182,7 @@ function ManagePosts() {
             // Make the GET request using Axios
                 axios.get(managePostsUrl + `?author_id=${authorId}`)
                 .then(response => {
+                axios.get(managePostsUrl + `?author_id=${authorId}`, {
                 // Handle the successful response here
                 console.log('Response data:', response.data);
                     setPostsLists(response.data)

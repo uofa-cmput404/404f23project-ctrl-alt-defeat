@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React from 'react'
 
-const unrestrictUrl = 'http://127.0.0.1:5000/posts/unrestrict/'
+const unrestrictUrl = process.env.HOSTNAME + '/posts/unrestrict/'
 function RestrictedUser(props) {  
 
   function removeRestriction(event) {

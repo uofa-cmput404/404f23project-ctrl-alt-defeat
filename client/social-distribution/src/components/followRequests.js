@@ -23,7 +23,7 @@ function FollowRequests({ authorId }) {
   }, [authorId]);
 
   const acceptFollowRequest = (requestId) => {
-    fetch('http://localhost:5000/follow/accept_request', {
+    fetch(process.env.HOSTNAME + '/follow/accept_request', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ function FollowRequests({ authorId }) {
       author_following: requestId,      
     };
   
-    fetch('http://localhost:5000/follow/reject_request', {
+    fetch(process.env.HOSTNAME + '/follow/reject_request', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
