@@ -202,8 +202,15 @@ def create_app():
 
     @app.route("/swagger")
     def swagger_json():
+        # Depending if this file is opened from the root folder,
+        # or `server` folder, it will get 
+        # the appropiate swagger.json path.
+        if os.path.exists(os.path.join(os.getcwd(), 'server/app')):
+            swagger_path = "swagger.json"
+        else:
+            swagger_path = "../swagger.json"
         # Load your Swagger JSON file here
-        with open('swagger.json', 'r') as f:
+        with open(swagger_path, 'r') as f:
             swagger_json = f.read()
         return swagger_json
 
