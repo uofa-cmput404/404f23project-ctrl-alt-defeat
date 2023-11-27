@@ -15,7 +15,7 @@ from flask_httpauth import HTTPBasicAuth
 import urllib.parse as urlparse
 import os
 from dotenv import load_dotenv
-from .dbase import get_db_connection # Used in verify_baclend_access
+from .dbase import get_db_connection # Used in verify_backend_access
 
 
 db = SQLAlchemy()
@@ -188,16 +188,16 @@ def create_app():
     from .main import bp as main_bp
     app.register_blueprint(main_bp)
     
-    from app.requestors import bp as requestors_bp
+    from .requestors import bp as requestors_bp
     app.register_blueprint(requestors_bp, url_prefix='/api/requestors')  # The only route that doesn't get affect is requestors
     
-    from app.authors import bp as authors_bp
+    from .authors import bp as authors_bp
     app.register_blueprint(authors_bp, url_prefix='/api')   
 
-    from app.follow import bp as follow_bp
+    from .follow import bp as follow_bp
     app.register_blueprint(follow_bp, url_prefix='/api') 
 
-    from app.posts import bp as posts_bp
+    from .posts import bp as posts_bp
     app.register_blueprint(posts_bp, url_prefix='/api')
 
     @app.route("/swagger")
