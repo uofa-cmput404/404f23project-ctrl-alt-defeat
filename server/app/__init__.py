@@ -158,7 +158,7 @@ def create_app():
     CORS(app, resources={r"/*": {"origins": "*"}})
 
     SWAGGER_URL = '/api/docs'  # URL for exposing Swagger UI (without trailing '/')
-    API_URL = 'http://localhost:5000/swagger'  # Our API url (can of course be a local resource)
+    API_URL = os.environ['URL'] + "/swagger"  # Our API url (can of course be a local resource)
 
     # Call factory function to create our blueprint
     swaggerui_blueprint = get_swaggerui_blueprint(
@@ -202,8 +202,15 @@ def create_app():
 
     @app.route("/swagger")
     def swagger_json():
+        # Depending if this file is opened from the root folder,
+        # or `server` folder, it will get 
+        # the appropiate swagger.json path.
+        if os.path.exists(os.path.join(os.getcwd(), 'server/app')):
+            swagger_path = "swagger.json"
+        else:
+            swagger_path = "../swagger.json"
         # Load your Swagger JSON file here
-        with open('app/swagger.json', 'r') as f:
+        with open(swagger_path, 'r') as f:
             swagger_json = f.read()
         return swagger_json
 
