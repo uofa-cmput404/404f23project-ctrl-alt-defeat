@@ -446,6 +446,18 @@ def get_post(author_id, post_id):
         curr.execute(query, (post_id, ))
         row = curr.fetchall()
         if len(row) == 0:
+            # print("not found locally, trying remote")
+            # try:
+            #     print(f"https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/{author_id}/posts/{post_id}")
+            #     res = requests.get(f"https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/{author_id}/posts/{post_id}", auth=("cross-server", "password"))
+            #     print(res)
+            #     if res.status_code == 404:
+            #         abort(404, "Post not found")       
+
+            # except Exception as e:
+            #     print(e)
+            #     print("Something went wrong")
+
             abort(404, "Post not found")
 
         post = [dict(i) for i in row][0]       
