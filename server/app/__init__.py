@@ -203,7 +203,7 @@ def create_app():
     @app.route("/swagger")
     def swagger_json():
         # Load your Swagger JSON file here
-        with open('app/swagger.json', 'r') as f:
+        with open('swagger.json', 'r') as f:
             swagger_json = f.read()
         return swagger_json
 
