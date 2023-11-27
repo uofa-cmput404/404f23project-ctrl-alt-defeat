@@ -75,10 +75,10 @@ function PostItem(props) {
   const fetchComments = async () => {
     try {
       const params = {
-          'Authorization' : 'Basic ' + process.env.USERPASSBASE64,
+          'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA==',
           comment_author_id: props.loginUser // Assuming this is the user ID
       };
-      const apiUrl = process.env.API_HOSTNAME + `/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
+      const apiUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + `/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
   
       const response = await axios.get(apiUrl, { params });
       if (response.data && response.data.comments) {
@@ -100,11 +100,11 @@ function PostItem(props) {
   const toggleLikeComment = async (commentId) => {
     try {
       // Construct the URL for the POST request
-      const apiUrl = process.env.API_HOSTNAME + `/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}/toggle-like`;
+      const apiUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + `/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}/toggle-like`;
   
       // Send the POST request
       await axios.post(apiUrl, { like_comment_author_id: props.loginUser }, {headers: {
-          'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+          'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='
           }});
   
       // Update the like status in the local state
@@ -142,8 +142,8 @@ function PostItem(props) {
     };
   
     try {
-      const apiUrl = process.env.API_HOSTNAME + `/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
-      await axios.post(apiUrl, commentData, {headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}});
+      const apiUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + `/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
+      await axios.post(apiUrl, commentData, {headers: {'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='}});
       setComment('');
       fetchComments(); // Refresh comments after posting
     } catch (error) {

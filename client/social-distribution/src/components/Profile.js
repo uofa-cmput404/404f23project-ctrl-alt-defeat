@@ -7,12 +7,12 @@ function Profile({ username, authorId, setUsername, onClose }) {
   const [newPassword, setNewPassword] = useState('');
 
   const handleGithubUpdate = async () => {
-    axios.post(process.env.API_HOSTNAME + '/api/authors/github', {
+    axios.post('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/authors/github', {
       
         author_id: authorId,
         github: GithubName
       
-    },{headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}})
+    },{headers: {'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='}})
         .then((response) => {
       toast.success(response.data);
     })
@@ -24,11 +24,11 @@ function Profile({ username, authorId, setUsername, onClose }) {
       return;
     }
 
-    const response = await fetch(process.env.API_HOSTNAME + '/authors/update_username', {
+    const response = await fetch('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/authors/update_username', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+        'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='
       },
       body: JSON.stringify({ new_username: newUsername, authorId }),
     });
@@ -51,11 +51,11 @@ function Profile({ username, authorId, setUsername, onClose }) {
       return;
     }
 
-    const response = await fetch(process.env.API_HOSTNAME + '/authors/update_password', {
+    const response = await fetch('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/authors/update_password', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+        'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='
       },
       body: JSON.stringify({ new_password: newPassword, authorId }),
     });

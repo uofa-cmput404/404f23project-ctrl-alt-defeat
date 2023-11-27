@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React from 'react'
 
-const unrestrictUrl = process.env.API_HOSTNAME + '/api/posts/unrestrict/'
+const unrestrictUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/posts/unrestrict/'
 function RestrictedUser(props) {  
 
   function removeRestriction(event) {
@@ -13,7 +13,7 @@ function RestrictedUser(props) {
         console.log(props.username);
         console.log(props.postSelected);
 
-        axios.delete(process.env.API_HOSTNAME + `/api/posts/unrestrict/${props.postSelected}/${props.username}`, {headers:{'Authorization' : 'Basic ' + process.env.USERPASSBASE64}})
+        axios.delete('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + `/api/posts/unrestrict/${props.postSelected}/${props.username}`, {headers:{'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='}})
             .then((response) => {
             if (response.data === "success") {
               alert("User restricted successfully")

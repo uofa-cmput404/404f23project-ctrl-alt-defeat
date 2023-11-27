@@ -21,7 +21,7 @@ function PostsList(props) {
     console.log("heard postsLists", changeLike, postSelected, postSelectedLiked, postSelectedAuthor);
 
     // URL goes to AUTHOR of post, NOT the author who is logged in/sending like
-    const sendLikeUrl = process.env.API_HOSTNAME + "/api/authors/" + postSelectedAuthor + '/inbox';
+    const sendLikeUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + "/api/authors/" + postSelectedAuthor + '/inbox';
 
     if (postSelectedLiked === true) {
       console.log("unlike");
@@ -31,7 +31,7 @@ function PostsList(props) {
         axios.post(sendUnlikeUrl, {
           like_author_id: props.authorId,
           post_id: postSelected
-        },{headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}})
+        },{headers: {'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='}})
         .then(response => {
           // Handle successful response
           // Update front-end to reflect change
@@ -59,7 +59,7 @@ function PostsList(props) {
         axios.post(sendLikeUrl, {
           like_author_id: props.authorId,
           post_id: postSelected
-        },{headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}})
+        },{headers: {'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='}})
         .then(response => {
           // Handle successful response
           // Update front-end to reflect change

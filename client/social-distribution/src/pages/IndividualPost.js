@@ -13,7 +13,7 @@ import Markdown from "react-markdown";
 import notLikedImgUrl from "../notLiked_black_24dp.svg";
 import likedImgUrl from "../liked_black_24dp.svg";
 
-const postsUrl = process.env.API_HOSTNAME + '/api/posts/';
+const postsUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/posts/';
 
 
 export default function IndividualPost({ username, authorId, setUsername }) {;    
@@ -33,7 +33,7 @@ export default function IndividualPost({ username, authorId, setUsername }) {;
                 axios.get(postsUrl + id, {
                     author_id: authorId,
                     headers: {
-                        'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+                        'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='
                     }
                 })
                 .then(response => {

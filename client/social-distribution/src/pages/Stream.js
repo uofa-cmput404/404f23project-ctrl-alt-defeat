@@ -8,13 +8,13 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
-const postsUrl = process.env.API_HOSTNAME + '/api/posts/';
+const postsUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/posts';
 
 
 export default function Stream({ username, authorId, setUsername, updateAuthStatus, updateUserAndAuthorId }) {;
     const navigate = useNavigate();
-    const likedPostsUrl = process.env.API_HOSTNAME + '/api/authors/' + authorId + '/liked';
-    const githubIdLink = process.env.API_HOSTNAME + '/api/authors/github/' + authorId;
+    const likedPostsUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/authors/' + authorId + '/liked';
+    const githubIdLink = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/authors/github/' + authorId;
     
     const [likedPostIds, setLikedPostIds] = useState({});
     const [responseData, setResponseData] = useState([]);
@@ -65,7 +65,8 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
-                axios.get(postsUrl + `?author_id=${authorId}`,{headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}})
+                axios.get(postsUrl + `?author_id=${authorId}`,{
+                    headers: {'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='}})
                 .then(response => {
                 // Handle the successful response here
                 //console.log('Response data:', response.data);
@@ -116,7 +117,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
      // Check `likes` table (back-end) for all posts that logged in author has liked
      async function fetchLikedPosts() {
         try {
-            axios.get(likedPostsUrl,{headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}})
+            axios.get(likedPostsUrl,{headers: {'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='}})
             .then(response => {
                 //console.log('liked ids:', response.data);
                 setLikedPostIds(response.data);

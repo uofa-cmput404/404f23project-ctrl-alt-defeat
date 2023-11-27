@@ -45,11 +45,11 @@ function Login(props) {
       password: password.toLowerCase(), 
     };
   
-    fetch(process.env.API_HOSTNAME + '/api/authors/login', {
+    fetch('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/authors/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-          'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+          'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='
       },
       body: JSON.stringify(loginData),
     })

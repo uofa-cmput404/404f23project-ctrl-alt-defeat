@@ -7,8 +7,8 @@ function UserSearch({ username, authorId }) {
 
   const handleSearch = async () => {
     try {
-      const response = await fetch( process.env.API_HOSTNAME + `/api/follow/usersearch?query=${searchQuery}`,{
-          headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}});
+      const response = await fetch( 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + `/api/follow/usersearch?query=${searchQuery}`,{
+          headers: {'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='}});
       if (response.ok) {
         const data = await response.json();
         const filteredResults = data.users.filter(user => user.id !== authorId);
@@ -23,11 +23,11 @@ function UserSearch({ username, authorId }) {
 
   const handleFollowRequest = async (recieveAuthorId) => {
     try {
-      const response = await fetch(process.env.API_HOSTNAME + '/api/follow/follow_request', {
+      const response = await fetch('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/follow/follow_request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+          'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='
         },
         body: JSON.stringify({
           author_send: authorId,
@@ -55,11 +55,11 @@ function UserSearch({ username, authorId }) {
 
   const handleUnfollow = async (unfollowUserId) => {
     try {
-      const response = await fetch(process.env.API_HOSTNAME + '/api/follow/unfollow', {
+      const response = await fetch('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/follow/unfollow', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+          'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='
         },
         body: JSON.stringify({
           author_unfollow: unfollowUserId,

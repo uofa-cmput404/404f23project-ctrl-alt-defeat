@@ -7,9 +7,9 @@ function FollowRequests({ authorId }) {
     // Fetch follow requests for the current user (authorId)
     const fetchFollowRequests = async () => {
       try {
-        const response = await fetch(process.env.API_HOSTNAME + `/api/follow/show_requests?authorId=${authorId}`, {
+        const response = await fetch('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + `/api/follow/show_requests?authorId=${authorId}`, {
           headers: {
-            'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+            'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='
           }
         });
         if (response.ok) {
@@ -27,11 +27,11 @@ function FollowRequests({ authorId }) {
   }, [authorId]);
 
   const acceptFollowRequest = (requestId) => {
-    fetch(process.env.API_HOSTNAME + '/api/follow/accept_request', {
+    fetch('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/follow/accept_request', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+        'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='
       },
       body: JSON.stringify({
         author_followee: authorId, // The current user
@@ -56,11 +56,11 @@ function FollowRequests({ authorId }) {
       author_following: requestId,      
     };
   
-    fetch(process.env.API_HOSTNAME + '/api/follow/reject_request', {
+    fetch('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/follow/reject_request', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+        'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='
       },
       body: JSON.stringify(data),
     })
