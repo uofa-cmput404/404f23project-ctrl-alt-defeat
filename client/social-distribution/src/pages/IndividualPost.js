@@ -13,7 +13,7 @@ import Markdown from "react-markdown";
 import notLikedImgUrl from "../notLiked_black_24dp.svg";
 import likedImgUrl from "../liked_black_24dp.svg";
 
-const postsUrl = 'http://127.0.0.1:5000/api/';
+const postsUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/';
 
 
 export default function IndividualPost() {;    

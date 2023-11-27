@@ -7,7 +7,7 @@ function Profile({ username, authorId, setUsername, onClose }) {
   const [newPassword, setNewPassword] = useState('');
 
   const handleGithubUpdate = async () => {
-    axios.post('http://localhost:5000/api/authors/github', {
+    axios.post('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/authors/github', {
       
         author_id: authorId,
         github: GithubName
@@ -23,7 +23,7 @@ function Profile({ username, authorId, setUsername, onClose }) {
       return;
     }
 
-    const response = await fetch('http://localhost:5000/api/authors/update_username', {
+    const response = await fetch('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/authors/update_username', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ function Profile({ username, authorId, setUsername, onClose }) {
       return;
     }
 
-    const response = await fetch('http://localhost:5000/api/authors/update_password', {
+    const response = await fetch('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/authors/update_password', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

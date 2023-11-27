@@ -6,11 +6,11 @@ import SetVisibilityDialog from '../components/SetVisibilityDialog';
 import RestrictedUser from '../components/RestrictedUser';
 import { UserContext } from '../App';
 
-const managePostsUrl = 'http://127.0.0.1:5000/api/posts/manage'
-const updateVisibilityUrl = 'http://127.0.0.1:5000/api/posts/visibility'
-const restrictUrl = 'http://127.0.0.1:5000/api/posts/restrict'
-const restrictionListUrl = 'http://127.0.0.1:5000/api/posts/restricted/'
-const editUrl = 'http://127.0.0.1:5000/api/posts/authors/'
+const managePostsUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/posts/manage'
+const updateVisibilityUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/posts/visibility'
+const restrictUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/posts/restrict'
+const restrictionListUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/posts/restricted/'
+const editUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/posts/authors/'
 
 function ManagePosts() {
     const styles = {

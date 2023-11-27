@@ -7,7 +7,7 @@ function UserSearch({ username, authorId }) {
 
   const handleSearch = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/follow/usersearch?query=${searchQuery}`);
+      const response = await fetch(`https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/follow/usersearch?query=${searchQuery}`);
       if (response.ok) {
         const data = await response.json();
         const filteredResults = data.users.filter(user => user.id !== authorId);
@@ -22,7 +22,7 @@ function UserSearch({ username, authorId }) {
 
   const handleFollowRequest = async (recieveAuthorId) => {
     try {
-      const response = await fetch('http://localhost:5000/api/follow/follow_request', {
+      const response = await fetch('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/follow/follow_request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ function UserSearch({ username, authorId }) {
 
   const handleUnfollow = async (unfollowUserId) => {
     try {
-      const response = await fetch('http://localhost:5000/api/follow/unfollow', {
+      const response = await fetch('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/follow/unfollow', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

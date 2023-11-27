@@ -3,7 +3,7 @@ import React from 'react'
 import Markdown from 'react-markdown';
 import './ManagePostItem.css';
 
-const deleteUrl = 'http://127.0.0.1:5000/api/posts/delete'
+const deleteUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/posts/delete'
 function ManagePostItem(props) {
     function processDelete() {
         if (window.confirm("Are you sure you want to delete this post?")) {
@@ -50,7 +50,7 @@ function ManagePostItem(props) {
     }
 
     function getRestrictedUsers() {
-        const restrictionListUrl = `http://127.0.0.1:5000/api/posts/restricted?post_id=${props.item.post_id}`
+        const restrictionListUrl = `https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/posts/restricted?post_id=${props.item.post_id}`
         console.log(restrictionListUrl)
         axios.get(restrictionListUrl).then((response) => {
             console.log(response.data)
