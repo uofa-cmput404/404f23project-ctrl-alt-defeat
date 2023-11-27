@@ -332,7 +332,7 @@ def new_post():
 # (REMOTE) 
 @bp.route('/authors/<author_id>/posts/<post_id>/image', methods=['GET'])
 def get_image(author_id, post_id):
-    conn = get_db_connection()
+    conn, curr = get_db_connection()
     final_message = Response(500,"Nothing happened.")
     try:
         query = "SELECT content, content_type,visibility from posts WHERE post_id = %s AND author_id = %s"
