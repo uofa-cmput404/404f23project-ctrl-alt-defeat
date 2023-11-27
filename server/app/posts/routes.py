@@ -507,7 +507,7 @@ def get_post(author_id, post_id):
 @bp.route("/authors/<author_id>/posts/", methods=["GET"])
 # Gets most recent post from author AUTHOR_ID
 def get_posts(author_id):    
-    conn = get_db_connection()
+    conn, curr = get_db_connection()
     data = ""
     page = request.args.get('page')
     size = request.args.get('size')
