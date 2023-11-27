@@ -3,13 +3,19 @@ import json
 
 from app.dbase import get_db_connection
 
-from flask import request, abort
+from flask import request, abort, send_file, Response
 from werkzeug.exceptions import HTTPException
+
+from requests.auth import HTTPBasicAuth
 
 from random import randrange
 import sqlite3
+from datetime import datetime, timezone
+import requests
+import uuid
+import io,base64
 
-@bp.route("/restricted", methods=["GET"])
+@bp.route("/posts/restricted", methods=["GET"])
 def get_restricted_users():    
     post_id = request.args.get('post_id')
     
@@ -40,7 +46,7 @@ def get_restricted_users():
 
 
 
-@bp.route("/restrict", methods=["POST"])
+@bp.route("/posts/restrict", methods=["POST"])
 def restrict_user():
     request_data = request.get_json()
     post_id = request_data['post_id']
@@ -90,7 +96,7 @@ def restrict_user():
     return data # data
 
 
-@bp.route("/unrestrict/<post_id>/<username>", methods=["DELETE"])
+@bp.route("/posts/unrestrict/<post_id>/<username>", methods=["DELETE"])
 def unrestrict_user(post_id, username):    
     print(post_id, username)
     data = ""
@@ -126,7 +132,7 @@ def unrestrict_user(post_id, username):
 
     return data # data
 
-@bp.route("/visibility", methods=["POST"])
+@bp.route("/posts/visibility", methods=["POST"])
 def change_visibility():
     request_data = request.get_json()
     post_id = request_data['post_id']
@@ -152,10 +158,8 @@ def change_visibility():
 
     return data # data
 
-@bp.route("/delete", methods=["POST"])
-def delete_post():
-    request_data = request.get_json()
-    post_id = request_data['post_id']
+@bp.route("/posts/<post_id>", methods=["DELETE"])
+def delete_post(post_id):    
     data = ""
 
     try:
@@ -166,7 +170,7 @@ def delete_post():
         
         conn.commit()
         conn.close()
-        
+        data = "Delete success"
     except Exception as e:
         print("Something went wrong")
         print(e)
@@ -174,7 +178,7 @@ def delete_post():
 
     return data # data
 
-@bp.route('/manage', methods=['GET'])
+@bp.route('/posts/manage', methods=['GET'])
 def get_my_posts():
     data = ""
     try:
@@ -203,7 +207,7 @@ def get_my_posts():
 
     return data # data
 
-@bp.route('/', methods=['GET'])
+@bp.route('/posts', methods=['GET'])
 def index():
     data = ""
     try:
@@ -225,12 +229,41 @@ def index():
                     "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  %s) " \
                 "ORDER BY date_posted DESC; " 
         
-        curr.execute(query, (author_id, author_id, author_id))
-        posts = curr.fetchall()                             
+        row = curr.execute(query, (author_id, author_id, author_id)).fetchall()                                
+        posts = [dict(i) for i in row]
 
-        posts = [dict(row) for row in posts]        
+        try:
+            url = "https://cmput-average-21-b54788720538.herokuapp.com/api/posts"
 
-        print(posts)
+            # Replace 'your_username' and 'your_password' with your actual credentials
+            response = requests.get(url, auth=HTTPBasicAuth('CtrlAltDefeat', 'string'))
+        
+            # Check if the request was successful (status code 200)
+            if response.status_code == 200:
+                # Print the response content
+                res = response.json()
+                print(res["results"])
+                # Convert api spec to our format
+                for r in res["results"]:
+                    item = dict()
+                    item["author_id"] = r["author"]["id"]
+                    item["username"] = r["displayName"] if "displayName" in r else None
+                    item["post_id"] = r["id"]
+                    item["title"] = r["title"]
+                    item["content_type"] = r["contentType"]
+                    item["content"] = r["content"]
+                    item["date_posted"] = r["published"]
+                    item["visibility"] = r["visibility"]
+
+                    posts.append(item)
+            else:
+                # Print an error message if the request was not successful
+                print(f"Error: {response.status_code}")
+        
+        except Exception as e:
+            print(e)
+            data = str(e)
+
         data = json.dumps(posts, indent=4, sort_keys=True, default=str)
 
     except Exception as e:
@@ -240,7 +273,7 @@ def index():
     return data # data
 
 # MAKE POSTS
-@bp.route('/new', methods=['POST'])
+@bp.route('/posts/new', methods=['POST'])
 def new_post():
     data = ""
     try:
@@ -254,8 +287,7 @@ def new_post():
         visibility = request_data["visibility"]
         content_type = request_data["content_type"]
 
-        # Assign random post ID - TODO: change method of randomization
-        post_id = str(randrange(0, 100000))
+        post_id = str(uuid.uuid4()) # Changed it so its a uuid instead
 
         # validate the content_type is of the following,
         try:
@@ -293,37 +325,35 @@ def new_post():
 
     return data  # data
 
-
-@bp.route('/authors/<author_id>/<post_id>/image/', methods=['GET'])
+# (REMOTE) 
+@bp.route('/authors/<author_id>/posts/<post_id>/image', methods=['GET'])
 def get_image(author_id, post_id):
-    conn, curr = get_db_connection()
-    final_message = "Nothing happened."
-    # check if image exists
+    conn = get_db_connection()
+    final_message = Response(500,"Nothing happened.")
     try:
-        query = "SELECT img_id, content_type from posts WHERE (post_id = %s AND img_id IS NOT NULL AND author_id = %s);"
-        cursor = conn.cursor()
-        curr.execute(query, (post_id, author_id))
-        img_id = cursor.fetchone()
-        if img_id[0] is None:
-            abort(404, "The post with this image id does not exist.")
-        print("Successfully found the post with this image id.")
+        query = "SELECT content, content_type,visibility from posts WHERE post_id = %s AND author_id = %s"
+        conn.execute(query, (post_id, author_id))
+        row = conn.execute(query, (post_id, author_id)).fetchone()
+        if row is None:
+            abort(404, "The post with this post_id does not exist.")
+        print("Successfully found post.")
 
-        query = "SELECT img_url,visibility FROM image_post WHERE img_id = %s;"
-
-        curr.execute(query, (img_id[0],))
-        img_visibility = cursor.fetchone()
-        if img_visibility is None:
-            abort(404, "The post exists, but the image it references does not exist.")
-        elif img_visibility["visibility"] != "public":
+        if row["content_type"] == "text/plain" or row["content_type"] == "text/markdown":
+            abort(404, "This is not an image.")
+        if row["visibility"] != "public":
             abort(403, "This post exists, but the image contained is only visible to specific users.")
 
-        content_type = img_id["content_type"]
-        content = img_visibility["img_url"]
-        final_message = f"data:{content_type},{content}"
-        return final_message
+        content_type = row["content_type"]
+        content = row["content"]
+
+        image_bytes = io.BytesIO(base64.b64decode(content))
+        #final_message = f"data:{content_type},{content}"
+        final_message = send_file(image_bytes, mimetype=content_type[:-7], max_age=30)
     except HTTPException as e:
         final_message = str(e)
         print(final_message)
+    except Exception as e:
+        print(e)
     finally:
         conn.close()
         return final_message
@@ -393,9 +423,8 @@ def edit_post(author_id, post_id):
 def categories():
     return "Test route for /posts"
 
-
-
-@bp.route("/<post_id>", methods=["GET"])
+# (REMOTE) 
+@bp.route("/authors/<author_id>/posts/<post_id>", methods=["GET"])
 # Gets an individual post
 def get_post(post_id):    
     conn, curr = get_db_connection()
@@ -419,16 +448,139 @@ def get_post(post_id):
         curr.execute(query, (author_id, ))
         row = curr.fetchone()
 
-        if row is not None:
-            row_values = [str(value) for value in row]
-            row_string = ', '.join(row_values)
-            post["username"] = row_string                                        
+        item = dict()
+        item["type"] = "post"
+        item["id"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
+        
+        # No idea what these are, skip for now
+        item["source"] = None
+        item["origin"] = None
+        item["description"] = None
+        item["contentType"] = post["content_type"]   
+        item["content"] = post["content"]        
+        item["title"] = post["title"]        
+        
+        author_item = dict()
+        author_item["type"] = "author"
+        author_item["host"] = request.root_url
+        author_item["id"] = request.root_url + row["author_id"]
+        author_item["url"] = request.root_url + row["author_id"]
+        author_item["displayName"] = row["username"]
+        author_item["github"] = row["github"]
+        author_item["profileImage"] = None
 
-        data = json.dumps(post)
+        item["author"] = author_item
+
+        # We don't have these rn
+        item["categories"] = None
+        item["comments"] = None
+        item["commentsSrc"] = None
+
+        input_datetime = datetime.strptime(post["date_posted"], "%Y-%m-%d %H:%M:%S")
+        
+        # Convert datetime object to ISO 8601 format with UTC offset
+        item["published"] = input_datetime.replace(tzinfo=timezone.utc).isoformat()
+
+        item["visibility"] = post["visibility"].upper()
+        item["unlisted"] = True if post["visibility"] == "unlisted" else False
+
+        data = json.dumps(item, indent=2)
+        print(data)
 
     except IndexError as e:
+        print(e)
         data = "invalid"
 
     except Exception as e:
         print(e)
+        data = "error"
+    
+    return data 
+
+# (REMOTE) 
+@bp.route("/authors/<author_id>/posts/", methods=["GET"])
+# Gets most recent post from author AUTHOR_ID
+def get_posts(author_id):    
+    conn = get_db_connection()
+    data = ""
+    page = request.args.get('page')
+    size = request.args.get('size')
+    try:
+        query = "SELECT * FROM posts " \
+                "WHERE author_id = ? " \
+                "AND (visibility = 'public') " \
+                "ORDER BY date_posted LIMIT ? OFFSET ? "
+        
+        if page is not None:
+            page = int(page)
+        else: page = 1 # Set default 1
+        
+        if size is not None:
+            size = int(size)
+        else: size = 20 # Set default 20
+
+        offset = (page - 1) * size
+        
+        row = conn.execute(query, (author_id, size, offset)).fetchall()                                        
+        
+        posts = [dict(i) for i in row]    
+
+        payload = dict()
+        payload["type"] = "authors"
+        payload["items"] = []
+
+        query = "SELECT * FROM authors " \
+                "WHERE author_id = ? " 
+        
+        author = conn.execute(query, (author_id, )).fetchone()            
+        # print(author)
+        for post in posts:
+            item = dict()
+            item["type"] = "post"
+            item["id"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
+            
+            # No idea what these are, skip for now
+            item["source"] = None
+            item["origin"] = None
+            item["description"] = None
+            item["contentType"] = post["content_type"]        
+            item["content"] = post["content"]        
+            
+            author_item = dict()
+            author_item["type"] = "author"
+            author_item["host"] = request.root_url
+            
+            author_item["id"] = request.root_url + post["author_id"]
+            author_item["url"] = request.root_url + post["author_id"]
+            author_item["displayName"] = author["username"]
+            author_item["github"] = (request.root_url + author["github"]) if author["github"] != None else None
+            author_item["profileImage"] = None
+
+            item["author"] = author_item
+
+            # We don't have these rn
+            item["categories"] = None
+            item["comments"] = None
+            item["commentsSrc"] = None
+
+            input_datetime = datetime.strptime(post["date_posted"], "%Y-%m-%d %H:%M:%S")
+            
+            # Convert datetime object to ISO 8601 format with UTC offset
+            item["published"] = input_datetime.replace(tzinfo=timezone.utc).isoformat()
+
+            item["visibility"] = post["visibility"].upper()
+            item["unlisted"] = True if post["visibility"] == "unlisted" else False
+
+            payload["items"].append(item)
+
+        data = json.dumps(payload, indent=2)        
+
+    except IndexError as e:
+        print(e)
+        data = "invalid"
+
+    except Exception as e:
+        print(e)
+        data = "error"
+    
     return data 

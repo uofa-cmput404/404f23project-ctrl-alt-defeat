@@ -3,7 +3,7 @@ import React from 'react'
 import Markdown from 'react-markdown';
 import './ManagePostItem.css';
 
-const deleteUrl = 'http://127.0.0.1:5000/posts/delete'
+const deleteUrl = 'http://127.0.0.1:5000/api/posts/delete'
 function ManagePostItem(props) {
     function processDelete() {
         if (window.confirm("Are you sure you want to delete this post?")) {
@@ -12,9 +12,7 @@ function ManagePostItem(props) {
 
             try {
                 // Make the GET request using Axios
-                    axios.post(deleteUrl, {
-                        post_id: props.item.post_id
-                    })
+                    axios.delete(deleteUrl + "/" + props.item.post_id)
                     .then(response => {
                         props.setPostsLists(oldValues => {                
                             return oldValues.filter(item => item.post_id !== props.item.post_id);
@@ -52,7 +50,7 @@ function ManagePostItem(props) {
     }
 
     function getRestrictedUsers() {
-        const restrictionListUrl = `http://127.0.0.1:5000/posts/restricted?post_id=${props.item.post_id}`
+        const restrictionListUrl = `http://127.0.0.1:5000/api/posts/restricted?post_id=${props.item.post_id}`
         console.log(restrictionListUrl)
         axios.get(restrictionListUrl).then((response) => {
             console.log(response.data)

@@ -8,6 +8,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_admin.actions import action
 from flask_admin import expose
 from markupsafe import Markup
+from flask_swagger_ui import get_swaggerui_blueprint
 
 from flask_cors import CORS, cross_origin
 
@@ -121,20 +122,58 @@ def create_app():
     # Change it so that only our web client is allowed.
     CORS(app, resources={r"/*": {"origins": "*"}})
 
+    SWAGGER_URL = '/api/docs'  # URL for exposing Swagger UI (without trailing '/')
+    API_URL = 'http://localhost:5000/swagger'  # Our API url (can of course be a local resource)
+
+    # Call factory function to create our blueprint
+    swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,  # Swagger UI static files will be mapped to '{SWAGGER_URL}/dist/'
+    API_URL,
+    config={  # Swagger UI config overrides
+        'app_name': "Ctrl + Alt + Defeat Social Distribution"
+    },
+    # oauth_config={  # OAuth config. See https://github.com/swagger-api/swagger-ui#oauth2-configuration .
+    #    'clientId': "your-client-id",
+    #    'clientSecret': "your-client-secret-if-required",
+    #    'realm': "your-realms",
+    #    'appName': "your-app-name",
+    #    'scopeSeparator': " ",
+    #    'additionalQueryStringParams': {'test': "hello"}
+    # }
+)
+
+  
+    # HUGE SECURITY ISSUE - DO NOT KEEP THIS IN PRODUCTION
+    # Need this so that the API allows all urls to make requests.
+    # Change it so that only our web client is allowed.
+    CORS(app, resources={r"/*": {"origins": "*"}})
+
 
      # Register blueprints here
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
+    
     from app.requestors import bp as requestors_bp
-    app.register_blueprint(requestors_bp, url_prefix='/requestors')   
+    app.register_blueprint(requestors_bp, url_prefix='/api/requestors')  # The only route that doesn't get affect is requestors
+    
     from app.authors import bp as authors_bp
-    app.register_blueprint(authors_bp, url_prefix='/authors')   
+    app.register_blueprint(authors_bp, url_prefix='/api')   
 
     from app.follow import bp as follow_bp
-    app.register_blueprint(follow_bp, url_prefix='/follow') 
+    app.register_blueprint(follow_bp, url_prefix='/api') 
 
     from app.posts import bp as posts_bp
-    app.register_blueprint(posts_bp, url_prefix='/posts')
+    app.register_blueprint(posts_bp, url_prefix='/api')
+
+    @app.route("/swagger")
+    def swagger_json():
+        # Load your Swagger JSON file here
+        with open('app/swagger.json', 'r') as f:
+            swagger_json = f.read()
+        return swagger_json
+
+
+    app.register_blueprint(swaggerui_blueprint)
     
     app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://hueygonzales:password@localhost:5432/flask_db"
     app.config["SECRET_KEY"] = "mysecret"

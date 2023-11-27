@@ -7,7 +7,95 @@ from random import randrange
 
 
 
-@bp.route('/login', methods=['POST'])
+# Get all authors (REMOTE)
+@bp.route('/authors', methods=['GET'])
+def get_authors():    
+    page = request.args.get('page')
+    size = request.args.get('size')
+    data = ""
+    try:
+        conn = get_db_connection()
+
+
+        query = "SELECT * " \
+                "FROM authors " \
+                "ORDER BY author_id " \
+                "LIMIT ? OFFSET ?"
+        
+        if page is not None:
+            page = int(page)
+        else: page = 1 # Set default 1
+        
+        if size is not None:
+            size = int(size)
+        else: size = 20 # Set default 20
+
+        offset = (page - 1) * size
+        row = conn.execute(query, (size, offset)).fetchall();
+        
+        # else: row = conn.execute(query).fetchall();
+        
+        # res = json.dumps([dict(i) for i in row])
+        res = [dict(i) for i in row]
+
+        data = dict()
+        data["type"] = "authors"
+        data["items"] = []
+        
+        for r in res:
+            item = dict()
+            item["type"] = "author"
+            item["id"] = request.url_root + "api/authors/" + r["author_id"] 
+            item["url"] = request.url_root + "api/authors/" + r["author_id"] 
+            item["host"] = request.url_root
+            item["displayName"] = r["username"]
+            item["profileImage"] = None # TODO: implement profile pics
+            data["items"].append(item)
+        
+        data = json.dumps(data, indent=2)
+        
+
+    except Exception as e:
+        print("Error getting authors: ", e)
+        data = "error"
+    
+    return data
+
+# Get a specific author (REMOTE)
+@bp.route('/authors/<author_id>', methods=['GET'])
+def get_author(author_id):
+    data = ""
+    try:
+        conn = get_db_connection()
+
+
+        query = "SELECT * " \
+                "FROM authors " \
+                "WHERE author_id = ? " \
+        
+        print(query)
+        row = conn.execute(query, (author_id,)).fetchall()
+        
+        res = [dict(i) for i in row][0]
+        item = dict()
+        item["type"] = "author"
+        item["host"] = request.url_root
+        item["id"] = request.url_root + "api/" + res["author_id"]
+        item["url"] = request.url_root + "api/" + res["author_id"]
+        item["displayName"] = res["username"]
+        item["github"] = "http://github.com/" + res["github"] if res["github"] is not None else None
+        item["profileImage"] = None
+
+        data = item
+        data = json.dumps(data, indent=2)
+
+    except Exception as e:
+        print("Error getting authors: ", e)
+        data = "error"
+    
+    return data
+
+@bp.route('/authors/login', methods=['POST'])
 def login():
     data = request.get_json()
     username = data.get('username')
@@ -32,7 +120,7 @@ def login():
     return jsonify(result)
 
 
-@bp.route('/update_username', methods=['POST'])
+@bp.route('/authors/update_username', methods=['POST'])
 def update_username():
     data = request.get_json()
     new_username = data.get('new_username')
@@ -57,7 +145,7 @@ def update_username():
         conn.close()
 
 
-@bp.route('/update_password', methods=['POST'])
+@bp.route('/authors/update_password', methods=['POST'])
 def update_password():
     data = request.get_json()
     new_password = data.get('new_password')
@@ -76,28 +164,55 @@ def update_password():
         conn.close()
 
 
-# Get posts that the logged in author has liked
-@bp.route('/<author_id>/liked', methods=['GET'])
-def get_liked_posts(author_id):
+# Get posts that the logged in author has liked 
+@bp.route('/authors/<author_id>/liked', methods=['GET'])
+def get_posts_liked(author_id):
     # TODO: Check specification regarding private posts, right now the spec specifies "public things AUTHOR_ID liked"
     # Currently, this function pulls ALL post_id's of the posts that AUTHOR_ID has liked 
     # POSSIBLE SECURITY ISSUE
+
+    # TODO: Use this query to actually match the spec requirement
+    #       can't do it rn because its going to mess the front end a lot
+
 
     data = ""
     try:
         conn, curr = get_db_connection()
 
-        query = "SELECT post_id " \
-                "FROM likes WHERE " \
-                "like_author_id = %s"
+        query = "SELECT l.post_id, p.author_id,  a.username, a.github " \
+                "FROM likes l " \
+                "JOIN posts p " \
+                "ON p.post_id = l.post_id " \
+                "JOIN authors a " \
+                "ON a.author_id = l.like_author_id " \
+                "WHERE " \
+                "like_author_id = % "
         
-        curr.execute(query, (author_id,))
-        likes = curr.fetchall()
-        likes = [dict(row) for row in likes]
+        likes = curr.execute(query, (author_id,)).fetchall()
+        likes = [dict(i) for i in likes]
+        
+        payload = dict()
+        payload["type"] = "liked"
+        payload["items"] = []
 
-        data = json.dumps(likes, indent=4, sort_keys=True, default=str)
-        print("likes:")
-        print(data)
+        for like in likes:
+            item = dict()
+            item["context"] = None
+            item["summary"] = like["username"] + " Likes your post"
+            item["type"] = "Like"
+            item["author"] = dict()
+                                    
+            item["author"]["type"] = "author"
+            item["author"]["id"] = request.root_url + "api/authors/" + like["author_id"]
+            item["author"]["host"] = request.root_url
+            item["author"]["displayName"] = like["username"]
+            item["author"]["profileImage"] = None
+            item["author"]["github"] = "http://github.com/" + like["github"] if like["github"] is not None else None
+
+            item["object"] = request.root_url + "authors/" + like["author_id"] + "posts/" + like["post_id"]
+            payload["items"].append(item)
+
+        data = json.dumps(payload, indent=2)
 
         conn.commit()
         conn.close()
@@ -109,10 +224,66 @@ def get_liked_posts(author_id):
     
     return data
 
-# SEND LIKE TO THE author_id OF THE POST
-@bp.route('/<author_id>/inbox', methods=['POST'])
+# Get a list of likes from other authors on AUTHOR_ID’s post POST_ID (REMOTE)
+@bp.route('/authors/<author_id>/posts/<post_id>/likes', methods=['GET'])
+def get_liked_posts(author_id, post_id):
+    # TODO: Check specification regarding private posts, right now the spec specifies "public things AUTHOR_ID liked"
+    # Currently, this function pulls ALL post_id's of the posts that AUTHOR_ID has liked 
+    # POSSIBLE SECURITY ISSUE
+
+    data = ""
+    try:
+        conn = get_db_connection()
+
+        query = "SELECT * " \
+                "FROM likes l " \
+                "JOIN authors a " \
+                "ON l.like_author_id = a.author_id " \
+                "WHERE " \
+                "l.post_id = ?"
+        
+        likes = conn.execute(query, (post_id,)).fetchall()        
+
+        res = [dict(i) for i in likes]
+    
+        data = dict()
+        data["count"] = len(res)
+        data["results"] = []
+        
+        for r in res:
+            item = dict()
+
+            item["@context"] = None # What is this?
+            item["summary"] = r["username"] + " Likes this post"
+            item["type"] = "Like"
+            item["author"] = dict()
+            item["author"]["type"] = "author"
+            item["author"]["id"] = request.root_url + "api/authors/" + r["author_id"]
+            item["author"]["host"] = request.root_url
+            item["author"]["displayName"] = r["username"]
+            item["author"]["profileImage"] = None
+            item["author"]["github"] = "http://github.com/" + r["github"] if r["github"] is not None else None
+
+            r["object"] = request.root_url + "api/" + author_id + "/posts/" + post_id             
+            data["results"].append(item)
+
+        data = json.dumps(data, indent=2)
+
+        conn.commit()
+        conn.close()
+
+
+    except Exception as e:
+        print("Getting likes error: ", e)
+        data = "error"
+    
+    return data
+
+# SEND LIKE TO THE author_id OF THE POST (REMOTE)
+@bp.route('/authors/<author_id>/inbox', methods=['POST'])
 def send_like(author_id):
     # Get attributes from HTTP body
+    
     request_data = request.get_json()
     like_author_id = request_data["like_author_id"]
     post_id = request_data["post_id"]
@@ -172,7 +343,7 @@ def delete_like(author_id):
 
 
 # Get Github username of author
-@bp.route('/github/<author_id>', methods=['GET'])
+@bp.route('/authors/github/<author_id>', methods=['GET'])
 def get_github(author_id):
     # TODO: Check specification regarding private posts, right now the spec specifies "public things AUTHOR_ID liked"
     # Currently, this function pulls ALL post_id's of the posts that AUTHOR_ID has liked 
@@ -205,7 +376,7 @@ def get_github(author_id):
     return data
 
 
-@bp.route('/github', methods=['POST'])
+@bp.route('/authors/github', methods=['POST'])
 # Set Github username
 def update_github():
     request_data = request.get_json()    
