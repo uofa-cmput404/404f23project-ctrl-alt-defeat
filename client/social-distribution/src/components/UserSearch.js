@@ -22,7 +22,7 @@ function UserSearch({ username, authorId }) {
 
   const handleFollowRequest = async (recieveAuthorId) => {
     try {
-      const response = await fetch(process.env.HOSTNAME + '/follow/follow_request', {
+      const response = await fetch(process.env.API_HOSTNAME + '/follow/follow_request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ function UserSearch({ username, authorId }) {
 
   const handleUnfollow = async (unfollowUserId) => {
     try {
-      const response = await fetch(process.env.HOSTNAME + '/follow/unfollow', {
+      const response = await fetch(process.env.API_HOSTNAME + '/follow/unfollow', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
