@@ -8,7 +8,7 @@ from random import randrange
 
 
 # Get all authors (REMOTE)
-@bp.route('/authors', methods=['GET'])
+@bp.route('/authors/', methods=['GET'])
 def get_authors():    
     page = request.args.get('page')
     size = request.args.get('size')
