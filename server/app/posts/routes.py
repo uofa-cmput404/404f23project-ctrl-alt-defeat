@@ -430,7 +430,7 @@ def categories():
 # (REMOTE) 
 @bp.route("/authors/<author_id>/posts/<post_id>", methods=["GET"])
 # Gets an individual post
-def get_post(post_id):    
+def get_post(author_id, post_id):    
     conn, curr = get_db_connection()
     data = ""
     print(post_id)
@@ -442,15 +442,17 @@ def get_post(post_id):
         curr.execute(query, (post_id, ))
         row = curr.fetchall()
         
-        post = [dict(i) for i in row][0]        
+        post = [dict(i) for i in row][0]       
+        print(post) 
 
         author_id = post["author_id"]
 
-        query = "SELECT username FROM authors " \
+        query = "SELECT * FROM authors " \
                 "WHERE author_id = %s " 
         
         curr.execute(query, (author_id, ))
-        row = curr.fetchone()
+        row = curr.fetchone()            
+        row = dict(row)            
 
         item = dict()
         item["type"] = "post"
@@ -480,10 +482,10 @@ def get_post(post_id):
         item["comments"] = None
         item["commentsSrc"] = None
 
-        input_datetime = datetime.strptime(post["date_posted"], "%Y-%m-%d %H:%M:%S")
+        # input_datetime = datetime.strptime(post["date_posted"], "%Y-%m-%d %H:%M:%S")
         
         # Convert datetime object to ISO 8601 format with UTC offset
-        item["published"] = input_datetime.replace(tzinfo=timezone.utc).isoformat()
+        item["published"] = post["date_posted"].replace(tzinfo=timezone.utc).isoformat()
 
         item["visibility"] = post["visibility"].upper()
         item["unlisted"] = True if post["visibility"] == "unlisted" else False

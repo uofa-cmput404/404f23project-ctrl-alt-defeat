@@ -143,17 +143,16 @@ def unfollow():
 @bp.route('/authors/<string:author_id>/followers', methods=['GET'])
 def get_followers(author_id):
     try:
-        db = get_db()
-        cursor = db.cursor()
+        db, cursor = get_db_connection()        
 
         query = """
             SELECT A.*
             FROM authors A
             JOIN friends F ON A.author_id = F.author_following
-            WHERE F.author_followee = ?
+            WHERE F.author_followee = %s;
         """
-        followers = cursor.execute(query, (author_id,)).fetchall()
-
+        cursor.execute(query, (author_id,))
+        followers = cursor.fetchall()        
         followers_list = [
             {
                 "type": "author",

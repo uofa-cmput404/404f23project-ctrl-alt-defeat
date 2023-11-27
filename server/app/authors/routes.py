@@ -32,12 +32,9 @@ def get_authors():
 
         offset = (page - 1) * size
         cur.execute(query, (size, offset))
-        row = cur.fetchall();
-        
-        # else: row = conn.execute(query).fetchall();
-        
-        # res = json.dumps([dict(i) for i in row])
-        res = [dict(i) for i in row]
+        row = cur.fetchall()
+                
+        res = [dict(i) for i in row]        
 
         data = dict()
         data["type"] = "authors"
