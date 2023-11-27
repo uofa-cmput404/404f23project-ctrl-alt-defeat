@@ -336,8 +336,8 @@ def get_image(author_id, post_id):
     final_message = Response(500,"Nothing happened.")
     try:
         query = "SELECT content, content_type,visibility from posts WHERE post_id = %s AND author_id = %s"
-        conn.execute(query, (post_id, author_id))
-        row = conn.execute(query, (post_id, author_id)).fetchone()
+        curr.execute(query, (post_id, author_id))
+        row = curr.execute(query, (post_id, author_id)).fetchone()
         if row is None:
             abort(404, "The post with this post_id does not exist.")
         print("Successfully found post.")
@@ -527,7 +527,7 @@ def get_posts(author_id):
 
         offset = (page - 1) * size
         
-        row = conn.execute(query, (author_id, size, offset)).fetchall()                                        
+        row = curr.execute(query, (author_id, size, offset)).fetchall()                                        
         
         posts = [dict(i) for i in row]    
 
@@ -538,7 +538,7 @@ def get_posts(author_id):
         query = "SELECT * FROM authors " \
                 "WHERE author_id = ? " 
         
-        author = conn.execute(query, (author_id, )).fetchone()            
+        author = curr.execute(query, (author_id, )).fetchone()            
         # print(author)
         for post in posts:
             item = dict()
