@@ -76,7 +76,11 @@ function PostsList(props) {
         {
             props.postsLists.map((item, index) => (
                 <PostItem item={item} index={index} 
-                toggleLike={toggleLike} />
+                setChangeLike = {setChangeLike} 
+                setPostSelected = {setPostSelected}
+                setPostSelectedLiked={setPostSelectedLiked}
+                setPostSelectedAuthor={setPostSelectedAuthor} 
+                loginUser = {props.authorId}/>
             ))
         }
     </ul>

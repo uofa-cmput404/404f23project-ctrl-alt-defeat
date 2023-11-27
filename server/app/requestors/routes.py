@@ -3,6 +3,8 @@ from flask import request, jsonify, g
 from ..dbase import get_db_connection
 import sqlite3
 import uuid
+from flask_bcrypt import Bcrypt
+bcrypt = Bcrypt()
 
 
 @bp.route('/register', methods=['POST'])
@@ -11,6 +13,9 @@ def register():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
+    # Hash the password
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+
 
     conn, cur = get_db_connection()
     # cur = db.cursor()

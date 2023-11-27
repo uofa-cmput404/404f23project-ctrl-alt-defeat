@@ -4,6 +4,10 @@ from flask import request, g, jsonify
 import sqlite3
 from ..dbase import get_db_connection
 from random import randrange
+from flask_bcrypt import Bcrypt
+
+from flask_bcrypt import check_password_hash
+from flask_bcrypt import generate_password_hash
 
 
 
@@ -106,7 +110,7 @@ def login():
 
     if author:
         stored_password = author['password']
-        if password == stored_password:
+        if check_password_hash(stored_password, password):
             result = {'message': 'Login successful', 'author_id': author['author_id']}
         else:
             result = {'message': 'Wrong Password'}
@@ -152,8 +156,10 @@ def update_password():
     conn, curr = get_db_connection()    
 
     try:
-        curr.execute("UPDATE authors SET password = %s WHERE author_id = %s", (new_password, author_id))
-        conn.commit()
+        hashed_password = generate_password_hash(new_password).decode('utf-8')
+        
+        curr.execute("UPDATE authors SET password = %s WHERE author_id = %s", (hashed_password, author_id))
+        conn.commit()        
 
         return jsonify({'message': 'Password updated successfully'})
     except Exception as e:
@@ -337,6 +343,106 @@ def delete_like(author_id):
     return jsonify(data)
 
 
+
+
+@bp.route('/<author_id>/posts/<post_id>/comments', methods=['GET'])
+
+
+def get_post_comments(author_id, post_id):
+    comment_author_id = request.args.get('comment_author_id')
+    if not comment_author_id:
+        return jsonify({'comments': []})
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT a.username, c.comment_text, c.comment_id, 
+                EXISTS (
+                    SELECT 1 FROM comment_likes cl 
+                    WHERE cl.comment_id = c.comment_id 
+                    AND cl.like_comment_author_id = ?
+                ) AS isLikedByCurrentUser
+            FROM comments c
+            INNER JOIN authors a ON c.comment_author_id = a.author_id
+            WHERE c.post_id = ?
+            AND c.author_id = ?
+            AND (
+                (c.status = 'public') OR
+                (c.status = 'private' AND c.comment_author_id = ?) OR
+                (c.status = 'private' AND c.author_id = ?)
+            )
+        """
+
+        cursor.execute(query, (comment_author_id, post_id, author_id, comment_author_id, comment_author_id))
+        comment_info = cursor.fetchall()
+        conn.close()
+
+        comments_list = [
+            {
+                'comment_name': comment[0],
+                'comment_text': comment[1], 
+                'comment_id': comment[2],
+                'isLikedByCurrentUser': comment[3]
+            } for comment in comment_info
+        ]
+        return jsonify({'comments': comments_list})
+
+    except Exception as e:
+        print("Getting comments error: ", e)
+        return jsonify({'error': str(e)}), 500
+
+
+
+
+@bp.route('/<author_id>/posts/<post_id>/comments', methods=['POST'])
+def send_comments(author_id, post_id):
+    # Get attributes from HTTP body
+    request_data = request.get_json()
+    comment_author_id = request_data["comment_author_id"]
+    comment_text = request_data["comment_text"]
+
+
+    # Create comment_id ID
+    # TODO: change method of randomization
+    comment_id = str(randrange(0, 100000))
+
+    data = ""
+    try:
+        conn = get_db_connection()
+
+        # Check if the authors are friends
+        check_friends_query = "SELECT COUNT(*) FROM friends " \
+                              "WHERE author_followee = ? AND author_following = ? " \
+                              "UNION " \
+                              "SELECT COUNT(*) FROM friends " \
+                              "WHERE author_followee = ? AND author_following = ?"
+        friends_count = conn.execute(check_friends_query, (author_id, comment_author_id, comment_author_id, author_id)).fetchall()
+
+        # Determine the status based on friendship
+        status = 'private' if all(count[0] > 0 for count in friends_count) else 'public'
+
+        query = "INSERT INTO comments " \
+                "(comment_id, comment_author_id, " \
+                "post_id, author_id, comment_text, status, date_commented) " \
+                "VALUES (?, ?, ?, ?, ?, ? ,CURRENT_TIMESTAMP)" 
+        
+        conn.execute(query, (comment_id, comment_author_id, post_id, author_id, comment_text, status))
+
+        data = "success"
+
+        conn.commit()
+        conn.close()
+
+
+    except Exception as e:
+        print("comment error: ", e)
+        data = "error"
+    
+    return data
+
+
+
 # Get Github username of author
 @bp.route('/authors/github/<author_id>', methods=['GET'])
 def get_github(author_id):
@@ -393,4 +499,66 @@ def update_github():
     except Exception as e:
         print("Error trying to update github username: ", e)
         data = "error"
-    return jsonify(data)
+    return jsonify(data)    
+
+
+@bp.route('/<author_id>/posts/<post_id>/comments/<comment_id>/toggle-like', methods=['POST'])
+def toggle_like(author_id, post_id, comment_id):
+    request_data = request.get_json()
+    like_comment_author_id = request_data["like_comment_author_id"]
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Check if the like already exists
+        cursor.execute("SELECT * FROM comment_likes WHERE like_comment_author_id = ? AND comment_id = ?", 
+                       (like_comment_author_id, comment_id))
+        like = cursor.fetchone()
+
+        if like:
+            # Like exists, so unlike it
+            cursor.execute("DELETE FROM comment_likes WHERE like_comment_author_id = ? AND comment_id = ?", 
+                           (like_comment_author_id, comment_id))
+        else:
+            # Like doesn't exist, so add it
+            cursor.execute("INSERT INTO comment_likes (like_comment_author_id, comment_id, time_liked) VALUES (?, ?, CURRENT_TIMESTAMP)", 
+                           (like_comment_author_id, comment_id))
+
+        conn.commit()
+        conn.close()
+        return jsonify({"status": "success"}), 200
+
+    except Exception as e:
+        print("Error toggling like: ", e)
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+@bp.route('/<author_id>/posts/<post_id>/comments/<comment_id>/likes', methods=['GET'])
+
+
+def get_comments_likes(comment_id):
+    try:
+        conn, cursor = get_db_connection()
+        
+        query = """
+            SELECT a.username, c.time_liked
+            FROM comment_likes c
+            INNER JOIN authors a ON c.like_comment_author_id = a.author_id
+            WHERE c.comment_id = %s
+        """
+
+        cursor.execute(query, (comment_id ))
+        comment_info = cursor.fetchall()
+        conn.close()
+
+        comment_likes_list = [{'like_comment_author_id':comment[0],'time_liked': comment[1]} for comment in comment_info]
+        return jsonify({'comment_likes': comment_likes_list})
+
+    except Exception as e:
+        print("Getting comments error: ", e)
+        return jsonify({'error': str(e)}), 500
+
+

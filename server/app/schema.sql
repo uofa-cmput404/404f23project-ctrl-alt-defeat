@@ -29,7 +29,7 @@ CREATE TABLE posts (
 CREATE TABLE sc.authors (
     author_id TEXT PRIMARY KEY,
     username TEXT NOT NULL,
-    github TEXT NOT NULL,
+    github TEXT ,
     password TEXT NOT NULL
 );
 
@@ -88,13 +88,25 @@ CREATE TABLE sc.likes (
     like_author_id TEXT NOT NULL,
     post_id TEXT NOT NULL,
     time_liked TIMESTAMP NOT NULL,
-    FOREIGN KEY (like_author_id) REFERENCES sc.authors(author_id) ON DELETE CASCADE,
-    FOREIGN KEY (post_id) REFERENCES sc.posts(post_id)
+    FOREIGN KEY (like_author_id) REFERENCES authors(author_id),
+    FOREIGN KEY (post_id) REFERENCES posts(post_id)
 );
 
-CREATE TABLE sc.comments (
-    post_id TEXT PRIMARY KEY,
-    comment_author_id TEXT NOT NULL,
+CREATE TABLE comment_likes (
+    like_comment_author_id TEXT NOT NULL, --TEXT
+    comment_id TEXT NOT NULL,
+    time_liked TIMESTAMP NOT NULL,
+    FOREIGN KEY (like_comment_author_id) REFERENCES authors(author_id),
+    FOREIGN KEY (comment_id) REFERENCES comments(comment_id)
+);
+
+CREATE TABLE comments (
+    comment_id TEXT PRIMARY KEY,
+    comment_author_id TEXT NOT NULL, --TEXT
+    post_id TEXT NOT NULL, --TEXT
+    author_id TEXT NOT NULL, --TEXT
+    comment_text TEXT NOT NULL, --TEXT
+    status TEXT NOT NULL,
     date_commented TIMESTAMP NOT NULL,
     FOREIGN KEY (comment_author_id) REFERENCES sc.authors(author_id),
     FOREIGN KEY (post_id) REFERENCES sc.posts(post_id)
