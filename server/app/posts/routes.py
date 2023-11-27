@@ -3,7 +3,7 @@ import json
 
 from ..dbase import get_db_connection
 
-from flask import request, abort, send_file, Response
+from flask import request, abort, send_file, Response, jsonify
 from werkzeug.exceptions import HTTPException
 
 from requests.auth import HTTPBasicAuth
@@ -32,7 +32,7 @@ def get_restricted_users():
         posts = curr.fetchall()           
                           
 
-        data = json.dumps([dict(i) for i in posts])
+        # data = json.dumps([dict(i) for i in posts])
         # print(data)
 
         conn.commit()
@@ -43,7 +43,7 @@ def get_restricted_users():
         print(e)
         data = "error"
 
-    return data # data
+    return jsonify(data) # data
 
 
 
@@ -94,7 +94,7 @@ def restrict_user():
         print(e)
         data = "error"
 
-    return data # data
+    return jsonify(data) # data
 
 
 @bp.route("/posts/unrestrict/<post_id>/<username>", methods=["DELETE"])
@@ -131,7 +131,7 @@ def unrestrict_user(post_id, username):
         print(e)
         data = "error"
 
-    return data # data
+    return jsonify(data) # data
 
 @bp.route("/posts/visibility", methods=["POST"])
 def change_visibility():
@@ -157,7 +157,7 @@ def change_visibility():
         print(e)
         data = str(e)
 
-    return data # data
+    return jsonify(data) # data
 
 @bp.route("/posts/<post_id>", methods=["DELETE"])
 def delete_post(post_id):    
@@ -177,7 +177,7 @@ def delete_post(post_id):
         print(e)
         data = str(e)
 
-    return data # data
+    return jsonify(data) # data
 
 @bp.route('/posts/manage', methods=['GET'])
 def get_my_posts():
@@ -199,14 +199,14 @@ def get_my_posts():
         posts = [dict(row) for row in posts]
         print(posts)       
 
-        data = json.dumps(posts, indent=4, sort_keys=True, default=str)
+        # data = json.dumps(posts, indent=4, sort_keys=True, default=str)
         
     except Exception as e:
         print("Something went wrong")
         print(e)
         data = str(e)
 
-    return data # data
+    return jsonify(data) # data
 
 @bp.route('/posts', methods=['GET'])
 @basic_auth.login_required
@@ -267,13 +267,13 @@ def index():
             print(e)
             data = str(e)
 
-        data = json.dumps(posts, indent=4, sort_keys=True, default=str)
+        # data = json.dumps(posts, indent=4, sort_keys=True, default=str)
 
     except Exception as e:
         print(e)
         data = str(e)
 
-    return data # data
+    return jsonify(data) # data
 
 # MAKE POSTS
 @bp.route('/posts/new', methods=['POST'])
@@ -327,7 +327,7 @@ def new_post():
         print(e)
         data = str(e)
 
-    return data  # data
+    return jsonify(data)  # data
 
 # (REMOTE) 
 @bp.route('/authors/<author_id>/posts/<post_id>/image', methods=['GET'])
@@ -492,7 +492,7 @@ def get_post(author_id, post_id):
         item["visibility"] = post["visibility"].upper()
         item["unlisted"] = True if post["visibility"] == "unlisted" else False
 
-        data = json.dumps(item, indent=2)
+       #  data = json.dumps(item, indent=2)
         print(data)
 
     except IndexError as e:
@@ -503,7 +503,7 @@ def get_post(author_id, post_id):
         print(e)
         data = e
     
-    return data 
+    return jsonify(data) 
 
 # (REMOTE) 
 @bp.route("/authors/<author_id>/posts/", methods=["GET"])
@@ -515,9 +515,9 @@ def get_posts(author_id):
     size = request.args.get('size')
     try:
         query = "SELECT * FROM posts " \
-                "WHERE author_id = ? " \
+                "WHERE author_id = %s " \
                 "AND (visibility = 'public') " \
-                "ORDER BY date_posted LIMIT ? OFFSET ? "
+                "ORDER BY date_posted LIMIT %s OFFSET %s "
         
         if page is not None:
             page = int(page)
@@ -529,8 +529,8 @@ def get_posts(author_id):
 
         offset = (page - 1) * size
         
-        row = curr.execute(query, (author_id, size, offset)).fetchall()                                        
-        
+        curr.execute(query, (author_id, size, offset))
+        row = curr.fetchall()                                        
         posts = [dict(i) for i in row]    
 
         payload = dict()
@@ -538,9 +538,10 @@ def get_posts(author_id):
         payload["items"] = []
 
         query = "SELECT * FROM authors " \
-                "WHERE author_id = ? " 
+                "WHERE author_id = %s " 
         
-        author = curr.execute(query, (author_id, )).fetchone()            
+        curr.execute(query, (author_id, ))
+        author = curr.fetchone()
         # print(author)
         for post in posts:
             item = dict()
@@ -571,17 +572,17 @@ def get_posts(author_id):
             item["comments"] = None
             item["commentsSrc"] = None
 
-            input_datetime = datetime.strptime(post["date_posted"], "%Y-%m-%d %H:%M:%S")
+            # input_datetime = post["date_posted"].strptime(post["date_posted"], "%Y-%m-%d %H:%M:%S")
             
             # Convert datetime object to ISO 8601 format with UTC offset
-            item["published"] = input_datetime.replace(tzinfo=timezone.utc).isoformat()
+            item["published"] = post["date_posted"].strftime("%Y-%m-%d %H:%M:%S") 
 
             item["visibility"] = post["visibility"].upper()
             item["unlisted"] = True if post["visibility"] == "unlisted" else False
 
             payload["items"].append(item)
 
-        data = json.dumps(payload, indent=2)        
+        data = payload        
 
     except IndexError as e:
         print(e)
@@ -591,4 +592,4 @@ def get_posts(author_id):
         print(e)
         data = "error"
     
-    return data 
+    return jsonify(data)

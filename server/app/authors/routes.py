@@ -50,14 +50,14 @@ def get_authors():
             item["profileImage"] = None # TODO: implement profile pics
             data["items"].append(item)
         
-        data = json.dumps(data, indent=2)
         
 
     except Exception as e:
         print("Error getting authors: ", e)
         data = "error"
     
-    return data
+    print("data here")
+    return jsonify(data)
 
 # Get a specific author (REMOTE)
 @bp.route('/authors/<author_id>/', methods=['GET'])
@@ -85,13 +85,12 @@ def get_author(author_id):
         item["profileImage"] = None
 
         data = item
-        data = json.dumps(data, indent=2)
 
     except Exception as e:
         print("Error getting authors: ", e)
         data = "error"
     
-    return data
+    return jsonify(data)
 
 @bp.route('/authors/login', methods=['POST'])
 def login():
@@ -206,9 +205,7 @@ def get_posts_liked(author_id):
             item["author"]["github"] = "http://github.com/" + like["github"] if like["github"] is not None else None
 
             item["object"] = request.root_url + "authors/" + like["author_id"] + "/posts/" + like["post_id"]
-            payload["items"].append(item)
-
-        data = json.dumps(payload, indent=2)
+            payload["items"].append(item)        
 
         conn.commit()
         conn.close()
@@ -218,7 +215,7 @@ def get_posts_liked(author_id):
         print("Getting likes error: ", e)
         data = "error"
     
-    return data
+    return jsonify(data)
 
 # Get a list of likes from other authors on AUTHOR_ID’s post POST_ID (REMOTE)
 @bp.route('/authors/<author_id>/posts/<post_id>/likes', methods=['GET'])
@@ -229,16 +226,17 @@ def get_liked_posts(author_id, post_id):
 
     data = ""
     try:
-        conn = get_db_connection()
+        conn, cur = get_db_connection()
 
         query = "SELECT * " \
                 "FROM likes l " \
                 "JOIN authors a " \
                 "ON l.like_author_id = a.author_id " \
                 "WHERE " \
-                "l.post_id = ?"
+                "l.post_id = %s"
         
-        likes = conn.execute(query, (post_id,)).fetchall()        
+        cur.execute(query, (post_id,))
+        likes = cur.fetchall()        
 
         res = [dict(i) for i in likes]
     
@@ -263,7 +261,7 @@ def get_liked_posts(author_id, post_id):
             r["object"] = request.root_url + "api/" + author_id + "/posts/" + post_id             
             data["results"].append(item)
 
-        data = json.dumps(data, indent=2)
+        # data = json.dumps(data, indent=2)
 
         conn.commit()
         conn.close()
@@ -273,7 +271,7 @@ def get_liked_posts(author_id, post_id):
         print("Getting likes error: ", e)
         data = "error"
     
-    return data
+    return jsonify(data)
 
 # SEND LIKE TO THE author_id OF THE POST (REMOTE)
 @bp.route('/authors/<author_id>/inbox', methods=['POST'])
@@ -310,7 +308,7 @@ def send_like(author_id):
         print("liked error: ", e)
         data = "error"
     
-    return data
+    return jsonify(data)
 
 @bp.route('/authors/<author_id>/inbox/unlike', methods=['POST'])
 # DELETE LIKE
@@ -335,7 +333,7 @@ def delete_like(author_id):
     except Exception as e:
         print("liked error: ", e)
         data = "error"
-    return data
+    return jsonify(data)
 
 
 # Get Github username of author
@@ -358,7 +356,7 @@ def get_github(author_id):
         
         # row = [dict(row) for row in row]
 
-        data = json.dumps(row, indent=4, sort_keys=True, default=str)
+        # data = json.dumps(row, indent=4, sort_keys=True, default=str)
         print(data)
         # if row is not None:
         #     row_values = [str(value) for value in row]
@@ -369,7 +367,7 @@ def get_github(author_id):
         print("Getting github username error: ", e)
         data = "error"
     
-    return data
+    return jsonify(data)
 
 
 @bp.route('/authors/github', methods=['POST'])
@@ -394,4 +392,4 @@ def update_github():
     except Exception as e:
         print("Error trying to update github username: ", e)
         data = "error"
-    return data
+    return jsonify(data)
