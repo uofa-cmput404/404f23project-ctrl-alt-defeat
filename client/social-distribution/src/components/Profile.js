@@ -7,7 +7,7 @@ function Profile({ username, authorId, setUsername, onClose }) {
   const [newPassword, setNewPassword] = useState('');
 
   const handleGithubUpdate = async () => {
-    axios.post(process.env.API_HOSTNAME + '/authors/github', {
+    axios.post(process.env.API_HOSTNAME + '/api/authors/github', {
       
         author_id: authorId,
         github: GithubName

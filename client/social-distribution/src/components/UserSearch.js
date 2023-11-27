@@ -7,7 +7,7 @@ function UserSearch({ username, authorId }) {
 
   const handleSearch = async () => {
     try {
-      const response = await fetch( process.env.API_HOSTNAME + `/follow/usersearch?query=${searchQuery}`,{
+      const response = await fetch( process.env.API_HOSTNAME + `/api/follow/usersearch?query=${searchQuery}`,{
           headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}});
       if (response.ok) {
         const data = await response.json();
@@ -23,7 +23,7 @@ function UserSearch({ username, authorId }) {
 
   const handleFollowRequest = async (recieveAuthorId) => {
     try {
-      const response = await fetch(process.env.API_HOSTNAME + '/follow/follow_request', {
+      const response = await fetch(process.env.API_HOSTNAME + '/api/follow/follow_request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ function UserSearch({ username, authorId }) {
 
   const handleUnfollow = async (unfollowUserId) => {
     try {
-      const response = await fetch(process.env.API_HOSTNAME + '/follow/unfollow', {
+      const response = await fetch(process.env.API_HOSTNAME + '/api/follow/unfollow', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

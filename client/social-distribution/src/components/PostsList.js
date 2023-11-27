@@ -21,7 +21,7 @@ function PostsList(props) {
     console.log("heard postsLists", changeLike, postSelected, postSelectedLiked, postSelectedAuthor);
 
     // URL goes to AUTHOR of post, NOT the author who is logged in/sending like
-    const sendLikeUrl = process.env.API_HOSTNAME + "/authors/" + postSelectedAuthor + '/inbox';
+    const sendLikeUrl = process.env.API_HOSTNAME + "/api/authors/" + postSelectedAuthor + '/inbox';
 
     if (postSelectedLiked === true) {
       console.log("unlike");

@@ -54,7 +54,7 @@ function Register(props) {
     };
     
     try {
-      const response = await fetch(process.env.API_HOSTNAME + '/requestors/register', {
+      const response = await fetch(process.env.API_HOSTNAME + '/api/requestors/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

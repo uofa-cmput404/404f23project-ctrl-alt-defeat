@@ -78,7 +78,7 @@ function PostItem(props) {
           'Authorization' : 'Basic ' + process.env.USERPASSBASE64,
           comment_author_id: props.loginUser // Assuming this is the user ID
       };
-      const apiUrl = process.env.API_HOSTNAME + `/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
+      const apiUrl = process.env.API_HOSTNAME + `/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
   
       const response = await axios.get(apiUrl, { params });
       if (response.data && response.data.comments) {
@@ -100,7 +100,7 @@ function PostItem(props) {
   const toggleLikeComment = async (commentId) => {
     try {
       // Construct the URL for the POST request
-      const apiUrl = process.env.API_HOSTNAME + `/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}/toggle-like`;
+      const apiUrl = process.env.API_HOSTNAME + `/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}/toggle-like`;
   
       // Send the POST request
       await axios.post(apiUrl, { like_comment_author_id: props.loginUser }, {headers: {
@@ -142,7 +142,7 @@ function PostItem(props) {
     };
   
     try {
-      const apiUrl = process.env.API_HOSTNAME + `/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
+      const apiUrl = process.env.API_HOSTNAME + `/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
       await axios.post(apiUrl, commentData, {headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}});
       setComment('');
       fetchComments(); // Refresh comments after posting

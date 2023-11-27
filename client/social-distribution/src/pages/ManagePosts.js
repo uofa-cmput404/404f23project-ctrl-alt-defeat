@@ -9,8 +9,8 @@ import { UserContext } from '../App';
 const managePostsUrl = process.env.API_HOSTNAME + '/api/posts/manage'
 const updateVisibilityUrl = process.env.API_HOSTNAME + '/api/posts/visibility'
 const restrictUrl = process.env.API_HOSTNAME + '/api/posts/restrict'
-const restrictionListUrl = process.env.API_HOSTNAME + '/api/posts/restricted/'
-const editUrl = process.env.API_HOSTNAME + '/posts/authors/'
+const restrictionListUrl = process.env.API_HOSTNAME + '/api/posts/restricted'
+const editUrl = process.env.API_HOSTNAME + '/api/posts/authors/'
 
 function ManagePosts() {
     const styles = {
