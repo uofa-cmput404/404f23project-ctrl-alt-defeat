@@ -51,7 +51,7 @@ export default function IndividualPost({ username, authorId, setUsername }) {;
         fetchData();        
     }, []);
 
-    function get_content_as_elements(content_type, content){
+    function getContentAsElements(content_type, content){
         if (content_type === "text/plain"){
             return(<p>{content}</p>);
         }
@@ -80,7 +80,7 @@ export default function IndividualPost({ username, authorId, setUsername }) {;
                     <h3>{postSelected.title}</h3>
                     <div>Posted by: {postSelected.username}</div>
                     <div>{postSelected.date_posted}</div>
-                    <div>{get_content_as_elements(postSelected.content_type,postSelected.content)}</div>                
+                    <div>{getContentAsElements(postSelected.content_type,postSelected.content)}</div>
                 </div>
                 : <h1>Post not found</h1>
              }

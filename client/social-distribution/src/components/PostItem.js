@@ -38,7 +38,7 @@ const styles = {
 }
 
 
-function get_content_as_elements(content_type, content){
+function getContentAsElements(content_type, content){
     if (content_type === "text/plain"){
         return(<p>{content}</p>);
     }
@@ -127,7 +127,7 @@ function PostItem(props) {
         <h3>{props.item.title}</h3>
         <div>Posted by: {props.item.username}</div>
         <div>{props.item.date_posted}</div>
-        <div>{get_content_as_elements(props.item.content_type, props.item.content)}</div>
+        <div>{getContentAsElements(props.item.content_type, props.item.content)}</div>
         
         <div style={styles.container} onClick={selectToggleLike}>
           {props.item.liked ?
