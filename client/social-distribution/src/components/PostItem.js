@@ -50,14 +50,6 @@ function get_content_as_elements(content_type, content){
 }
 
 function PostItem(props) {
-  const selectToggleLike = async () => {
-    console.log('toggle');
-
-    props.setChangeLike(true);
-    props.setPostSelected(props.item.post_id);
-    props.setPostSelectedLiked(props.item.liked);
-    props.setPostSelectedAuthor(props.item.author_id);
-  }
 
   return (
     <li key={props.key}>
@@ -66,16 +58,19 @@ function PostItem(props) {
         <div>{props.item.date_posted}</div>
         <div>{get_content_as_elements(props.item.content_type,props.item.content)}</div>
         
-        <div style={styles.container} onClick={selectToggleLike}>
-        {// Show like icon as liked or not based on if logged in author has liked the post
+        <div style={styles.container} onClick={
+          async () => {
+            props.toggleLike(props.item.post_id, props.item.liked, props.item.author_id);
+          }
+        }> {
+        // Show like icon as liked or not based on if logged in author has liked the post
         props.item.liked ?
-
-            <img style={styles.img} src={likedImgUrl} />
+        
+        <img style={styles.img} src={likedImgUrl} />
+        
+        : <img style={styles.img} src={notLikedImgUrl} /> 
           
-            : <img style={styles.img} src={notLikedImgUrl} onClick={selectToggleLike} /> 
-          
-        }
-        </div>
+        } </div>
     </li>
   )
 }

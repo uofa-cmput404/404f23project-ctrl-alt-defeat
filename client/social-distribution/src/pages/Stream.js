@@ -42,7 +42,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
                                     .then(response => {
                                     // Handle the successful response here                
                                     setActivityList(response.data.slice(0, 5));         
-                                    console.log(response.data);   
+                                    //console.log(response.data);   
                                     })
                                     .catch(error => {
                                     // Handle any errors that occur during the request                                    
@@ -75,9 +75,10 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
                 // Handle the successful response here
                 //console.log('Response data:', response.data);
                 
-                setResponseData(response.data);      
-                console.log(response.data)          
-                setPostsLists(response.data);                
+                setResponseData(response.data);    
+                
+                // We set postLists here, in case the post likes feature is not working
+                setPostsLists(response.data);
                 })
                 .catch(error => {
                 // Handle any errors that occur during the request
@@ -97,15 +98,39 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
 
     useEffect(() => {
         labelLikedPosts();
-    }, [likedPostIds, responseData]);
+    }, [responseData]);
 
+    // Check `likes` table (back-end) for all posts that logged in author has liked
+    async function fetchLikedPosts() {
+       try {
+           axios.get(likedPostsUrl)
+           .then(response => {
+               // Parse the liked posts for the post IDs exclusively
+               let fetchedLikedPostIds = [];
+               for (let i = 0; i < response.data.items.length; i++) {
+                // Assuming each liked item has an 
+                // `object` that follows URL structure per spec,
+                // i.e. http://service/authors/<author_id>/posts/<post_id>
+                fetchedLikedPostIds.push(response.data.items[i].object.split('/')[6]);
+
+               }
+
+               setLikedPostIds(fetchedLikedPostIds);
+           })
+           .catch(error => {
+               console.error('Error:', error);
+           });
+           } catch (error) {
+               console.error('Error:', error);
+           }
+   }
     const labelLikedPosts = () => {
         // Label (on front-end) which posts have been liked by the logged in author
         let posts = responseData.map((item, index) => {
             let liked = false;
             for (let i = 0; i < likedPostIds.length; i++) {
-                //console.log("check post id in likedPostIds", likedPostIds[i].post_id);
-                if (likedPostIds[i].post_id === item.post_id) {
+                //console.log('indiv like post id', likedPostIds[i])
+                if (likedPostIds[i]=== item.post_id) {
                     liked = true;
                 }
             }
@@ -118,22 +143,6 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
         setPostsLists(posts);
     };
 
-     // Check `likes` table (back-end) for all posts that logged in author has liked
-     async function fetchLikedPosts() {
-        try {
-            axios.get(likedPostsUrl)
-            .then(response => {
-                //console.log('liked ids:', response.data);
-                setLikedPostIds(response.data);
-                console.log(response.data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-            } catch (error) {
-                console.error('Error:', error);
-            }
-    }
 
     const toggleProfile = () => {
         setShowProfile(!showProfile);

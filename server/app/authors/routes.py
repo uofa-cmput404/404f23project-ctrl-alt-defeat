@@ -172,9 +172,6 @@ def get_posts_liked(author_id):
     # Currently, this function pulls ALL post_id's of the posts that AUTHOR_ID has liked 
     # POSSIBLE SECURITY ISSUE
 
-    # TODO: Use this query to actually match the spec requirement
-    #       can't do it rn because its going to mess the front end a lot
-
 
     data = ""
     try:
@@ -318,7 +315,7 @@ def send_like(author_id):
     
     return data
 
-@bp.route('/<author_id>/inbox/unlike', methods=['POST'])
+@bp.route('/authors/<author_id>/inbox/unlike', methods=['POST'])
 # DELETE LIKE
 def delete_like(author_id):
     request_data = request.get_json()
