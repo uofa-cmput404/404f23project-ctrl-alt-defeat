@@ -413,23 +413,31 @@ def send_comments(author_id, post_id):
         conn, cur = get_db_connection()
 
         # Check if the authors are friends
-        check_friends_query = "SELECT COUNT(*) FROM friends " \
-                              "WHERE author_followee = %s AND author_following = %s " \
-                              "UNION " \
-                              "SELECT COUNT(*) FROM friends " \
-                              "WHERE author_followee = %s AND author_following = %s"
+        check_friends_query = """
+            SELECT CASE WHEN (
+                SELECT COUNT() FROM friends 
+                WHERE author_followee = %s AND author_following = %s
+                ) + (
+                SELECT COUNT() FROM friends 
+                WHERE author_followee = %s AND author_following = %s
+                ) = 2 THEN 'private'
+                ELSE 'public'
+            END AS status
+        """
         cur.execute(check_friends_query, (author_id, comment_author_id, comment_author_id, author_id))
-        friends_count = cur.fetchall()
-        friends_count = [dict(i) for i in friends_count]
+        
+        friends_count = cur.fetchone()[0]
+        
         print(friends_count)
         # Determine the status based on friendship
-        status = 'private' if all(count[0] > 0 for count in friends_count) else 'public'
+        status = 'private' if friends_count['count'] > 0 else 'public'
 
         # query = "INSERT INTO comments " \
         #         "(comment_id, comment_author_id, " \
         #         "post_id, author_id, comment_text, status, date_commented) " \
-        #         "VALUES (?, ?, ?, ?, ?, ? ,CURRENT_TIMESTAMP)" 
+        #         "VALUES (%s, %s, %s, %s, %s, %s ,CURRENT_TIMESTAMP)" 
         
+        # print(comment_author_id)
         # cur.execute(query, (comment_id, comment_author_id, post_id, author_id, comment_text, status))
 
         # data = "success"

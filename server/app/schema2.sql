@@ -74,8 +74,8 @@ CREATE TABLE comments (
     comment_text TEXT NOT NULL, --TEXT
     status TEXT NOT NULL,
     date_commented TIMESTAMP NOT NULL,
-    FOREIGN KEY (comment_author_id) REFERENCES sc.authors(author_id),
-    FOREIGN KEY (post_id) REFERENCES sc.posts(post_id)
+    FOREIGN KEY (comment_author_id) REFERENCES authors(author_id),
+    FOREIGN KEY (post_id) REFERENCES posts(post_id)
 );
 
 CREATE TABLE comment_likes (
