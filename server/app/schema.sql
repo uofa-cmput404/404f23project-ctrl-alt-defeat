@@ -1,15 +1,29 @@
--- Drop tables if they exist
-DROP TABLE IF EXISTS sc.post_restrictions;
-DROP TABLE IF EXISTS sc.shares;
-DROP TABLE IF EXISTS sc.comments;
-DROP TABLE IF EXISTS sc.likes;
-DROP TABLE IF EXISTS sc.follow_requests;
-DROP TABLE IF EXISTS sc.friends;
-DROP TABLE IF EXISTS sc.image_post;
-DROP TABLE IF EXISTS sc.admins;
-DROP TABLE IF EXISTS sc.requestors;
-DROP TABLE IF EXISTS sc.authors;
-DROP TABLE IF EXISTS sc.posts;
+
+DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS authors;
+DROP TABLE IF EXISTS requestors;
+DROP TABLE IF EXISTS admins;
+DROP TABLE IF EXISTS image_post;
+DROP TABLE IF EXISTS friends;
+DROP TABLE IF EXISTS follow_requests;
+DROP TABLE IF EXISTS likes;
+DROP TABLE IF EXISTS comments;
+DROP TABLE IF EXISTS shares;
+DROP TABLE IF EXISTS post_restrictions;
+DROP TABLE IF EXISTS nodes;
+
+CREATE TABLE posts (
+    post_id TEXT PRIMARY KEY,
+    author_id TEXT NOT NULL, --TEXT
+    date_posted TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    title TEXT NOT NULL,
+    content_type TEXT NOT NULL DEFAULT "text/plain",
+    content TEXT NOT NULL,
+    image_id TEXT,
+    visibility TEXT NOT NULL DEFAULT "public",
+    FOREIGN KEY (image_id) REFERENCES image_post(img_id) ON DELETE SET NULL,
+    FOREIGN KEY (author_id) REFERENCES authors(author_id) ON DELETE CASCADE
+);
 
 
 CREATE TABLE sc.authors (

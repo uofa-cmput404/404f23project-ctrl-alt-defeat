@@ -1,4 +1,3 @@
-
 from flask import Flask, redirect, url_for, render_template
 from flask_cors import CORS, cross_origin
 
@@ -12,12 +11,38 @@ from flask_swagger_ui import get_swaggerui_blueprint
 
 from flask_cors import CORS, cross_origin
 
-from flask_basicauth import BasicAuth
+from flask_httpauth import HTTPBasicAuth
+import urllib.parse as urlparse
+import os
+from dotenv import load_dotenv
+from .dbase import get_db_connection # Used in verify_baclend_access
 
 
 db = SQLAlchemy()
-basic_auth = BasicAuth()
+basic_auth = HTTPBasicAuth()
 admin = Admin()
+
+# This is to verify back-end access for nodes.
+@basic_auth.verify_password
+def verify_backend_access(username, password):
+    print("verifying...")
+    response = None # equivalent to 401 Unauthorized
+    conn, cur = get_db_connection()
+
+    if username == "front-end": # TODO: remove this in future
+        return {'message': 'Authenticated through origin front-end'}
+
+    query = "SELECT node_id, password FROM nodes WHERE username = %s"
+    cur.execute(query, (username,))
+    node = cur.fetchone()
+
+    if node:
+        stored_password = node['password']
+        if password == stored_password:
+            response = {'message': "Authenticated", 'node_id': node['node_id']}
+    conn.close()
+
+    return response
 
 class Author(db.Model):
     __tablename__ = "authors"
@@ -97,13 +122,14 @@ class ImageView(ModelView):
 class Node(db.Model):
     __tablename__ = "nodes"
     node_id = db.Column(db.Integer, primary_key=True)
-    base_url = db.Column(db.Text)
     node_name = db.Column(db.Text)    
+    username = db.Column(db.Text, nullable=False)
+    password = db.Column(db.Text, nullable=False)
 
 class NodeView(ModelView):
     can_delete = True
-    form_columns = ["node_id", "base_url", "node_name"]
-    column_list = ["node_id", "base_url", "node_name"]
+    form_columns = ["node_id", "node_name", "username", "password"]
+    column_list = ["node_id", "node_name", "username"]
     column_searchable_list = ["node_name"]  
 
 admin.add_view(AuthorView(Author, db.session))
@@ -115,6 +141,15 @@ admin.add_view(NodeView(Node, db.session))
 
 def create_app():
     app = Flask(__name__)
+
+    load_dotenv()
+
+    url = urlparse.urlparse(os.environ['DATABASE_URL'])
+    dbname = url.path[1:]
+    user = url.username
+    password = url.password
+    host = url.hostname
+    port = url.port
 
   
     # HUGE SECURITY ISSUE - DO NOT KEEP THIS IN PRODUCTION
@@ -150,7 +185,7 @@ def create_app():
 
 
      # Register blueprints here
-    from app.main import bp as main_bp
+    from .main import bp as main_bp
     app.register_blueprint(main_bp)
     
     from app.requestors import bp as requestors_bp
@@ -175,10 +210,13 @@ def create_app():
 
     app.register_blueprint(swaggerui_blueprint)
     
-    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://hueygonzales:password@localhost:5432/flask_db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://%s:%s@%s:%d/%s" % (user, password, host, port, dbname)
     app.config["SECRET_KEY"] = "mysecret"
 
     db.init_app(app)
     admin.init_app(app)
     return app
 
+if __name__ == '__main__':
+    app = create_app()
+    app.run(debug=True)

@@ -1,6 +1,6 @@
-from app.requestors import bp
+from . import bp
 from flask import request, jsonify, g
-from app.dbase import get_db_connection
+from ..dbase import get_db_connection
 import sqlite3
 import uuid
 

@@ -1,7 +1,7 @@
-from app.follow import bp
+from . import bp
 from flask import request, g, jsonify
 import sqlite3
-from app.dbase import get_db_connection
+from ..dbase import get_db_connection
 
 # Hard coded for now
 HOST = "http://127.0.0.1:5000"

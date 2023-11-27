@@ -1,7 +1,7 @@
-from app.posts import bp
+from . import bp
 import json
 
-from app.dbase import get_db_connection
+from ..dbase import get_db_connection
 
 from flask import request, abort, send_file, Response
 from werkzeug.exceptions import HTTPException
@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 import requests
 import uuid
 import io,base64
+from .. import basic_auth
 
 @bp.route("/posts/restricted", methods=["GET"])
 def get_restricted_users():    
@@ -208,6 +209,7 @@ def get_my_posts():
     return data # data
 
 @bp.route('/posts', methods=['GET'])
+@basic_auth.login_required
 def index():
     data = ""
     try:
@@ -275,6 +277,7 @@ def index():
 
 # MAKE POSTS
 @bp.route('/posts/new', methods=['POST'])
+@basic_auth.login_required
 def new_post():
     data = ""
     try:

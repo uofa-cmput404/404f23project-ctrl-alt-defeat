@@ -66,7 +66,11 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
-                axios.get(postsUrl + `?author_id=${authorId}`)
+                axios.get(postsUrl + `?author_id=${authorId}`, {
+                    headers: {
+                        'Authorization': 'Basic Q3RybEFsdERlZmVhdDpmcm9udGVuZA=='
+                    }
+                })
                 .then(response => {
                 // Handle the successful response here
                 //console.log('Response data:', response.data);
