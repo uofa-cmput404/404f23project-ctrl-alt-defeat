@@ -194,7 +194,7 @@ def get_post_comments(author_id, post_id):
         conn = get_db_connection()
         cursor = conn.cursor()
         query = """
-            SELECT a.username, c.comment_text
+            SELECT a.username, c.comment_text, c.comment_id
             FROM comments c
             INNER JOIN authors a ON c.comment_author_id = a.author_id
             WHERE c.post_id = ?
@@ -211,7 +211,7 @@ def get_post_comments(author_id, post_id):
         comment_info = cursor.fetchall()
         conn.close()
 
-        comments_list = [{'comment_name':comment[0],'comment_text': comment[1]} for comment in comment_info]
+        comments_list = [{'comment_name':comment[0],'comment_text': comment[1], 'comment_id':comment[2]} for comment in comment_info]
         return jsonify({'comments': comments_list})
 
     except Exception as e:
@@ -320,3 +320,65 @@ def update_github():
         print("Error trying to update github username: ", e)
         data = "error"
     return data
+
+
+@bp.route('/<author_id>/posts/<post_id>/comments/<comment_id>/toggle-like', methods=['POST'])
+def toggle_like(author_id, post_id, comment_id):
+    request_data = request.get_json()
+    like_comment_author_id = request_data["like_comment_author_id"]
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Check if the like already exists
+        cursor.execute("SELECT * FROM comment_likes WHERE like_comment_author_id = ? AND comment_id = ?", 
+                       (like_comment_author_id, comment_id))
+        like = cursor.fetchone()
+
+        if like:
+            # Like exists, so unlike it
+            cursor.execute("DELETE FROM comment_likes WHERE like_comment_author_id = ? AND comment_id = ?", 
+                           (like_comment_author_id, comment_id))
+        else:
+            # Like doesn't exist, so add it
+            cursor.execute("INSERT INTO comment_likes (like_comment_author_id, comment_id, time_liked) VALUES (?, ?, CURRENT_TIMESTAMP)", 
+                           (like_comment_author_id, comment_id))
+
+        conn.commit()
+        conn.close()
+        return jsonify({"status": "success"}), 200
+
+    except Exception as e:
+        print("Error toggling like: ", e)
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+@bp.route('/<author_id>/posts/<post_id>/comments/<comment_id>/likes', methods=['GET'])
+
+
+def get_comments_likes(comment_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = """
+            SELECT a.username, c.time_liked
+            FROM comment_likes c
+            INNER JOIN authors a ON c.like_comment_author_id = a.author_id
+            WHERE c.comment_id = ?
+        """
+
+        cursor.execute(query, (comment_id ))
+        comment_info = cursor.fetchall()
+        conn.close()
+
+        comment_likes_list = [{'like_comment_author_id':comment[0],'time_liked': comment[1]} for comment in comment_info]
+        return jsonify({'comment_likes': comment_likes_list})
+
+    except Exception as e:
+        print("Getting comments error: ", e)
+        return jsonify({'error': str(e)}), 500
+
+
