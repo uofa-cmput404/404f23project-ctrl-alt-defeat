@@ -194,7 +194,12 @@ def get_post_comments(author_id, post_id):
         conn = get_db_connection()
         cursor = conn.cursor()
         query = """
-            SELECT a.username, c.comment_text, c.comment_id
+            SELECT a.username, c.comment_text, c.comment_id, 
+                EXISTS (
+                    SELECT 1 FROM comment_likes cl 
+                    WHERE cl.comment_id = c.comment_id 
+                    AND cl.like_comment_author_id = ?
+                ) AS isLikedByCurrentUser
             FROM comments c
             INNER JOIN authors a ON c.comment_author_id = a.author_id
             WHERE c.post_id = ?
@@ -203,20 +208,27 @@ def get_post_comments(author_id, post_id):
                 (c.status = 'public') OR
                 (c.status = 'private' AND c.comment_author_id = ?) OR
                 (c.status = 'private' AND c.author_id = ?)
-                
             )
         """
 
-        cursor.execute(query, (post_id, author_id, comment_author_id, comment_author_id ))
+        cursor.execute(query, (comment_author_id, post_id, author_id, comment_author_id, comment_author_id))
         comment_info = cursor.fetchall()
         conn.close()
 
-        comments_list = [{'comment_name':comment[0],'comment_text': comment[1], 'comment_id':comment[2]} for comment in comment_info]
+        comments_list = [
+            {
+                'comment_name': comment[0],
+                'comment_text': comment[1], 
+                'comment_id': comment[2],
+                'isLikedByCurrentUser': comment[3]
+            } for comment in comment_info
+        ]
         return jsonify({'comments': comments_list})
 
     except Exception as e:
         print("Getting comments error: ", e)
         return jsonify({'error': str(e)}), 500
+
 
 
 

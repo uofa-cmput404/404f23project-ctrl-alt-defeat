@@ -81,26 +81,42 @@ function PostItem(props) {
   
       const response = await axios.get(apiUrl, { params });
       if (response.data && response.data.comments) {
-        setComments(response.data.comments); // Assuming the response has a 'comments' field
+        // Map through each comment and add a 'liked' property based on the user's like status
+        const updatedComments = response.data.comments.map(comment => ({
+          ...comment,
+          liked: comment.isLikedByCurrentUser 
+        }));
+        setComments(updatedComments);
       } else {
-        setComments([]); // In case the response does not have a 'comments' field
+        setComments([]);
       }
     } catch (error) {
       console.error('Error fetching comments:', error);
     }
   };
+  
 
-  //now like all comment in same post
-  const toggleLikeComment = (commentId) => {
-    const updatedComments = comments.map(comment => {
-      if (comment.comment_id === commentId) {
-        // Toggle only the clicked comment's liked status
-        return { ...comment, liked: !comment.liked };
-      }
-      return comment;
-    });
-
-    setComments(updatedComments);
+  const toggleLikeComment = async (commentId) => {
+    try {
+      // Construct the URL for the POST request
+      const apiUrl = `http://127.0.0.1:5000/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}/toggle-like`;
+  
+      // Send the POST request
+      await axios.post(apiUrl, { like_comment_author_id: props.loginUser });
+  
+      // Update the like status in the local state
+      const updatedComments = comments.map(comment => {
+        if (comment.comment_id === commentId) {
+          return { ...comment, liked: !comment.liked };
+        }
+        return comment;
+      });
+  
+      setComments(updatedComments);
+    } catch (error) {
+      console.error('Error toggling like status:', error);
+      // Optionally, handle the error more visibly to the user
+    }
   };
   
   useEffect(() => {
