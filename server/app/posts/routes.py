@@ -478,7 +478,7 @@ def get_post(author_id, post_id):
         author_item["id"] = request.root_url + row["author_id"]
         author_item["url"] = request.root_url + row["author_id"]
         author_item["displayName"] = row["username"]
-        author_item["github"] = row["github"]
+        author_item["github"] = (request.url_root + row["github"]) if row["github"] != None else None
         author_item["profileImage"] = None
 
         item["author"] = author_item
