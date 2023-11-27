@@ -441,9 +441,11 @@ def get_post(author_id, post_id):
                 
         curr.execute(query, (post_id, ))
         row = curr.fetchall()
-        
+        if len(row) == 0:
+            abort(404, "Post not found")
+
         post = [dict(i) for i in row][0]       
-        print(post) 
+        # print(post) 
 
         author_id = post["author_id"]
 
@@ -499,7 +501,7 @@ def get_post(author_id, post_id):
 
     except Exception as e:
         print(e)
-        data = "error"
+        data = e
     
     return data 
 

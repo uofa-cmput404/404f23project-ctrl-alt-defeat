@@ -13,13 +13,14 @@ import Markdown from "react-markdown";
 import notLikedImgUrl from "../notLiked_black_24dp.svg";
 import likedImgUrl from "../liked_black_24dp.svg";
 
-const postsUrl = 'http://127.0.0.1:5000/api/posts/';
+const postsUrl = 'http://127.0.0.1:5000/api/';
 
 
-export default function IndividualPost({ username, authorId, setUsername }) {;    
+export default function IndividualPost() {;    
     const [postSelected, setPostSelected] = useState([]);
+    const [username, setUsername] = useState("");
     const navigate = useNavigate();
-    let { id } = useParams();
+    let { post_id, author_id } = useParams();
 
     const styles = {
         container: {
@@ -30,18 +31,18 @@ export default function IndividualPost({ username, authorId, setUsername }) {;
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
-                axios.get(postsUrl + id, {
-                    author_id: authorId
-                })
+                axios.get(postsUrl + "authors/" + author_id + "/posts/" + post_id)
                 .then(response => {
                 // Handle the successful response here
                 //console.log('Response data:', response.data);                      
                 console.log(response.data)
                 setPostSelected(response.data);      
+                setUsername(response.data.author.displayName);
                 })
                 .catch(error => {
                 // Handle any errors that occur during the request
                 console.error('Error:', error);
+                setPostSelected("invalid"); 
                 });
           } catch (error) {
             console.error('Error:', error);
@@ -78,8 +79,8 @@ export default function IndividualPost({ username, authorId, setUsername }) {;
              {postSelected !== "invalid" ?
                 <div>
                     <h3>{postSelected.title}</h3>
-                    <div>Posted by: {postSelected.username}</div>
-                    <div>{postSelected.date_posted}</div>
+                    <div>Posted by: {username}</div>
+                    <div>{postSelected.published}</div>
                     <div>{get_content_as_elements(postSelected.content_type,postSelected.content)}</div>                
                 </div>
                 : <h1>Post not found</h1>
