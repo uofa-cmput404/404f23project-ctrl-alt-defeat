@@ -60,7 +60,7 @@ def get_authors():
     return data
 
 # Get a specific author (REMOTE)
-@bp.route('/authors/<author_id>', methods=['GET'])
+@bp.route('/authors/<author_id>/', methods=['GET'])
 def get_author(author_id):
     data = ""
     try:
