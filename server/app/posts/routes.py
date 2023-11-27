@@ -493,7 +493,7 @@ def get_post(author_id, post_id):
         item["unlisted"] = True if post["visibility"] == "unlisted" else False
 
        #  data = json.dumps(item, indent=2)
-        data = item
+        print(data)
 
     except IndexError as e:
         print(e)
