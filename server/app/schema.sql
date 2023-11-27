@@ -72,8 +72,16 @@ CREATE TABLE likes (
     like_author_id TEXT NOT NULL, --TEXT
     post_id TEXT NOT NULL,
     time_liked TIMESTAMP NOT NULL,
-    FOREIGN KEY (like_author_id) REFERENCES authors(author_id) ON DELETE CASCADE,
+    FOREIGN KEY (like_author_id) REFERENCES authors(author_id),
     FOREIGN KEY (post_id) REFERENCES posts(post_id)
+);
+
+CREATE TABLE comment_likes (
+    like_comment_author_id TEXT NOT NULL, --TEXT
+    comment_id TEXT NOT NULL,
+    time_liked TIMESTAMP NOT NULL,
+    FOREIGN KEY (like_comment_author_id) REFERENCES authors(author_id),
+    FOREIGN KEY (comment_id) REFERENCES comments(comment_id)
 );
 
 CREATE TABLE comments (
