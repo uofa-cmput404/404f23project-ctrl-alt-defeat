@@ -3,8 +3,6 @@ from flask import request, g, jsonify
 import sqlite3
 from ..dbase import get_db_connection
 
-# Hard coded for now
-HOST = "http://127.0.0.1:5000"
 
 def get_db():
     if 'db' not in g:
@@ -157,8 +155,8 @@ def get_followers(author_id):
             {
                 "type": "author",
                 "id": follower['author_id'],
-                "url": f"{HOST}/authors/{follower['author_id']}",
-                "host": HOST,
+                "url": f"{request.root_url}/authors/{follower['author_id']}",
+                "host": request.root_url,
                 "displayName": follower['username'],
                 "github": f"https://github.com/{follower['github']}" if follower['github'] is not None else None,
             }
