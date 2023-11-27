@@ -32,7 +32,7 @@ def register():
         
         requestor_id = str(uuid.uuid4())
 
-        cur.execute("INSERT INTO requestors (requestor_id, username, password) VALUES (%s, %s, %s)", (requestor_id, username, password))
+        cur.execute("INSERT INTO requestors (requestor_id, username, password) VALUES (%s, %s, %s)", (requestor_id, username, hashed_password))
         conn.commit()
         print("here2")
         print('hi',requestor_id)

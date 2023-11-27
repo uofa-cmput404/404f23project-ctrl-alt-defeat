@@ -53,8 +53,7 @@ CREATE TABLE friends (
 
 CREATE TABLE follow_requests (
     author_send TEXT NOT NULL,
-    author_receive TEXT NOT NULL,
-    FOREIGN KEY (author_send) REFERENCES authors(author_id),
+    author_receive TEXT NOT NULL,    
     FOREIGN KEY (author_receive) REFERENCES authors(author_id)
 );
 
@@ -68,12 +67,25 @@ CREATE TABLE likes (
 );
 
 CREATE TABLE comments (
-    post_id TEXT PRIMARY KEY,
-    comment_author_id TEXT NOT NULL,
+    comment_id TEXT PRIMARY KEY,
+    comment_author_id TEXT NOT NULL, --TEXT
+    post_id TEXT NOT NULL, --TEXT
+    author_id TEXT NOT NULL, --TEXT
+    comment_text TEXT NOT NULL, --TEXT
+    status TEXT NOT NULL,
     date_commented TIMESTAMP NOT NULL,
-    FOREIGN KEY (comment_author_id) REFERENCES authors(author_id),
-    FOREIGN KEY (post_id) REFERENCES posts(post_id)
+    FOREIGN KEY (comment_author_id) REFERENCES sc.authors(author_id),
+    FOREIGN KEY (post_id) REFERENCES sc.posts(post_id)
 );
+
+CREATE TABLE comment_likes (
+    like_comment_author_id TEXT NOT NULL, --TEXT
+    comment_id TEXT NOT NULL,
+    time_liked TIMESTAMP NOT NULL,
+    FOREIGN KEY (like_comment_author_id) REFERENCES authors(author_id),
+    FOREIGN KEY (comment_id) REFERENCES comments(comment_id)
+);
+
 
 CREATE TABLE shares(
     post_id TEXT PRIMARY KEY,

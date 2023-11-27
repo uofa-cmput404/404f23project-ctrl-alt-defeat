@@ -446,19 +446,19 @@ def get_post(author_id, post_id):
         curr.execute(query, (post_id, ))
         row = curr.fetchall()
         if len(row) == 0:
-            # print("not found locally, trying remote")
-            # try:
-            #     print(f"https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/{author_id}/posts/{post_id}")
-            #     res = requests.get(f"https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/{author_id}/posts/{post_id}", auth=("cross-server", "password"))
-            #     print(res)
-            #     if res.status_code == 404:
-            #         abort(404, "Post not found")       
+            print("not found locally, trying remote")
+            try:
+                print(f"https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/{author_id}/posts/{post_id}")
+                res = requests.get(f"https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/{author_id}/posts/{post_id}", auth=("cross-server", "password"))
+                
+                if res.status_code == 404:
+                    abort(404, "Post not found")       
+                
+                return res.json()
 
-            # except Exception as e:
-            #     print(e)
-            #     print("Something went wrong")
-
-            abort(404, "Post not found")
+            except Exception as e:
+                print(e)
+                print("Something went wrong")            
 
         post = [dict(i) for i in row][0]       
         # print(post) 
@@ -503,12 +503,13 @@ def get_post(author_id, post_id):
         # input_datetime = datetime.strptime(post["date_posted"], "%Y-%m-%d %H:%M:%S")
         
         # Convert datetime object to ISO 8601 format with UTC offset
-        item["published"] = post["date_posted"].replace(tzinfo=timezone.utc).isoformat()
+        item["published"] = post["date_posted"].strftime("%Y-%m-%d %H:%M:%S") 
 
         item["visibility"] = post["visibility"].upper()
         item["unlisted"] = True if post["visibility"] == "unlisted" else False
 
        #  data = json.dumps(item, indent=2)
+        data = item
         print(data)
 
     except IndexError as e:

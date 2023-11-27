@@ -345,7 +345,7 @@ def delete_like(author_id):
 
 
 
-@bp.route('/<author_id>/posts/<post_id>/comments', methods=['GET'])
+@bp.route('/authors/<author_id>/posts/<post_id>/comments', methods=['GET'])
 
 
 def get_post_comments(author_id, post_id):
@@ -354,23 +354,23 @@ def get_post_comments(author_id, post_id):
         return jsonify({'comments': []})
 
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        conn, cursor = get_db_connection()
+        
         query = """
             SELECT a.username, c.comment_text, c.comment_id, 
                 EXISTS (
                     SELECT 1 FROM comment_likes cl 
                     WHERE cl.comment_id = c.comment_id 
-                    AND cl.like_comment_author_id = ?
+                    AND cl.like_comment_author_id = %s
                 ) AS isLikedByCurrentUser
             FROM comments c
             INNER JOIN authors a ON c.comment_author_id = a.author_id
-            WHERE c.post_id = ?
-            AND c.author_id = ?
+            WHERE c.post_id = %s
+            AND c.author_id = %s
             AND (
                 (c.status = 'public') OR
-                (c.status = 'private' AND c.comment_author_id = ?) OR
-                (c.status = 'private' AND c.author_id = ?)
+                (c.status = 'private' AND c.comment_author_id = %s) OR
+                (c.status = 'private' AND c.author_id = %s)
             )
         """
 
@@ -395,9 +395,10 @@ def get_post_comments(author_id, post_id):
 
 
 
-@bp.route('/<author_id>/posts/<post_id>/comments', methods=['POST'])
+@bp.route('/authors/<author_id>/posts/<post_id>/comments', methods=['POST'])
 def send_comments(author_id, post_id):
     # Get attributes from HTTP body
+
     request_data = request.get_json()
     comment_author_id = request_data["comment_author_id"]
     comment_text = request_data["comment_text"]
@@ -409,30 +410,32 @@ def send_comments(author_id, post_id):
 
     data = ""
     try:
-        conn = get_db_connection()
+        conn, cur = get_db_connection()
 
         # Check if the authors are friends
         check_friends_query = "SELECT COUNT(*) FROM friends " \
-                              "WHERE author_followee = ? AND author_following = ? " \
+                              "WHERE author_followee = %s AND author_following = %s " \
                               "UNION " \
                               "SELECT COUNT(*) FROM friends " \
-                              "WHERE author_followee = ? AND author_following = ?"
-        friends_count = conn.execute(check_friends_query, (author_id, comment_author_id, comment_author_id, author_id)).fetchall()
-
+                              "WHERE author_followee = %s AND author_following = %s"
+        cur.execute(check_friends_query, (author_id, comment_author_id, comment_author_id, author_id))
+        friends_count = cur.fetchall()
+        friends_count = [dict(i) for i in friends_count]
+        print(friends_count)
         # Determine the status based on friendship
         status = 'private' if all(count[0] > 0 for count in friends_count) else 'public'
 
-        query = "INSERT INTO comments " \
-                "(comment_id, comment_author_id, " \
-                "post_id, author_id, comment_text, status, date_commented) " \
-                "VALUES (?, ?, ?, ?, ?, ? ,CURRENT_TIMESTAMP)" 
+        # query = "INSERT INTO comments " \
+        #         "(comment_id, comment_author_id, " \
+        #         "post_id, author_id, comment_text, status, date_commented) " \
+        #         "VALUES (?, ?, ?, ?, ?, ? ,CURRENT_TIMESTAMP)" 
         
-        conn.execute(query, (comment_id, comment_author_id, post_id, author_id, comment_text, status))
+        # cur.execute(query, (comment_id, comment_author_id, post_id, author_id, comment_text, status))
 
-        data = "success"
+        # data = "success"
 
-        conn.commit()
-        conn.close()
+        # conn.commit()
+        # conn.close()
 
 
     except Exception as e:
@@ -464,7 +467,8 @@ def get_github(author_id):
         # row = [dict(row) for row in row]
 
         # data = json.dumps(row, indent=4, sort_keys=True, default=str)
-        print(data)
+        # print(data)
+        data = row
         # if row is not None:
         #     row_values = [str(value) for value in row]
         #     row_string = ', '.join(row_values)
@@ -502,7 +506,7 @@ def update_github():
     return jsonify(data)    
 
 
-@bp.route('/<author_id>/posts/<post_id>/comments/<comment_id>/toggle-like', methods=['POST'])
+@bp.route('/authors/<author_id>/posts/<post_id>/comments/<comment_id>/toggle-like', methods=['POST'])
 def toggle_like(author_id, post_id, comment_id):
     request_data = request.get_json()
     like_comment_author_id = request_data["like_comment_author_id"]
@@ -512,17 +516,17 @@ def toggle_like(author_id, post_id, comment_id):
         cursor = conn.cursor()
 
         # Check if the like already exists
-        cursor.execute("SELECT * FROM comment_likes WHERE like_comment_author_id = ? AND comment_id = ?", 
+        cursor.execute("SELECT * FROM comment_likes WHERE like_comment_author_id = %s AND comment_id = %s", 
                        (like_comment_author_id, comment_id))
         like = cursor.fetchone()
 
         if like:
             # Like exists, so unlike it
-            cursor.execute("DELETE FROM comment_likes WHERE like_comment_author_id = ? AND comment_id = ?", 
+            cursor.execute("DELETE FROM comment_likes WHERE like_comment_author_id = %s AND comment_id = %s", 
                            (like_comment_author_id, comment_id))
         else:
             # Like doesn't exist, so add it
-            cursor.execute("INSERT INTO comment_likes (like_comment_author_id, comment_id, time_liked) VALUES (?, ?, CURRENT_TIMESTAMP)", 
+            cursor.execute("INSERT INTO comment_likes (like_comment_author_id, comment_id, time_liked) VALUES (%s, %s, CURRENT_TIMESTAMP)", 
                            (like_comment_author_id, comment_id))
 
         conn.commit()
@@ -536,7 +540,7 @@ def toggle_like(author_id, post_id, comment_id):
 
 
 
-@bp.route('/<author_id>/posts/<post_id>/comments/<comment_id>/likes', methods=['GET'])
+@bp.route('/authors/<author_id>/posts/<post_id>/comments/<comment_id>/likes', methods=['GET'])
 
 
 def get_comments_likes(comment_id):
