@@ -89,7 +89,7 @@ function ManagePosts() {
             "visibility": visibility,
             "post_id": postSelected,
             "title": editTitle
-        }).then((response) => {
+        },{headers: {'Authorization' : 'Basic ' + process.env.API_HOSTNAME}}).then((response) => {
             if (response.data === "Post Updated Successfully") {
                 
                 setPostsLists(postsLists.map(item => {
@@ -121,7 +121,9 @@ function ManagePosts() {
                 axios.post(restrictUrl, {
                     post_id: postSelected,
                     username: restrictedUsername
-                })
+                }, {headers:{
+                    'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+                    }})
                 .then(response => {
                 // Handle the successful response here            
                     if (response.data === "success") {
@@ -156,7 +158,9 @@ function ManagePosts() {
             axios.post(updateVisibilityUrl, {
                 post_id: postSelected,
                 visibility: visibility
-            })
+            }, {headers:{
+                'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+                }})
             .then(response => {
             // Handle the successful response here            
                 setPostsLists(postsLists.map(item => {
@@ -180,9 +184,10 @@ function ManagePosts() {
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
-                axios.get(managePostsUrl + `?author_id=${authorId}`)
+                axios.get(managePostsUrl + `?author_id=${authorId}`,{headers:
+                        {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}
+                })
                 .then(response => {
-                axios.get(managePostsUrl + `?author_id=${authorId}`, {
                 // Handle the successful response here
                 console.log('Response data:', response.data);
                     setPostsLists(response.data)

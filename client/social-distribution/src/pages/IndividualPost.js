@@ -31,7 +31,10 @@ export default function IndividualPost({ username, authorId, setUsername }) {;
         try {
             // Make the GET request using Axios
                 axios.get(postsUrl + id, {
-                    author_id: authorId
+                    author_id: authorId,
+                    headers: {
+                        'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+                    }
                 })
                 .then(response => {
                 // Handle the successful response here

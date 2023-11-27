@@ -75,7 +75,8 @@ function PostItem(props) {
   const fetchComments = async () => {
     try {
       const params = {
-        comment_author_id: props.loginUser // Assuming this is the user ID
+          'Authorization' : 'Basic ' + process.env.USERPASSBASE64,
+          comment_author_id: props.loginUser // Assuming this is the user ID
       };
       const apiUrl = process.env.API_HOSTNAME + `/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
   
@@ -99,10 +100,12 @@ function PostItem(props) {
   const toggleLikeComment = async (commentId) => {
     try {
       // Construct the URL for the POST request
-      const apiUrl = `http://127.0.0.1:5000/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}/toggle-like`;
+      const apiUrl = process.env.API_HOSTNAME + `/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}/toggle-like`;
   
       // Send the POST request
-      await axios.post(apiUrl, { like_comment_author_id: props.loginUser });
+      await axios.post(apiUrl, { like_comment_author_id: props.loginUser }, {headers: {
+          'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+          }});
   
       // Update the like status in the local state
       const updatedComments = comments.map(comment => {

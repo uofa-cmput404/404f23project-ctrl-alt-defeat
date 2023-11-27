@@ -49,6 +49,7 @@ function Login(props) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+          'Authorization' : 'Basic ' + process.env.USERPASSBASE64
       },
       body: JSON.stringify(loginData),
     })

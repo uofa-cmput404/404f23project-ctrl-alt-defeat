@@ -13,14 +13,17 @@ function RestrictedUser(props) {
         console.log(props.username);
         console.log(props.postSelected);
 
-        axios.delete(process.env.API_HOSTNAME + `/posts/unrestrict/${props.postSelected}/${props.username}`, (response) => {
+        axios.delete(process.env.API_HOSTNAME + `/posts/unrestrict/${props.postSelected}/${props.username}`, {headers:{'Authorization' : 'Basic ' + process.env.USERPASSBASE64}})
+            .then((response) => {
             if (response.data === "success") {
               alert("User restricted successfully")
             }
             else {
               alert("Something went wrong")
             }
-        })
+        }).catch(error => {
+          console.error('Error:', error);
+          });
     }
 
   return (

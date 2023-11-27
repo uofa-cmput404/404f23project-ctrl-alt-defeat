@@ -12,7 +12,8 @@ function Profile({ username, authorId, setUsername, onClose }) {
         author_id: authorId,
         github: GithubName
       
-    }).then((response) => {
+    },{headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}})
+        .then((response) => {
       toast.success(response.data);
     })
   }
@@ -27,6 +28,7 @@ function Profile({ username, authorId, setUsername, onClose }) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization' : 'Basic ' + process.env.USERPASSBASE64
       },
       body: JSON.stringify({ new_username: newUsername, authorId }),
     });
@@ -53,6 +55,7 @@ function Profile({ username, authorId, setUsername, onClose }) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization' : 'Basic ' + process.env.USERPASSBASE64
       },
       body: JSON.stringify({ new_password: newPassword, authorId }),
     });

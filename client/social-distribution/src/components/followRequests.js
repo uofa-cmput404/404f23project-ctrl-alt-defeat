@@ -7,7 +7,11 @@ function FollowRequests({ authorId }) {
     // Fetch follow requests for the current user (authorId)
     const fetchFollowRequests = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/follow/show_requests?authorId=${authorId}`);
+        const response = await fetch(process.env.API_HOSTNAME + `/follow/show_requests?authorId=${authorId}`, {
+          headers: {
+            'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+          }
+        });
         if (response.ok) {
           const data = await response.json();
           setFollowRequests(data.followRequests);
@@ -27,6 +31,7 @@ function FollowRequests({ authorId }) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization' : 'Basic ' + process.env.USERPASSBASE64
       },
       body: JSON.stringify({
         author_followee: authorId, // The current user
@@ -55,6 +60,7 @@ function FollowRequests({ authorId }) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization' : 'Basic ' + process.env.USERPASSBASE64
       },
       body: JSON.stringify(data),
     })

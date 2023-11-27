@@ -31,7 +31,7 @@ function PostsList(props) {
         axios.post(sendUnlikeUrl, {
           like_author_id: props.authorId,
           post_id: postSelected
-        })
+        },{headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}})
         .then(response => {
           // Handle successful response
           // Update front-end to reflect change
@@ -59,7 +59,7 @@ function PostsList(props) {
         axios.post(sendLikeUrl, {
           like_author_id: props.authorId,
           post_id: postSelected
-        })
+        },{headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}})
         .then(response => {
           // Handle successful response
           // Update front-end to reflect change

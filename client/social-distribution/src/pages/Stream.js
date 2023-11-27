@@ -65,7 +65,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
-                axios.get(postsUrl + `?author_id=${authorId}`)
+                axios.get(postsUrl + `?author_id=${authorId}`,{headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}})
                 .then(response => {
                 // Handle the successful response here
                 //console.log('Response data:', response.data);
@@ -116,7 +116,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
      // Check `likes` table (back-end) for all posts that logged in author has liked
      async function fetchLikedPosts() {
         try {
-            axios.get(likedPostsUrl)
+            axios.get(likedPostsUrl,{headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}})
             .then(response => {
                 //console.log('liked ids:', response.data);
                 setLikedPostIds(response.data);

@@ -87,7 +87,7 @@ export default function NewPost(props) {
           content: content,
           visibility: visibility,
           image_id: imageId
-        })
+        },{headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}})
         .then(response => {
           if (response.data === "success") {
             alert("Post successfully posted");

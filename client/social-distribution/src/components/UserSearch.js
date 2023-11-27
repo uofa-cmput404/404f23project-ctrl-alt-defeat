@@ -7,7 +7,8 @@ function UserSearch({ username, authorId }) {
 
   const handleSearch = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/follow/usersearch?query=${searchQuery}`);
+      const response = await fetch( process.env.API_HOSTNAME + `/follow/usersearch?query=${searchQuery}`,{
+          headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}});
       if (response.ok) {
         const data = await response.json();
         const filteredResults = data.users.filter(user => user.id !== authorId);
@@ -26,6 +27,7 @@ function UserSearch({ username, authorId }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization' : 'Basic ' + process.env.USERPASSBASE64
         },
         body: JSON.stringify({
           author_send: authorId,
@@ -57,6 +59,7 @@ function UserSearch({ username, authorId }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization' : 'Basic ' + process.env.USERPASSBASE64
         },
         body: JSON.stringify({
           author_unfollow: unfollowUserId,

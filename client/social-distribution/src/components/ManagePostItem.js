@@ -14,7 +14,9 @@ function ManagePostItem(props) {
                 // Make the GET request using Axios
                     axios.post(deleteUrl, {
                         post_id: props.item.post_id
-                    })
+                    },{headers: {
+                        'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+                        }})
                     .then(response => {
                         props.setPostsLists(oldValues => {                
                             return oldValues.filter(item => item.post_id !== props.item.post_id);
@@ -54,14 +56,16 @@ function ManagePostItem(props) {
     function getRestrictedUsers() {
         const restrictionListUrl = process.env.API_HOSTNAME + `/posts/restricted?post_id=${props.item.post_id}`
         console.log(restrictionListUrl)
-        axios.get(restrictionListUrl).then((response) => {
+        axios.get(restrictionListUrl, {headers:{
+            'Authorization' : 'Basic ' + process.env.USERPASSBASE64
+            }}).then((response) => {
             console.log(response.data)
             props.setRestrictedUsers(response.data)
         })
     }
 
 
-function get_content_as_elements(content_type, content){
+function getContentAsElements(content_type, content){
     if (content_type === "text/plain"){
         return(<p>{content}</p>);
     }
@@ -88,13 +92,13 @@ function get_content_as_elements(content_type, content){
             <h3>{props.item.title}</h3>
             <div>{props.item.date_posted}</div>
             <div>Visibility: {props.item.visibility}</div>
-            {props.item.visibility !== "private" && <a href={'http://127.0.0.1:3000/post/'+ props.item.post_id}>{'http://127.0.0.1:3000/post/'+ props.item.post_id}</a>}
+            {props.item.visibility !== "private" && <a href={process.env.REACT_HOSTNAME +'/post/'+ props.item.post_id}>{process.env.REACT_HOSTNAME+ '/post/'+ props.item.post_id}</a>}
         </div>
         <button onClick={selectEdit}>Edit</button>
         <button onClick={processDelete}>Delete this post</button>
         <button onClick={selectVisibility}>Change visibility</button>
         <button onClick={selectRestriction}>Restrictions</button>
-        <div>{get_content_as_elements(props.item.content_type,props.item.content)}</div>
+        <div>{getContentAsElements(props.item.content_type,props.item.content)}</div>
     </li>
   )
 }
