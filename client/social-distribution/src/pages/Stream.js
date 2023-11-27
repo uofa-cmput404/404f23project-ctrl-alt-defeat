@@ -8,13 +8,13 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
-const postsUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/posts';
+const postsUrl = 'http://127.0.0.1:5000/api/posts';
 
 
 export default function Stream({ username, authorId, setUsername, updateAuthStatus, updateUserAndAuthorId }) {;
     const navigate = useNavigate();
-    const likedPostsUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/authors/' + authorId + '/liked';
-    const githubIdLink = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/authors/github/' + authorId;     
+    const likedPostsUrl = 'http://127.0.0.1:5000/api/authors/' + authorId + '/liked';
+    const githubIdLink = 'http://127.0.0.1:5000/api/authors/github/' + authorId;     
     
     const [likedPostIds, setLikedPostIds] = useState({});
     const [responseData, setResponseData] = useState([]);

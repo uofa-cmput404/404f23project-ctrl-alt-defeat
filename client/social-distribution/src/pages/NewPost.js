@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { UserContext } from '../App';
 
-const newPostUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/posts/new'
+const newPostUrl = 'http://127.0.0.1:5000/api/posts/new'
 
 export default function NewPost(props) {
 

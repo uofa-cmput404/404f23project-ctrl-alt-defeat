@@ -45,7 +45,7 @@ function Login(props) {
       password: password.toLowerCase(), 
     };
   
-    fetch('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/authors/login', {
+    fetch('http://localhost:5000/api/authors/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

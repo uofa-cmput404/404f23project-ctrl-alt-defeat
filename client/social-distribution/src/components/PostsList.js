@@ -10,7 +10,7 @@ function PostsList(props) {
     console.log("heard postsLists", postSelectedId, postSelectedLiked, postSelectedAuthor);
 
     // URL goes to AUTHOR of post, NOT the author who is logged in/sending like
-    const sendLikeUrl = "https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/api/authors/" + postSelectedAuthor + '/inbox';
+    const sendLikeUrl = "http://127.0.0.1:5000/api/authors/" + postSelectedAuthor + '/inbox';
 
     if (postSelectedLiked === true) {
       console.log("unlike");
