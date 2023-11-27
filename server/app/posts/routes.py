@@ -478,7 +478,7 @@ def get_post(author_id, post_id):
         author_item["id"] = request.root_url + row["author_id"]
         author_item["url"] = request.root_url + row["author_id"]
         author_item["displayName"] = row["username"]
-        author_item["github"] = (request.url_root + row["github"]) if row["github"] != None else None
+        author_item["github"] = ("https://github.com/" + row["github"]) if row["github"] != None else None
         author_item["profileImage"] = None
 
         item["author"] = author_item
@@ -566,7 +566,7 @@ def get_posts(author_id):
             author_item["id"] = request.root_url + post["author_id"]
             author_item["url"] = request.root_url + post["author_id"]
             author_item["displayName"] = author["username"]
-            author_item["github"] = (request.root_url + author["github"]) if author["github"] != None else None
+            author_item["github"] = ("https://github.com/" + author["github"]) if author["github"] != None else None
             author_item["profileImage"] = None
 
             item["author"] = author_item
