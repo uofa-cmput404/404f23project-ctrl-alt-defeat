@@ -47,7 +47,6 @@ def get_authors():
             item["url"] = request.url_root + "api/authors/" + r["author_id"] 
             item["host"] = request.url_root
             item["displayName"] = r["username"]
-            item["github"] = request.url_root + "/" + r["github"] if "github" in r else None
             item["profileImage"] = None # TODO: implement profile pics
             data["items"].append(item)
         

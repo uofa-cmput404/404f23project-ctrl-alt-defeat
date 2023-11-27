@@ -35,8 +35,6 @@ def get_restricted_users():
         # data = json.dumps([dict(i) for i in posts])
         # print(data)
 
-        data = posts
-
         conn.commit()
         conn.close()
         
@@ -201,7 +199,6 @@ def get_my_posts():
         posts = [dict(row) for row in posts]
         print(posts)       
 
-        data = posts
         # data = json.dumps(posts, indent=4, sort_keys=True, default=str)
         
     except Exception as e:
@@ -270,7 +267,6 @@ def index():
             print(e)
             data = str(e)
 
-        data = posts
         # data = json.dumps(posts, indent=4, sort_keys=True, default=str)
 
     except Exception as e:
@@ -465,8 +461,8 @@ def get_post(author_id, post_id):
         item["id"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
         
         # No idea what these are, skip for now
-        item["source"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
-        item["origin"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
+        item["source"] = None
+        item["origin"] = None
         item["description"] = None
         item["contentType"] = post["content_type"]   
         item["content"] = post["content"]        
@@ -553,8 +549,8 @@ def get_posts(author_id):
             item["id"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
             
             # No idea what these are, skip for now
-            item["source"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
-            item["origin"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
+            item["source"] = None
+            item["origin"] = None
             item["description"] = None
             item["contentType"] = post["content_type"]        
             item["content"] = post["content"]        
