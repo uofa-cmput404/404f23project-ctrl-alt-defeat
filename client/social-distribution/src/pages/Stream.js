@@ -8,15 +8,13 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
-const postsUrl = process.env.HOSTNAME + '/api/posts/';
+const postsUrl = process.env.API_HOSTNAME + '/api/posts/';
 
 
 export default function Stream({ username, authorId, setUsername, updateAuthStatus, updateUserAndAuthorId }) {;
     const navigate = useNavigate();
-    const likedPostsUrl = 'http://127.0.0.1:5000/authors/' + authorId + '/liked';
-    const githubIdLink = 'http://127.0.0.1:5000/authors/github/' + authorId;     
-    const likedPostsUrl = process.env.HOSTNAME + '/api/authors/' + authorId + '/liked';
-    const githubIdLink = process.env.HOSTNAME + '/api/authors/github/' + authorId;
+    const likedPostsUrl = process.env.API_HOSTNAME + '/api/authors/' + authorId + '/liked';
+    const githubIdLink = process.env.API_HOSTNAME + '/api/authors/github/' + authorId;
     
     const [likedPostIds, setLikedPostIds] = useState({});
     const [responseData, setResponseData] = useState([]);

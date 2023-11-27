@@ -7,7 +7,7 @@ function Profile({ username, authorId, setUsername, onClose }) {
   const [newPassword, setNewPassword] = useState('');
 
   const handleGithubUpdate = async () => {
-    axios.post(process.env.HOSTNAME + '/authors/github', {
+    axios.post(process.env.API_HOSTNAME + '/authors/github', {
       
         author_id: authorId,
         github: GithubName
@@ -23,7 +23,7 @@ function Profile({ username, authorId, setUsername, onClose }) {
       return;
     }
 
-    const response = await fetch(process.env.HOSTNAME + '/authors/update_username', {
+    const response = await fetch(process.env.API_HOSTNAME + '/authors/update_username', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ function Profile({ username, authorId, setUsername, onClose }) {
       return;
     }
 
-    const response = await fetch(process.env.HOSTNAME + '/authors/update_password', {
+    const response = await fetch(process.env.API_HOSTNAME + '/authors/update_password', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

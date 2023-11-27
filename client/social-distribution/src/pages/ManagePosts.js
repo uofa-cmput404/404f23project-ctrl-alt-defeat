@@ -6,11 +6,11 @@ import SetVisibilityDialog from '../components/SetVisibilityDialog';
 import RestrictedUser from '../components/RestrictedUser';
 import { UserContext } from '../App';
 
-const managePostsUrl = process.env.HOSTNAME + '/api/posts/manage'
-const updateVisibilityUrl = process.env.HOSTNAME + '/api/posts/visibility'
-const restrictUrl = process.env.HOSTNAME + '/api/posts/restrict'
-const restrictionListUrl = process.env.HOSTNAME + '/api/posts/restricted/'
-const editUrl = process.env.HOSTNAME + '/posts/authors/'
+const managePostsUrl = process.env.API_HOSTNAME + '/api/posts/manage'
+const updateVisibilityUrl = process.env.API_HOSTNAME + '/api/posts/visibility'
+const restrictUrl = process.env.API_HOSTNAME + '/api/posts/restrict'
+const restrictionListUrl = process.env.API_HOSTNAME + '/api/posts/restricted/'
+const editUrl = process.env.API_HOSTNAME + '/posts/authors/'
 
 function ManagePosts() {
     const styles = {

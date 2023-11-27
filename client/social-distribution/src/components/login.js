@@ -45,7 +45,7 @@ function Login(props) {
       password: password.toLowerCase(), 
     };
   
-    fetch(process.env.HOSTNAME + '/api/authors/login', {
+    fetch(process.env.API_HOSTNAME + '/api/authors/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

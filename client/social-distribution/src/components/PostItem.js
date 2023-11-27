@@ -77,7 +77,7 @@ function PostItem(props) {
       const params = {
         comment_author_id: props.loginUser // Assuming this is the user ID
       };
-      const apiUrl = process.env.HOSTNAME + `/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
+      const apiUrl = process.env.API_HOSTNAME + `/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
   
       const response = await axios.get(apiUrl, { params });
       if (response.data && response.data.comments) {
@@ -139,8 +139,8 @@ function PostItem(props) {
     };
   
     try {
-      const apiUrl = `http://127.0.0.1:5000/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
-      await axios.post(apiUrl, commentData);
+      const apiUrl = process.env.API_HOSTNAME + `/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
+      await axios.post(apiUrl, commentData, {headers: {'Authorization' : 'Basic ' + process.env.USERPASSBASE64}});
       setComment('');
       fetchComments(); // Refresh comments after posting
     } catch (error) {

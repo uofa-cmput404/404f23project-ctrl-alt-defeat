@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React from 'react'
 
-const unrestrictUrl = process.env.HOSTNAME + '/posts/unrestrict/'
+const unrestrictUrl = process.env.API_HOSTNAME + '/posts/unrestrict/'
 function RestrictedUser(props) {  
 
   function removeRestriction(event) {
@@ -13,7 +13,7 @@ function RestrictedUser(props) {
         console.log(props.username);
         console.log(props.postSelected);
 
-        axios.delete(`http://127.0.0.1:5000/posts/unrestrict/${props.postSelected}/${props.username}`, (response) => {
+        axios.delete(process.env.API_HOSTNAME + `/posts/unrestrict/${props.postSelected}/${props.username}`, (response) => {
             if (response.data === "success") {
               alert("User restricted successfully")
             }

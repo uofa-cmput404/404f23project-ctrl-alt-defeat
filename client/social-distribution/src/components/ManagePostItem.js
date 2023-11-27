@@ -3,7 +3,7 @@ import React from 'react'
 import Markdown from 'react-markdown';
 import './ManagePostItem.css';
 
-const deleteUrl = process.env.HOSTNAME + '/posts/delete'
+const deleteUrl = process.env.API_HOSTNAME + '/posts/delete'
 function ManagePostItem(props) {
     function processDelete() {
         if (window.confirm("Are you sure you want to delete this post?")) {
@@ -52,7 +52,7 @@ function ManagePostItem(props) {
     }
 
     function getRestrictedUsers() {
-        const restrictionListUrl = process.env.HOSTNAME + `/posts/restricted?post_id=${props.item.post_id}`
+        const restrictionListUrl = process.env.API_HOSTNAME + `/posts/restricted?post_id=${props.item.post_id}`
         console.log(restrictionListUrl)
         axios.get(restrictionListUrl).then((response) => {
             console.log(response.data)
