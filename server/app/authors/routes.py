@@ -210,6 +210,8 @@ def get_posts_liked(author_id):
         conn.commit()
         conn.close()
 
+        data=payload
+
 
     except Exception as e:
         print("Getting likes error: ", e)
