@@ -46,16 +46,12 @@ CREATE TABLE posts (
 
 CREATE TABLE friends (
     author_followee TEXT NOT NULL,
-    author_following TEXT NOT NULL,
-    FOREIGN KEY (author_followee) REFERENCES authors(author_id) ON DELETE CASCADE,
-    FOREIGN KEY (author_following) REFERENCES authors(author_id) ON DELETE CASCADE
+    author_following TEXT NOT NULL
 );
 
 CREATE TABLE follow_requests (
-    author_send TEXT NOT NULL,
-    author_receive TEXT NOT NULL,
-    FOREIGN KEY (author_send) REFERENCES authors(author_id),
-    FOREIGN KEY (author_receive) REFERENCES authors(author_id)
+    author_send TEXT,
+    author_receive TEXT NOT NULL
 );
 
 CREATE TABLE likes (

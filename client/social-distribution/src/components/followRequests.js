@@ -51,7 +51,7 @@ function FollowRequests({ authorId }) {
       author_following: requestId,      
     };
   
-    fetch('http://localhost:5000/api/reject_request', {
+    fetch('http://localhost:5000/api/follow/reject_request', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

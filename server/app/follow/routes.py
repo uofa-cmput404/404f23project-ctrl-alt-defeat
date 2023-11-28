@@ -1,3 +1,5 @@
+import flask
+import requests
 from . import bp
 from flask import request, g, jsonify
 import sqlite3
@@ -55,32 +57,82 @@ def follow_request():
     
     return jsonify({'message': 'Follow request sent'})
 
+def is_local_user(author_id):
+    connection, cursor = get_db_connection()
+
+    # Check if the author_id exists in the local authors table
+    cursor.execute("SELECT 1 FROM authors WHERE author_id = %s LIMIT 1", (author_id,))
+    exists = cursor.fetchone() is not None
+
+    connection.close()
+
+    return exists
+
+def get_remote_author_info(author_id):
+    auth = ('cross-server', 'password')
+    response = requests.get(
+        f'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/{author_id}',
+        auth=auth
+    )
+    if response.ok:
+        return response.json()
+    return None
+
 @bp.route('/follow/show_requests', methods=['GET'])
 def get_follow_requests():
-    print("here")
-    author_id = request.args.get('authorId')
+    local_request = flask.request
+    author_id = local_request.args.get('authorId')
     if not author_id:
         return jsonify({'followRequests': []})
     
     connection, cursor = get_db_connection()   
 
     cursor.execute(
-        "SELECT f.author_send, a.username FROM follow_requests f "
-        "INNER JOIN authors a ON f.author_send = a.author_id "
+        "SELECT f.author_send FROM follow_requests f "
         "WHERE f.author_receive = %s",
         (author_id,)
     )
 
     follow_requests = cursor.fetchall()
     follow_requests = [dict(row) for row in follow_requests]
+    print('FOLLOWS',follow_requests)
+    # Fetch all usernames before closing the connection
+    usernames = {}
+    for request_entry in follow_requests:
+        author_send = request_entry['author_send']
+        cursor.execute("SELECT username FROM authors WHERE author_id = %s", (author_send,))
+        local_user = cursor.fetchone()
+        if local_user:
+            usernames[author_send] = local_user['username']
 
     connection.close()
 
-    if follow_requests:
-        follow_requests_list = [{'id': request["author_send"], 'username': request["username"]} for request in follow_requests]
-        return jsonify({'followRequests': follow_requests_list})
-    else:
-        return jsonify({'followRequests': []})
+    follow_requests_list = []
+
+    for request_entry in follow_requests:
+        author_send = request_entry['author_send']
+
+        # Check if the author_send is local or remote
+        if is_local_user(author_send):
+            # If local, use the username from the pre-fetched data
+            print('if',author_send)
+            username = usernames.get(author_send)
+            if username:
+                follow_requests_list.append({'id': author_send, 'username': username})
+        else:
+            print('else',author_send)
+            # If remote, fetch the display name from the remote server
+            remote_user_info = get_remote_author_info(author_send)
+            print('REMOTE INFOOOO!',remote_user_info)
+            if remote_user_info:
+                follow_requests_list.append({
+                    'id': remote_user_info['id'].split('/')[-1],
+                    'username': remote_user_info['displayName']
+                })
+    
+    print(follow_requests_list)
+    return jsonify({'followRequests': follow_requests_list})
+
 
 @bp.route('/follow/accept_request', methods=['POST'])
 def accept_follow_request():

@@ -217,8 +217,9 @@ def create_app():
 
     app.register_blueprint(swaggerui_blueprint)
     
-    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://%s:%s@%s:%d/%s" % (user, password, host, port, dbname)
-    app.config["SECRET_KEY"] = "mysecret"
+    # app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://%s:%s@%s:%d/%s" % (postgres, 7777, localhost, 5432, postgres)
+    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:7777@localhost:5432/postgres"
+    #app.config["SECRET_KEY"] = "mysecret"
 
     db.init_app(app)
     admin.init_app(app)

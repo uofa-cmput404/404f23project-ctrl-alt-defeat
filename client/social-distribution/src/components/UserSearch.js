@@ -7,14 +7,35 @@ function UserSearch({ username, authorId }) {
 
   const handleSearch = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/follow/usersearch?query=${searchQuery}`);
-      if (response.ok) {
-        const data = await response.json();
-        const filteredResults = data.users.filter(user => user.id !== authorId);
-        setSearchResults(filteredResults);
-      } else {
-        console.error('Search failed');
+      // Fetch local users
+      const localResponse = await fetch(`http://localhost:5000/api/follow/usersearch?query=${searchQuery}`);
+      if (!localResponse.ok) {
+        console.error('Local search failed');
+        return;
       }
+      const localData = await localResponse.json();
+      const localResults = localData.users.filter(user => user.id !== authorId);
+  
+      // Fetch external users
+      const externalResponse = await fetch('https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/', {
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Basic Y3Jvc3Mtc2VydmVyOnBhc3N3b3Jk',
+        },
+      });
+      if (!externalResponse.ok) {
+        console.error('External search failed');
+        return;
+      }
+      const externalData = await externalResponse.json();
+      const externalResults = externalData.items.map(item => ({
+        id: item.id.split('/').pop(), // Extracting just the ID from the URL
+        username: item.displayName,
+      }));
+  
+      // Combine local and external results
+      const combinedResults = [...localResults, ...externalResults];
+      setSearchResults(combinedResults);
     } catch (error) {
       console.error('Error:', error);
     }
