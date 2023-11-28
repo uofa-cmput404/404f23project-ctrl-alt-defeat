@@ -214,6 +214,7 @@ def get_posts_liked(author_id):
             item["object"] = request.root_url + "authors/" + like["author_id"] + "/posts/" + like["post_id"]
             payload["items"].append(item)        
 
+        data = payload
         conn.commit()
         conn.close()
 
@@ -284,7 +285,7 @@ def get_liked_posts(author_id, post_id):
 @bp.route('/authors/<author_id>/inbox', methods=['POST'])
 def send_like(author_id):
     # Get attributes from HTTP body
-    
+    print("reach")
     request_data = request.get_json()
     like_author_id = request_data["like_author_id"]
     post_id = request_data["post_id"]
@@ -346,8 +347,6 @@ def delete_like(author_id):
 
 
 @bp.route('/authors/<author_id>/posts/<post_id>/comments', methods=['GET'])
-
-
 def get_post_comments(author_id, post_id):
     comment_author_id = request.args.get('comment_author_id')
     if not comment_author_id:
@@ -376,14 +375,16 @@ def get_post_comments(author_id, post_id):
 
         cursor.execute(query, (comment_author_id, post_id, author_id, comment_author_id, comment_author_id))
         comment_info = cursor.fetchall()
+        comment_info = [dict(i) for i in comment_info]
+        print(comment_info)
         conn.close()
 
         comments_list = [
             {
-                'comment_name': comment[0],
-                'comment_text': comment[1], 
-                'comment_id': comment[2],
-                'isLikedByCurrentUser': comment[3]
+                'comment_name': comment['username'],
+                'comment_text': comment['comment_text'], 
+                'comment_id': comment['comment_id'],
+                'isLikedByCurrentUser': comment['islikedbycurrentuser']
             } for comment in comment_info
         ]
         return jsonify({'comments': comments_list})
@@ -391,8 +392,6 @@ def get_post_comments(author_id, post_id):
     except Exception as e:
         print("Getting comments error: ", e)
         return jsonify({'error': str(e)}), 500
-
-
 
 
 @bp.route('/authors/<author_id>/posts/<post_id>/comments', methods=['POST'])
@@ -412,39 +411,33 @@ def send_comments(author_id, post_id):
     try:
         conn, cur = get_db_connection()
 
-        # Check if the authors are friends
+        #Check if the authors are friends
         check_friends_query = """
-            SELECT CASE WHEN (
-                SELECT COUNT() FROM friends 
+        SELECT CASE WHEN (
+                SELECT COUNT(*) FROM friends 
                 WHERE author_followee = %s AND author_following = %s
                 ) + (
-                SELECT COUNT() FROM friends 
+                SELECT COUNT(*) FROM friends 
                 WHERE author_followee = %s AND author_following = %s
                 ) = 2 THEN 'private'
                 ELSE 'public'
-            END AS status
+        END AS status
         """
         cur.execute(check_friends_query, (author_id, comment_author_id, comment_author_id, author_id))
-        
-        friends_count = cur.fetchone()[0]
-        
-        print(friends_count)
-        # Determine the status based on friendship
-        status = 'private' if friends_count['count'] > 0 else 'public'
+        status = dict(cur.fetchone())['status']
+        print(status)
+        query = "INSERT INTO comments " \
+                "(comment_id, comment_author_id, " \
+                "post_id, author_id, comment_text, status, date_commented) " \
+                "VALUES (%s, %s, %s, %s, %s, %s ,CURRENT_TIMESTAMP)" 
+        cur.execute(query, (comment_id, comment_author_id, post_id, author_id, comment_text, status))
 
-        # query = "INSERT INTO comments " \
-        #         "(comment_id, comment_author_id, " \
-        #         "post_id, author_id, comment_text, status, date_commented) " \
-        #         "VALUES (%s, %s, %s, %s, %s, %s ,CURRENT_TIMESTAMP)" 
-        
-        # print(comment_author_id)
-        # cur.execute(query, (comment_id, comment_author_id, post_id, author_id, comment_text, status))
 
-        # data = "success"
+        data = "success"
 
-        # conn.commit()
-        # conn.close()
+        conn.commit()
 
+        conn.close()
 
     except Exception as e:
         print("comment error: ", e)
@@ -520,13 +513,15 @@ def toggle_like(author_id, post_id, comment_id):
     like_comment_author_id = request_data["like_comment_author_id"]
 
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        conn, cursor = get_db_connection()
+
 
         # Check if the like already exists
         cursor.execute("SELECT * FROM comment_likes WHERE like_comment_author_id = %s AND comment_id = %s", 
                        (like_comment_author_id, comment_id))
+        
         like = cursor.fetchone()
+        
 
         if like:
             # Like exists, so unlike it

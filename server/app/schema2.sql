@@ -1,16 +1,16 @@
 -- Drop tables if they exist
 DROP TABLE IF EXISTS post_restrictions;
 DROP TABLE IF EXISTS shares;
+DROP TABLE IF EXISTS comment_likes;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS likes;
 DROP TABLE IF EXISTS follow_requests;
 DROP TABLE IF EXISTS friends;
-DROP TABLE IF EXISTS image_post;
 DROP TABLE IF EXISTS admins;
 DROP TABLE IF EXISTS requestors;
 DROP TABLE IF EXISTS posts;
-DROP TABLE IF EXISTS authors;
 DROP TABLE IF EXISTS nodes;
+DROP TABLE IF EXISTS authors CASCADE;
 
 CREATE TABLE authors (
     author_id TEXT PRIMARY KEY,
