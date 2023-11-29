@@ -24,8 +24,6 @@ def user_search():
     users = cursor.fetchall()
     users = [dict(row) for row in users]
 
-    print(users)
-
     if users:        
         user_list = [{'id': user["author_id"], 'username': user["username"]} for user in users]
         return jsonify({'users': user_list})

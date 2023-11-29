@@ -7,7 +7,7 @@ function UserSearch({ username, authorId }) {
 
   const handleSearch = async () => {
     try {
-      // Fetch local users
+      // Fetch local users with the search query
       const localResponse = await fetch(`http://localhost:5000/api/follow/usersearch?query=${searchQuery}`);
       if (!localResponse.ok) {
         console.error('Local search failed');
@@ -16,7 +16,7 @@ function UserSearch({ username, authorId }) {
       const localData = await localResponse.json();
       const localResults = localData.users.filter(user => user.id !== authorId);
   
-      // Fetch external users
+      // Fetch all external users
       const externalResponse = await fetch('https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/', {
         headers: {
           'accept': 'application/json',
@@ -33,14 +33,17 @@ function UserSearch({ username, authorId }) {
         username: item.displayName,
       }));
   
-      // Combine local and external results
-      const combinedResults = [...localResults, ...externalResults];
+      // Filter external results based on the search query
+      const filteredExternalResults = externalResults.filter(user => user.username.toLowerCase().includes(searchQuery.toLowerCase()));
+  
+      // Combine local and filtered external results
+      const combinedResults = [...localResults, ...filteredExternalResults];
       setSearchResults(combinedResults);
     } catch (error) {
       console.error('Error:', error);
     }
   };
-
+  
   const handleFollowRequest = async (recieveAuthorId) => {
     try {
       const response = await fetch('http://localhost:5000/api/follow/follow_request', {
