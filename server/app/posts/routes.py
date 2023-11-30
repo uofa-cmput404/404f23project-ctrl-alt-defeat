@@ -222,6 +222,7 @@ def index():
         # print(author_id)
         conn, curr = get_db_connection()
         
+        # Local posts first
         # Get all the posts from people who I'm following + posts who are public + posts that are mine
         # Do not include posts that I'm restricted from
         query = "SELECT posts.author_id, username, posts.post_id, date_posted, title, content_type, content, image_id, visibility " \
@@ -236,16 +237,76 @@ def index():
         
         curr.execute(query, (author_id, author_id, author_id))
         row = curr.fetchall()                                
-        posts = [dict(i) for i in row]        
+        data = [dict(i) for i in row]                
 
-        data = posts
-        # data = json.dumps(posts, indent=4, sort_keys=True, default=str)
+        # Then remote posts:           
+        remote_post1 = grab_remote_posts("https://cmput-average-21-b54788720538.herokuapp.com/api/authors/", "CtrlAltDefeat", "string")
+        remote_post2 = grab_remote_posts("https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/", "cross-server", "password")
+        data.extend(remote_post1)
+        data.extend(remote_post2)
+
 
     except Exception as e:
         print(e)
         data = str(e)
 
     return jsonify(data) # data
+
+# Util func for grabbing remote posts
+def grab_remote_posts(authors_url, server_username, server_password):
+    data = []
+    print("account")
+    print(server_username, server_password)
+    res = requests.get(authors_url, auth=(server_username, server_password))
+
+    items = res.json()["items"]
+    
+    print("posts found:")
+    for item in items:        
+        url_parts = item["id"].split("/")
+
+        # Find the index of "authors" in the split URL
+        authors_index = url_parts.index("authors")
+        
+        author_id = url_parts[authors_index + 1]
+        username = item["displayName"]
+
+        res = requests.get(authors_url + author_id + "/posts/", auth=(server_username, server_password))
+
+        print(res.json())
+        posts = res.json()["items"]       
+
+
+        # parse author_id, username, posts.post_id, date_posted, title, content_type, content, image_id, visibility
+        for post in posts:
+            # print(post)
+            new_data = dict()
+            url_parts = post["id"].split("/")
+            # Find the index of "posts" in the split URL
+            posts_index = url_parts.index("posts")                
+            post_id = url_parts[posts_index + 1]
+
+            # TODO: work on friends only
+            visibility = "public"
+            if post["visibility"] == "PRIVATE":
+                visibility = "private"                 
+            
+            if post["unlisted"] == True:
+                visibility = "unlisted"                 
+
+            new_data["author_id"] = author_id
+            new_data["username"] = username
+            new_data["post_id"] = post_id
+            new_data["date_post"] = post["published"]
+            new_data["title"] = post["title"]
+            new_data["content_type"] = post["contentType"]
+            new_data["content"] = post["content"]
+            new_data["image_id"] = None # Do we even need this                 
+            new_data["visibility"] = visibility
+
+            data.append(new_data)     
+            
+    return data        
 
 # MAKE POSTS
 @bp.route('/posts/new', methods=['POST'])
