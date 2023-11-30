@@ -66,10 +66,10 @@ def is_local_user(author_id):
 
     return exists
 
-def get_remote_author_info(author_id):
+def get_remote_author_info(author_id, server_url):
     auth = ('cross-server', 'password')
     response = requests.get(
-        f'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/{author_id}',
+        f'{server_url}/authors/{author_id}',
         auth=auth
     )
     if response.ok:
@@ -83,17 +83,20 @@ def get_follow_requests():
     if not author_id:
         return jsonify({'followRequests': []})
     
+    server_urls = ['https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com', 'https://cmput-average-21-b54788720538.herokuapp.com/api']
+
     connection, cursor = get_db_connection()   
 
     cursor.execute(
         "SELECT f.author_send FROM follow_requests f "
         "WHERE f.author_receive = %s",
-        (author_id,)
+        (author_id,)    
     )
 
     follow_requests = cursor.fetchall()
     follow_requests = [dict(row) for row in follow_requests]
-    print('FOLLOWS',follow_requests)
+    print('FOLLOWS', follow_requests)
+
     # Fetch all usernames before closing the connection
     usernames = {}
     for request_entry in follow_requests:
@@ -113,20 +116,22 @@ def get_follow_requests():
         # Check if the author_send is local or remote
         if is_local_user(author_send):
             # If local, use the username from the pre-fetched data
-            print('if',author_send)
+            print('local', author_send)
             username = usernames.get(author_send)
             if username:
                 follow_requests_list.append({'id': author_send, 'username': username})
         else:
-            print('else',author_send)
-            # If remote, fetch the display name from the remote server
-            remote_user_info = get_remote_author_info(author_send)
-            print('REMOTE INFOOOO!',remote_user_info)
-            if remote_user_info:
-                follow_requests_list.append({
-                    'id': remote_user_info['id'].split('/')[-1],
-                    'username': remote_user_info['displayName']
-                })
+            print('remote', author_send)
+            # Iterate over each server URL
+            for server_url in server_urls:
+                # Try fetching from the current server URL
+                remote_user_info = get_remote_author_info(author_send, server_url)
+                if remote_user_info:
+                    follow_requests_list.append({
+                        'id': remote_user_info['id'].split('/')[-1],
+                        'username': remote_user_info['displayName']
+                    })
+                    break  # Break out of the loop if user is found on any server
     
     print(follow_requests_list)
     return jsonify({'followRequests': follow_requests_list})
