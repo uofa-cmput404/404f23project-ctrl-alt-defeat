@@ -391,7 +391,7 @@ def get_post_comments(author_id, post_id):
         conn, cursor = get_db_connection()
         
         query = """
-            SELECT a.username, c.comment_text, c.comment_id, 
+            SELECT a.username, c.comment_text,c.comment_author_id, c.comment_id, 
                 EXISTS (
                     SELECT 1 FROM comment_likes cl 
                     WHERE cl.comment_id = c.comment_id 
@@ -419,6 +419,7 @@ def get_post_comments(author_id, post_id):
                 'comment_name': comment['username'],
                 'comment_text': comment['comment_text'], 
                 'comment_id': comment['comment_id'],
+                'comment_author_id': comment['comment_author_id'],
                 'isLikedByCurrentUser': comment['islikedbycurrentuser']
             } for comment in comment_info
         ]
@@ -427,6 +428,7 @@ def get_post_comments(author_id, post_id):
     except Exception as e:
         print("Getting comments error: ", e)
         return jsonify({'error': str(e)}), 500
+
 
 
 @bp.route('/authors/<author_id>/posts/<post_id>/comments', methods=['POST'])
@@ -479,6 +481,32 @@ def send_comments(author_id, post_id):
         data = "error"
     
     return data
+
+@bp.route('/authors/<author_id>/posts/<post_id>/comments/<comment_id>', methods=['DELETE'])
+def delete_comment(author_id, post_id, comment_id):
+    try:
+        conn, cur = get_db_connection()
+
+        # SQL query to delete all likes associated with the comment
+        delete_likes_query = "DELETE FROM comment_likes WHERE comment_id = %s"
+        cur.execute(delete_likes_query, (comment_id,))
+
+        # SQL query to delete the comment
+        delete_comment_query = "DELETE FROM comments WHERE comment_id = %s AND author_id = %s AND post_id = %s"
+        cur.execute(delete_comment_query, (comment_id, author_id, post_id))
+
+        # Commit the changes
+        conn.commit()
+        conn.close()
+        return {"status": "success"}, 200
+    except Exception as e:
+        # Roll back the transaction in case of error
+        if conn:
+            conn.rollback()
+        print("Error deleting comment: ", e)
+        return {"status": "error", "message": str(e)}, 500
+
+
 
 
 
