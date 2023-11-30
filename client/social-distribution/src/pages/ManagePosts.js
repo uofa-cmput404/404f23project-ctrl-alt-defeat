@@ -185,6 +185,7 @@ function ManagePosts() {
                 // Handle the successful response here
                 console.log('Response data:', response.data);
                     setPostsLists(response.data)
+                    setVisibility(response.data.visibility);
                 })
                 .catch(error => {
                 // Handle any errors that occur during the request
