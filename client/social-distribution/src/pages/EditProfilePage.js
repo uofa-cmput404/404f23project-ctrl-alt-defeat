@@ -4,10 +4,32 @@ import { UserContext } from '../App';
 import axios from 'axios';
 
 function EditProfilePage() {
-    const [newUsername, setNewUsername] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [GithubName, setGithubName] = useState('');
-    const {username, authorId} = useContext(UserContext);    
+  const [newPassword, setNewPassword] = useState('');
+  const [GithubName, setGithubName] = useState('');
+  const {username, authorId} = useContext(UserContext);    
+  const [newUsername, setNewUsername] = useState(username);
+  const githubIdLink = 'http://127.0.0.1:5000/api/authors/github/' + authorId;     
+
+  const fetchGithubUsername = async () => {        
+    try {
+        // Make the GET request using Axios
+            axios.get(githubIdLink)
+            .then(response => {
+              try {
+                if (response.data !== "" && response.data.github !== null) {
+                  setGithubName(response.data.github);
+                }
+              }
+              catch (error) {
+                console.error('Error', error)
+              }}).catch(error => {
+                // Handle any errors that occur during the request
+                console.error('Error:', error);
+                });
+          } catch (error) {
+            console.error('Error:', error);
+          }
+    }
 
     const styles = {
         container: {
@@ -84,7 +106,7 @@ function EditProfilePage() {
       };
 
     useEffect(() => {
-        console.log(authorId);
+        fetchGithubUsername();
     }, [])
     
   return (

@@ -84,7 +84,8 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
             marginTop: 20
         },
         card: {
-            padding: 10
+            padding: 10,
+            textOverflow: 'ellipsis',                        
         },        
         sidebar: {            
             position: "fixed",
@@ -92,8 +93,10 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
             left: 10,            
             overflowX: "hidden",            
             overflowY:"scroll",
-            height: "90%",
-            paddingBottom: 10
+            maxHeight: "90%",            
+            textOverflow: 'ellipsis',
+            paddingBottom: 10,   
+            width: 280                     
         }
     }
 
@@ -208,29 +211,32 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 
             {showProfile && <Profile username={username} authorId={authorId} setUsername={setUsername} onClose={closeProfile} />}          
-        <div style={styles.container}>       
-        <div style={styles.sidebar}>
-            <div class="card" style={styles.card}>                                  
-                    <h3>My Github Activity</h3>                          
-                    {activityList.length ? <div>
-                        {activityList.map(e => {
-                            return <div>
-                                <b>{e.repo.name}</b>
-                                    <p>{e.created_at.split("T")[0]}</p>                                
+        <div style={styles.container}> 
+            <div style={styles.sidebar}>                
+                <div class="card" style={styles.card}>                                  
+                        <h3>My Github Activity</h3>                          
+                        {activityList.length ? <div>
+                            {activityList.map(e => {
+                                return <div>
+                                    <b>{e.repo.name}</b>
+                                        <p>{e.created_at.split("T")[0]}</p>                                
                                 </div>
-                        })}
-                    
-            </div> : "You have no commits"}
-            
-            </div>                
-            <div class="card" style={styles.followContainer}>
-                <h3>Follow Requests</h3>
-                <FollowRequests authorId={authorId} />
-            </div>
+                            })}
+                        
+                </div> : "You have no commits"}
+                
+                </div>                
+                <div class="card" style={styles.followContainer}>
+                    <h3>Follow Requests</h3>
+                    <FollowRequests authorId={authorId} />
+                </div>
             </div>        
-            <div style={styles.posts}>
+            <div style={styles.posts}>                
+                <b>Hi {username}! 😎</b>
                 <h1>Streams</h1>
-                    <button onClick={goToNewPost} type="button" class="btn btn-primary"><i class="fa fa-comment"></i> New Post</button>                                      
+                    <div>
+                        <button onClick={goToNewPost} type="button" class="btn btn-primary"><i class="fa fa-comment"></i> New Post</button>                                                              
+                    </div>
                 <div style={styles.postsContainer}>
                     {
                         !fetchDone ?

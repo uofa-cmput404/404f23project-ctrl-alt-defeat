@@ -158,7 +158,7 @@ function PostItem(props) {
 
   return (
     <div style={styles.container} class="card">
-        <h3>{props.item.title}</h3>
+        <h3><a href={"http://localhost:3000/authors/" + props.item.author_id + "/posts/" + props.item.post_id}   >{props.item.title}</a></h3>
         <small class="text-muted">Posted by: {props.item.username}</small>        
         <small class="text-muted">{props.item.date_posted}</small>        
         <hr/>
