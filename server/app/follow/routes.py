@@ -65,7 +65,7 @@ def is_local_user(author_id):
     connection.close()
 
     return exists
-
+    
 def get_remote_author_info(author_id, server_url):
     auth = ('cross-server', 'password')
     response = requests.get(
@@ -142,13 +142,15 @@ def accept_follow_request():
     author_followee = data.get('author_followee')  # The user who is accepting the request
     author_following = data.get('author_following')  # The user who sent the request
 
-    conn, cursor = get_db_connection()   
+    conn, cursor = get_db_connection()
 
     cursor.execute("SELECT * FROM follow_requests WHERE author_send = %s AND author_receive = %s", (author_following, author_followee))
     existing_request = cursor.fetchone()
 
     if existing_request:
-        cursor.execute("INSERT INTO friends (author_followee, author_following) VALUES (%s, %s)", (author_followee, author_following))
+        host = existing_request["host"]  
+
+        cursor.execute("INSERT INTO friends (author_followee, author_following, host) VALUES (%s, %s, %s)", (author_followee, author_following, host))
 
         cursor.execute("DELETE FROM follow_requests WHERE author_send = %s AND author_receive = %s", (author_following, author_followee))
 
@@ -156,6 +158,7 @@ def accept_follow_request():
         return jsonify({'message': 'Follow request accepted'})
     else:
         return jsonify({'message': 'Follow request not found'})
+
 
 @bp.route('/follow/reject_request', methods=['POST'])
 def reject_follow_request():

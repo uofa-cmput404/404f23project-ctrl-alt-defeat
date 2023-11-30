@@ -307,10 +307,11 @@ def send(author_id):
 
             data = "like success"
 
-        elif message_type == "follow":
-            # receiver = request_data["receiver"]
-            receiver = author_id
-            sender = request_data["sender"]
+        elif message_type == "Follow":
+            actor_host = request_data["actor"]["host"]
+            receiver = request_data["object"]["id"].split("/")[-1]
+            #receiver = author_id
+            sender = request_data["actor"]["id"].split("/")[-1]
 
             conn, curr = get_db_connection()
 
@@ -331,15 +332,15 @@ def send(author_id):
                 return jsonify({'message': 'Follow request already sent'})
             
             query = "INSERT INTO follow_requests " \
-                    "(author_receive, author_send) " \
-                    "VALUES (%s, %s)"
+                    "(author_receive, author_send, host) " \
+                    "VALUES (%s, %s, %s)"
 
-            curr.execute(query, (receiver, sender))
+            curr.execute(query, (receiver, sender, actor_host))
 
             conn.commit()
             conn.close()
 
-            data = "follow success"
+            data = "follow sent"
 
         elif message_type == "post":
             pass
