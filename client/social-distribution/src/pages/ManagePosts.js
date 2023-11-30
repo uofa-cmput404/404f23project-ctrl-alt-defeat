@@ -67,7 +67,7 @@ function ManagePosts() {
     const [openVisibilityDialog, setOpenVisibilityDialog] = useState(false);
     const [openRestrictionsDialog, setRestrictionsDialog] = useState(false);
     const [defaultVisibility, setDefaultVisibility] = useState("");
-    const [visibility, setVisibility] = useState("private");
+    const [visibility, setVisibility] = useState(null);
     const [restrictedUsers, setRestrictedUsers] = useState([1,2,3,4,5]);
     const [restrictedUsername, setRestrictedUsername] = useState("");   
     const [openEditDialog, setOpenEditDialog] = useState(false);  
@@ -80,8 +80,15 @@ function ManagePosts() {
         // console.log(postSelected);
         // console.log(editContent);
         // console.log(editTitle);
-        // console.log(edittedContentType);
-        
+        // console.log(edittedContentType);        
+        console.log({
+            "content_type": edittedContentType,
+            "content": editContent,
+            "image_id": null,
+            "visibility": visibility,
+            "post_id": postSelected,
+            "title": editTitle
+        })
         axios.post(editUrl + authorId + "/" + postSelected + "/edit/", {
             "content_type": edittedContentType,
             "content": editContent,
@@ -100,7 +107,7 @@ function ManagePosts() {
                 }))
                 alert("The post was successfully edited.");
             } else {
-                alert("Something went wronng")
+                alert(response.data)
             }
         }).catch(error => {
             // Handle any errors that occur during the request
@@ -184,8 +191,7 @@ function ManagePosts() {
                 .then(response => {
                 // Handle the successful response here
                 console.log('Response data:', response.data);
-                    setPostsLists(response.data)
-                    setVisibility(response.data.visibility);
+                    setPostsLists(response.data)                    
                 })
                 .catch(error => {
                 // Handle any errors that occur during the request
@@ -312,7 +318,8 @@ function ManagePosts() {
                                     setRestrictedUsers={setRestrictedUsers}  
                                     setOpenEditDialog={setOpenEditDialog}   
                                     setEditContent={setEditContent}  
-                                    setEditTitle={setEditTitle}                     
+                                    setEditTitle={setEditTitle}        
+                                    setVisibility={setVisibility}             
                                     setEdittedContentType={setEdittedContentType}
                                     />
                 )) : <div>You have no posts</div>

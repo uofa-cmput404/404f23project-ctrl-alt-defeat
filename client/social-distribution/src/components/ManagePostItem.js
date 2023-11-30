@@ -45,6 +45,7 @@ function ManagePostItem(props) {
         props.setOpenEditDialog(true);    
         props.setEditContent(props.item.content);
         props.setPostSelected(props.item.post_id);
+        props.setVisibility(props.item.visibility);             
         props.setEditTitle(props.item.title);
         props.setEdittedContentType(props.item.content_type);
     }
