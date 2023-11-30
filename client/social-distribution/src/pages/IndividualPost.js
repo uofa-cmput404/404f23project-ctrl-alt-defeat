@@ -34,9 +34,8 @@ export default function IndividualPost() {;
                 axios.get(postsUrl + "authors/" + author_id + "/posts/" + post_id)
                 .then(response => {
                 // Handle the successful response here
-                //console.log('Response data:', response.data);                      
-                console.log(response.data)
-                setPostSelected(response.data);      
+                
+                setPostSelected(response.data);                                   
                 setUsername(response.data.author.displayName);
                 })
                 .catch(error => {
@@ -52,7 +51,7 @@ export default function IndividualPost() {;
         fetchData();        
     }, []);
 
-    function get_content_as_elements(content_type, content){
+    function get_content_as_elements(content_type, content){        
         if (content_type === "text/plain"){
             return(<p>{content}</p>);
         }
@@ -81,7 +80,7 @@ export default function IndividualPost() {;
                     <h3>{postSelected.title}</h3>
                     <div>Posted by: {username}</div>
                     <div>{postSelected.published}</div>
-                    <div>{get_content_as_elements(postSelected.content_type,postSelected.content)}</div>                
+                    <div>{get_content_as_elements(postSelected.contentType,postSelected.content)}</div>                
                 </div>
                 : <h1>Post not found</h1>
              }
