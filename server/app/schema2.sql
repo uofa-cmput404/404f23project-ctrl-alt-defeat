@@ -47,6 +47,7 @@ CREATE TABLE posts (
 CREATE TABLE friends (
     author_followee TEXT NOT NULL,
     author_following TEXT NOT NULL,
+    host TEXT NOT NULL
     --FOREIGN KEY (author_followee) REFERENCES authors(author_id) ON DELETE CASCADE,
     --FOREIGN KEY (author_following) REFERENCES authors(author_id) ON DELETE CASCADE
 );
@@ -54,6 +55,7 @@ CREATE TABLE friends (
 CREATE TABLE follow_requests (
     author_send TEXT NOT NULL,
     author_receive TEXT NOT NULL,    
+    host TEXT DEFAULT 'local' NOT NULL,
     FOREIGN KEY (author_receive) REFERENCES authors(author_id)
 );
 
