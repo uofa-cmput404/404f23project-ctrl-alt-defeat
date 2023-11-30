@@ -67,7 +67,7 @@ function ManagePosts() {
     const [openVisibilityDialog, setOpenVisibilityDialog] = useState(false);
     const [openRestrictionsDialog, setRestrictionsDialog] = useState(false);
     const [defaultVisibility, setDefaultVisibility] = useState("");
-    const [visibility, setVisibility] = useState(null);
+    const [visibility, setVisibility] = useState("private");
     const [restrictedUsers, setRestrictedUsers] = useState([1,2,3,4,5]);
     const [restrictedUsername, setRestrictedUsername] = useState("");   
     const [openEditDialog, setOpenEditDialog] = useState(false);  
