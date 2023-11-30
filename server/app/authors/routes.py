@@ -281,41 +281,76 @@ def get_liked_posts(author_id, post_id):
     
     return jsonify(data)
 
-# SEND LIKE TO THE author_id OF THE POST (REMOTE)
 @bp.route('/authors/<author_id>/inbox', methods=['POST'])
-def send_like(author_id):
-    # Get attributes from HTTP body
-    print("reach")
-    request_data = request.get_json()
-    like_author_id = request_data["like_author_id"]
-    post_id = request_data["post_id"]
-
-    # Create like ID
-    # TODO: change method of randomization
-    like_id = str(randrange(0, 100000))
-
-    data = ""
+def send(author_id):
     try:
-        conn, curr = get_db_connection()
+        request_data = request.get_json()
+        message_type = request_data["type"]
 
-        query = "INSERT INTO likes " \
-                "(like_id, like_author_id, " \
-                "post_id, time_liked) " \
-                "VALUES (%s, %s, %s, " \
-                "CURRENT_TIMESTAMP)"
-        
-        curr.execute(query, (like_id, like_author_id, post_id))
+        if message_type == "like":
+            like_author_id = request_data["like_author_id"]
+            post_id = request_data["post_id"]
+            like_id = str(randrange(0, 100000))
 
-        data = "success"
+            conn, curr = get_db_connection()
 
-        conn.commit()
-        conn.close()
+            query = "INSERT INTO likes " \
+                    "(like_id, like_author_id, " \
+                    "post_id, time_liked) " \
+                    "VALUES (%s, %s, %s, " \
+                    "CURRENT_TIMESTAMP)"
 
+            curr.execute(query, (like_id, like_author_id, post_id))
+
+            conn.commit()
+            conn.close()
+
+            data = "like success"
+
+        elif message_type == "follow":
+            # receiver = request_data["receiver"]
+            receiver = author_id
+            sender = request_data["sender"]
+
+            conn, curr = get_db_connection()
+
+            # Check if already following
+            curr.execute("SELECT * FROM friends WHERE author_following = %s AND author_followee = %s", (sender, receiver))
+            existing_friendship = curr.fetchone()
+
+            if existing_friendship:
+                conn.close()
+                return jsonify({'message': 'Already following'})
+
+            # Check if follow request already sent
+            curr.execute("SELECT * FROM follow_requests WHERE author_send = %s AND author_receive = %s", (sender, receiver))
+            existing_request = curr.fetchone()
+
+            if existing_request:
+                conn.close()
+                return jsonify({'message': 'Follow request already sent'})
+            
+            query = "INSERT INTO follow_requests " \
+                    "(author_receive, author_send) " \
+                    "VALUES (%s, %s)"
+
+            curr.execute(query, (receiver, sender))
+
+            conn.commit()
+            conn.close()
+
+            data = "follow success"
+
+        elif message_type == "post":
+            pass
+
+        elif message_type == "comment":
+            pass
 
     except Exception as e:
-        print("liked error: ", e)
+        print("send error: ", e)
         data = "error"
-    
+
     return jsonify(data)
 
 @bp.route('/authors/<author_id>/inbox/unlike', methods=['POST'])
