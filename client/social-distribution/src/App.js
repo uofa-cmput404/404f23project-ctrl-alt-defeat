@@ -67,7 +67,7 @@ function App() {
             path="/homepage"
             element={isAuthenticated ? <Stream username={username} authorId={authorId} setUsername={setUsername} updateAuthStatus={updateAuthStatus} updateUserAndAuthorId={updateUserAndAuthorId}/> : <Navigate to="/" />}
           />
-          <Route path="/post/:id" element={<IndividualPost/>}/>
+          <Route path="/authors/:author_id/posts/:post_id" element={<IndividualPost/>}/>
           <Route path="/manageposts" element={<ManagePosts/>}/>
           <Route path="/manageposts/restrictions" element={<Restrictions/>}/> 
           <Route path="/newpost" element={<NewPost/>}/> 

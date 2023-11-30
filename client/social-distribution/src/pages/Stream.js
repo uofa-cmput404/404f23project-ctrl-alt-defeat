@@ -8,13 +8,13 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
-const postsUrl = 'http://127.0.0.1:5000/posts/';
+const postsUrl = 'http://127.0.0.1:5000/api/posts';
 
 
 export default function Stream({ username, authorId, setUsername, updateAuthStatus, updateUserAndAuthorId }) {;
     const navigate = useNavigate();
-    const likedPostsUrl = 'http://127.0.0.1:5000/authors/' + authorId + '/liked';
-    const githubIdLink = 'http://127.0.0.1:5000/authors/github/' + authorId;     
+    const likedPostsUrl = 'http://127.0.0.1:5000/api/authors/' + authorId + '/liked';
+    const githubIdLink = 'http://127.0.0.1:5000/api/authors/github/' + authorId;     
     
     const [likedPostIds, setLikedPostIds] = useState({});
     const [responseData, setResponseData] = useState([]);
@@ -35,13 +35,14 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
                 axios.get(githubIdLink)
                 .then(response => {
                     try {
-                            if (response.data !== "") {
+                            if (response.data !== "" && response.data.github !== null) {
+                                
                                 // Make the GET request using Axios
-                                    axios.get('https://api.github.com/users/' + response.data + '/events')
+                                    axios.get('https://api.github.com/users/' + response.data.github + '/events')
                                     .then(response => {
                                     // Handle the successful response here                
                                     setActivityList(response.data.slice(0, 5));         
-                                    console.log(response.data);   
+                                    //console.log(response.data);   
                                     })
                                     .catch(error => {
                                     // Handle any errors that occur during the request                                    
@@ -65,14 +66,19 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
-                axios.get(postsUrl + `?author_id=${authorId}`)
+                axios.get(postsUrl + `?author_id=${authorId}`, {
+                    headers: {
+                        'Authorization': 'Basic Q3RybEFsdERlZmVhdDpmcm9udGVuZA=='
+                    }
+                })
                 .then(response => {
                 // Handle the successful response here
                 //console.log('Response data:', response.data);
                 
-                setResponseData(response.data);      
-                console.log(response.data)          
-                setPostsLists(response.data);                
+                setResponseData(response.data);    
+                
+                // We set postLists here, in case the post likes feature is not working
+                setPostsLists(response.data);
                 })
                 .catch(error => {
                 // Handle any errors that occur during the request
@@ -92,15 +98,39 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
 
     useEffect(() => {
         labelLikedPosts();
-    }, [likedPostIds]);
+    }, [responseData]);
 
+    // Check `likes` table (back-end) for all posts that logged in author has liked
+    async function fetchLikedPosts() {
+       try {
+           axios.get(likedPostsUrl)
+           .then(response => {
+               // Parse the liked posts for the post IDs exclusively
+               let fetchedLikedPostIds = [];
+               for (let i = 0; i < response.data.items.length; i++) {
+                // Assuming each liked item has an 
+                // `object` that follows URL structure per spec,
+                // i.e. http://service/authors/<author_id>/posts/<post_id>
+                fetchedLikedPostIds.push(response.data.items[i].object.split('/')[6]);
+
+               }
+
+               setLikedPostIds(fetchedLikedPostIds);
+           })
+           .catch(error => {
+               console.error('Error:', error);
+           });
+           } catch (error) {
+               console.error('Error:', error);
+           }
+   }
     const labelLikedPosts = () => {
         // Label (on front-end) which posts have been liked by the logged in author
         let posts = responseData.map((item, index) => {
             let liked = false;
             for (let i = 0; i < likedPostIds.length; i++) {
-                //console.log("check post id in likedPostIds", likedPostIds[i].post_id);
-                if (likedPostIds[i].post_id === item.post_id) {
+                //console.log('indiv like post id', likedPostIds[i])
+                if (likedPostIds[i]=== item.post_id) {
                     liked = true;
                 }
             }
@@ -113,22 +143,6 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
         setPostsLists(posts);
     };
 
-     // Check `likes` table (back-end) for all posts that logged in author has liked
-     async function fetchLikedPosts() {
-        try {
-            axios.get(likedPostsUrl)
-            .then(response => {
-                //console.log('liked ids:', response.data);
-                setLikedPostIds(response.data);
-                console.log(response.data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-            } catch (error) {
-                console.error('Error:', error);
-            }
-    }
 
     const toggleProfile = () => {
         setShowProfile(!showProfile);
@@ -166,7 +180,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
             <div className="follow-requests-container">
               <FollowRequests authorId={authorId} />
             </div>
-            <button onClick={handleLogout}>Logout</button>
+            <button onClick={handleLogout}>Logout {username}</button>
           </div>
           {showProfile && <Profile username={username} authorId={authorId} setUsername={setUsername} onClose={closeProfile} />}
           <button onClick={toggleProfile}>Edit Profile</button>

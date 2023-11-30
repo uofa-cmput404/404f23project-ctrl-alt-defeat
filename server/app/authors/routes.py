@@ -1,30 +1,112 @@
-from app.authors import bp
+from . import bp
 import json
 from flask import request, g, jsonify
 import sqlite3
-from app.dbase import get_db_connection
+from ..dbase import get_db_connection
 from random import randrange
 from flask_bcrypt import Bcrypt
 
 from flask_bcrypt import check_password_hash
 from flask_bcrypt import generate_password_hash
 
-def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect('database.db')
-        g.db.row_factory = sqlite3.Row
-    return g.db
 
-@bp.route('/login', methods=['POST'])
+
+# Get all authors (REMOTE)
+@bp.route('/authors/', methods=['GET'])
+def get_authors():    
+    page = request.args.get('page')
+    size = request.args.get('size')
+    data = ""
+    try:
+        conn, cur = get_db_connection()
+
+
+        query = "SELECT * " \
+                "FROM authors " \
+                "ORDER BY author_id " \
+                "LIMIT %s OFFSET %s"
+        
+        if page is not None:
+            page = int(page)
+        else: page = 1 # Set default 1
+        
+        if size is not None:
+            size = int(size)
+        else: size = 20 # Set default 20
+
+        offset = (page - 1) * size
+        cur.execute(query, (size, offset))
+        row = cur.fetchall()
+                
+        res = [dict(i) for i in row]        
+
+        data = dict()
+        data["type"] = "authors"
+        data["items"] = []
+        
+        for r in res:
+            item = dict()
+            item["type"] = "author"
+            item["id"] = request.url_root + "api/authors/" + r["author_id"] 
+            item["url"] = request.url_root + "api/authors/" + r["author_id"] 
+            item["host"] = request.url_root
+            item["displayName"] = r["username"]
+            item["github"] = ("https://github.com/" + r["github"]) if r["github"] != None else None
+            item["profileImage"] = None # TODO: implement profile pics
+            data["items"].append(item)
+        
+        
+
+    except Exception as e:
+        print("Error getting authors: ", e)
+        data = "error"
+    
+    print("data here")
+    return jsonify(data)
+
+# Get a specific author (REMOTE)
+@bp.route('/authors/<author_id>/', methods=['GET'])
+def get_author(author_id):
+    data = ""
+    try:
+        conn, cur = get_db_connection()
+
+
+        query = "SELECT * " \
+                "FROM authors " \
+                "WHERE author_id = %s " \
+                
+        cur.execute(query, (author_id,))
+        row = cur.fetchall()
+        print(row)
+        res = [dict(i) for i in row][0]
+        item = dict()
+        item["type"] = "author"
+        item["host"] = request.url_root
+        item["id"] = request.url_root + "api/" + res["author_id"]
+        item["url"] = request.url_root + "api/" + res["author_id"]
+        item["displayName"] = res["username"]
+        item["github"] = "http://github.com/" + res["github"] if res["github"] is not None else None
+        item["profileImage"] = None
+
+        data = item
+
+    except Exception as e:
+        print("Error getting authors: ", e)
+        data = "error"
+    
+    return jsonify(data)
+
+@bp.route('/authors/login', methods=['POST'])
 def login():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
-    db = get_db()
-    cur = db.cursor()
+    conn, cur = get_db_connection()
 
-    cur.execute("SELECT author_id, password FROM authors WHERE username = ?", (username,))
+    cur.execute("SELECT author_id, password FROM authors WHERE username = %s", (username,))
     author = cur.fetchone()
+    print(author)
 
     if author:
         stored_password = author['password']
@@ -35,78 +117,159 @@ def login():
     else:
         result = {'message': 'User not found'}
 
-    db.close()
+    conn.close()
 
     return jsonify(result)
 
 
-@bp.route('/update_username', methods=['POST'])
+@bp.route('/authors/update_username', methods=['POST'])
 def update_username():
     data = request.get_json()
     new_username = data.get('new_username')
     author_id = data.get('authorId')
 
-    db = get_db()
-    cur = db.cursor()
+    conn, curr = get_db_connection()
 
     try:
-        cur.execute("SELECT author_id FROM authors WHERE username = ?", (new_username,))
-        existing_username = cur.fetchone()
+        curr.execute("SELECT author_id FROM authors WHERE username = %s", (new_username,))
+        existing_username = curr.fetchone()
 
         if existing_username:
             return jsonify({'error': 'Username already exists'})
 
-        cur.execute("UPDATE authors SET username = ? WHERE author_id = ?", (new_username, author_id))
-        db.commit()
+        curr.execute("UPDATE authors SET username = %s WHERE author_id = %s", (new_username, author_id))
+        conn.commit()
 
         return jsonify({'message': 'Username updated successfully'})
     except Exception as e:
         return jsonify({'error': 'An error occurred while updating the username.'})
     finally:
-        db.close()
+        conn.close()
 
 
-@bp.route('/update_password', methods=['POST'])
+@bp.route('/authors/update_password', methods=['POST'])
 def update_password():
     data = request.get_json()
     new_password = data.get('new_password')
     author_id = data.get('authorId') 
 
-    db = get_db()
-    cur = db.cursor()
+    conn, curr = get_db_connection()    
 
     try:
         hashed_password = generate_password_hash(new_password).decode('utf-8')
-        cur.execute("UPDATE authors SET password = ? WHERE author_id = ?", (hashed_password, author_id))
-        db.commit()
+        
+        curr.execute("UPDATE authors SET password = %s WHERE author_id = %s", (hashed_password, author_id))
+        conn.commit()        
 
         return jsonify({'message': 'Password updated successfully'})
     except Exception as e:
         return jsonify({'error': 'An error occurred while updating the password.'})
     finally:
-        db.close()
+        conn.close()
 
 
-# Get posts that the logged in author has liked
-@bp.route('/<author_id>/liked', methods=['GET'])
-def get_liked_posts(author_id):
+# Get posts that the logged in author has liked 
+@bp.route('/authors/<author_id>/liked', methods=['GET'])
+def get_posts_liked(author_id):
+    # TODO: Check specification regarding private posts, right now the spec specifies "public things AUTHOR_ID liked"
+    # Currently, this function pulls ALL post_id's of the posts that AUTHOR_ID has liked 
+    # POSSIBLE SECURITY ISSUE
+
+
+    data = ""
+    try:
+        conn, curr = get_db_connection()
+
+        query = "SELECT l.post_id, p.author_id,  a.username, a.github " \
+                "FROM likes l " \
+                "JOIN posts p " \
+                "ON p.post_id = l.post_id " \
+                "JOIN authors a " \
+                "ON a.author_id = l.like_author_id " \
+                "WHERE " \
+                "like_author_id = %s "
+        
+        curr.execute(query, (author_id,))
+        likes = curr.fetchall()
+        likes = [dict(i) for i in likes]
+        
+        payload = dict()
+        payload["type"] = "liked"
+        payload["items"] = []
+
+        for like in likes:
+            item = dict()
+            item["context"] = None
+            item["summary"] = like["username"] + " Likes your post"
+            item["type"] = "Like"
+            item["author"] = dict()
+                                    
+            item["author"]["type"] = "author"
+            item["author"]["id"] = request.root_url + "api/authors/" + like["author_id"]
+            item["author"]["host"] = request.root_url
+            item["author"]["displayName"] = like["username"]
+            item["author"]["profileImage"] = None
+            item["author"]["github"] = "http://github.com/" + like["github"] if like["github"] is not None else None
+
+            item["object"] = request.root_url + "authors/" + like["author_id"] + "/posts/" + like["post_id"]
+            payload["items"].append(item)        
+
+        data = payload
+        conn.commit()
+        conn.close()
+
+
+    except Exception as e:
+        print("Getting likes error: ", e)
+        data = "error"
+    
+    return jsonify(data)
+
+# Get a list of likes from other authors on AUTHOR_ID’s post POST_ID (REMOTE)
+@bp.route('/authors/<author_id>/posts/<post_id>/likes', methods=['GET'])
+def get_liked_posts(author_id, post_id):
     # TODO: Check specification regarding private posts, right now the spec specifies "public things AUTHOR_ID liked"
     # Currently, this function pulls ALL post_id's of the posts that AUTHOR_ID has liked 
     # POSSIBLE SECURITY ISSUE
 
     data = ""
     try:
-        conn = get_db_connection()
+        conn, cur = get_db_connection()
 
-        query = "SELECT post_id " \
-                "FROM likes WHERE " \
-                "like_author_id = ?"
+        query = "SELECT * " \
+                "FROM likes l " \
+                "JOIN authors a " \
+                "ON l.like_author_id = a.author_id " \
+                "WHERE " \
+                "l.post_id = %s"
         
-        likes = conn.execute(query, (author_id,)).fetchall()
+        cur.execute(query, (post_id,))
+        likes = cur.fetchall()        
 
+        res = [dict(i) for i in likes]
+    
+        data = dict()
+        data["count"] = len(res)
+        data["results"] = []
+        
+        for r in res:
+            item = dict()
 
-        data = json.dumps([dict(i) for i in likes])
-        print(data)
+            item["@context"] = None # What is this?
+            item["summary"] = r["username"] + " Likes this post"
+            item["type"] = "Like"
+            item["author"] = dict()
+            item["author"]["type"] = "author"
+            item["author"]["id"] = request.root_url + "api/authors/" + r["author_id"]
+            item["author"]["host"] = request.root_url
+            item["author"]["displayName"] = r["username"]
+            item["author"]["profileImage"] = None
+            item["author"]["github"] = "http://github.com/" + r["github"] if r["github"] is not None else None
+
+            r["object"] = request.root_url + "api/" + author_id + "/posts/" + post_id             
+            data["results"].append(item)
+
+        # data = json.dumps(data, indent=2)
 
         conn.commit()
         conn.close()
@@ -116,12 +279,13 @@ def get_liked_posts(author_id):
         print("Getting likes error: ", e)
         data = "error"
     
-    return data
+    return jsonify(data)
 
-# SEND LIKE TO THE author_id OF THE POST
-@bp.route('/<author_id>/inbox', methods=['POST'])
+# SEND LIKE TO THE author_id OF THE POST (REMOTE)
+@bp.route('/authors/<author_id>/inbox', methods=['POST'])
 def send_like(author_id):
     # Get attributes from HTTP body
+    print("reach")
     request_data = request.get_json()
     like_author_id = request_data["like_author_id"]
     post_id = request_data["post_id"]
@@ -132,15 +296,15 @@ def send_like(author_id):
 
     data = ""
     try:
-        conn = get_db_connection()
+        conn, curr = get_db_connection()
 
         query = "INSERT INTO likes " \
                 "(like_id, like_author_id, " \
                 "post_id, time_liked) " \
-                "VALUES (?, ?, ?, " \
+                "VALUES (%s, %s, %s, " \
                 "CURRENT_TIMESTAMP)"
         
-        conn.execute(query, (like_id, like_author_id, post_id))
+        curr.execute(query, (like_id, like_author_id, post_id))
 
         data = "success"
 
@@ -152,9 +316,9 @@ def send_like(author_id):
         print("liked error: ", e)
         data = "error"
     
-    return data
+    return jsonify(data)
 
-@bp.route('/<author_id>/inbox/unlike', methods=['POST'])
+@bp.route('/authors/<author_id>/inbox/unlike', methods=['POST'])
 # DELETE LIKE
 def delete_like(author_id):
     request_data = request.get_json()
@@ -163,12 +327,12 @@ def delete_like(author_id):
     
     data = ""
     try:
-        conn = get_db_connection()
+        conn, curr = get_db_connection()
 
         query = "DELETE FROM likes " \
-                "WHERE like_author_id = ? AND post_id = ?"
+                "WHERE like_author_id = %s AND post_id = %s"
         
-        conn.execute(query, (like_author_id, post_id))
+        curr.execute(query, (like_author_id, post_id))
 
         data = "success"
 
@@ -177,50 +341,50 @@ def delete_like(author_id):
     except Exception as e:
         print("liked error: ", e)
         data = "error"
-    return data
+    return jsonify(data)
 
 
 
 
-@bp.route('/<author_id>/posts/<post_id>/comments', methods=['GET'])
-
-
+@bp.route('/authors/<author_id>/posts/<post_id>/comments', methods=['GET'])
 def get_post_comments(author_id, post_id):
     comment_author_id = request.args.get('comment_author_id')
     if not comment_author_id:
         return jsonify({'comments': []})
 
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        conn, cursor = get_db_connection()
+        
         query = """
             SELECT a.username, c.comment_text, c.comment_id, 
                 EXISTS (
                     SELECT 1 FROM comment_likes cl 
                     WHERE cl.comment_id = c.comment_id 
-                    AND cl.like_comment_author_id = ?
+                    AND cl.like_comment_author_id = %s
                 ) AS isLikedByCurrentUser
             FROM comments c
             INNER JOIN authors a ON c.comment_author_id = a.author_id
-            WHERE c.post_id = ?
-            AND c.author_id = ?
+            WHERE c.post_id = %s
+            AND c.author_id = %s
             AND (
                 (c.status = 'public') OR
-                (c.status = 'private' AND c.comment_author_id = ?) OR
-                (c.status = 'private' AND c.author_id = ?)
+                (c.status = 'private' AND c.comment_author_id = %s) OR
+                (c.status = 'private' AND c.author_id = %s)
             )
         """
 
         cursor.execute(query, (comment_author_id, post_id, author_id, comment_author_id, comment_author_id))
         comment_info = cursor.fetchall()
+        comment_info = [dict(i) for i in comment_info]
+        print(comment_info)
         conn.close()
 
         comments_list = [
             {
-                'comment_name': comment[0],
-                'comment_text': comment[1], 
-                'comment_id': comment[2],
-                'isLikedByCurrentUser': comment[3]
+                'comment_name': comment['username'],
+                'comment_text': comment['comment_text'], 
+                'comment_id': comment['comment_id'],
+                'isLikedByCurrentUser': comment['islikedbycurrentuser']
             } for comment in comment_info
         ]
         return jsonify({'comments': comments_list})
@@ -230,11 +394,10 @@ def get_post_comments(author_id, post_id):
         return jsonify({'error': str(e)}), 500
 
 
-
-
-@bp.route('/<author_id>/posts/<post_id>/comments', methods=['POST'])
+@bp.route('/authors/<author_id>/posts/<post_id>/comments', methods=['POST'])
 def send_comments(author_id, post_id):
     # Get attributes from HTTP body
+
     request_data = request.get_json()
     comment_author_id = request_data["comment_author_id"]
     comment_text = request_data["comment_text"]
@@ -246,31 +409,35 @@ def send_comments(author_id, post_id):
 
     data = ""
     try:
-        conn = get_db_connection()
+        conn, cur = get_db_connection()
 
-        # Check if the authors are friends
-        check_friends_query = "SELECT COUNT(*) FROM friends " \
-                              "WHERE author_followee = ? AND author_following = ? " \
-                              "UNION " \
-                              "SELECT COUNT(*) FROM friends " \
-                              "WHERE author_followee = ? AND author_following = ?"
-        friends_count = conn.execute(check_friends_query, (author_id, comment_author_id, comment_author_id, author_id)).fetchall()
-
-        # Determine the status based on friendship
-        status = 'private' if all(count[0] > 0 for count in friends_count) else 'public'
-
+        #Check if the authors are friends
+        check_friends_query = """
+        SELECT CASE WHEN (
+                SELECT COUNT(*) FROM friends 
+                WHERE author_followee = %s AND author_following = %s
+                ) + (
+                SELECT COUNT(*) FROM friends 
+                WHERE author_followee = %s AND author_following = %s
+                ) = 2 THEN 'private'
+                ELSE 'public'
+        END AS status
+        """
+        cur.execute(check_friends_query, (author_id, comment_author_id, comment_author_id, author_id))
+        status = dict(cur.fetchone())['status']
+        print(status)
         query = "INSERT INTO comments " \
                 "(comment_id, comment_author_id, " \
                 "post_id, author_id, comment_text, status, date_commented) " \
-                "VALUES (?, ?, ?, ?, ?, ? ,CURRENT_TIMESTAMP)" 
-        
-        conn.execute(query, (comment_id, comment_author_id, post_id, author_id, comment_text, status))
+                "VALUES (%s, %s, %s, %s, %s, %s ,CURRENT_TIMESTAMP)" 
+        cur.execute(query, (comment_id, comment_author_id, post_id, author_id, comment_text, status))
+
 
         data = "success"
 
         conn.commit()
-        conn.close()
 
+        conn.close()
 
     except Exception as e:
         print("comment error: ", e)
@@ -281,7 +448,7 @@ def send_comments(author_id, post_id):
 
 
 # Get Github username of author
-@bp.route('/github/<author_id>', methods=['GET'])
+@bp.route('/authors/github/<author_id>', methods=['GET'])
 def get_github(author_id):
     # TODO: Check specification regarding private posts, right now the spec specifies "public things AUTHOR_ID liked"
     # Currently, this function pulls ALL post_id's of the posts that AUTHOR_ID has liked 
@@ -289,27 +456,33 @@ def get_github(author_id):
 
     data = ""
     try:
-        conn = get_db_connection()
+        conn, curr = get_db_connection()
 
         query = "SELECT github " \
                 "FROM authors WHERE " \
-                "author_id = ?"
+                "author_id = %s"
         
-        row = conn.execute(query, (author_id,)).fetchone();
-        # print(str(github_username))
-        if row is not None:
-            row_values = [str(value) for value in row]
-            row_string = ', '.join(row_values)
-            data = row_string
+        curr.execute(query, (author_id,))
+        row = curr.fetchone()
+        
+        # row = [dict(row) for row in row]
+
+        # data = json.dumps(row, indent=4, sort_keys=True, default=str)
+        # print(data)
+        data = row
+        # if row is not None:
+        #     row_values = [str(value) for value in row]
+        #     row_string = ', '.join(row_values)
+        #     data = row_string
 
     except Exception as e:
         print("Getting github username error: ", e)
         data = "error"
     
-    return data
+    return jsonify(data)
 
 
-@bp.route('/github', methods=['POST'])
+@bp.route('/authors/github', methods=['POST'])
 # Set Github username
 def update_github():
     request_data = request.get_json()    
@@ -318,11 +491,11 @@ def update_github():
     
     data = ""
     try:
-        conn = get_db_connection()        
-        query = "UPDATE authors SET github = ? " \
-                "WHERE author_id = ?"
+        conn, curr = get_db_connection()        
+        query = "UPDATE authors SET github = %s " \
+                "WHERE author_id = %s"
         
-        conn.execute(query, (github,author_id))
+        curr.execute(query, (github,author_id))
 
         data = "success"
 
@@ -331,30 +504,32 @@ def update_github():
     except Exception as e:
         print("Error trying to update github username: ", e)
         data = "error"
-    return data
+    return jsonify(data)    
 
 
-@bp.route('/<author_id>/posts/<post_id>/comments/<comment_id>/toggle-like', methods=['POST'])
+@bp.route('/authors/<author_id>/posts/<post_id>/comments/<comment_id>/toggle-like', methods=['POST'])
 def toggle_like(author_id, post_id, comment_id):
     request_data = request.get_json()
     like_comment_author_id = request_data["like_comment_author_id"]
 
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        conn, cursor = get_db_connection()
+
 
         # Check if the like already exists
-        cursor.execute("SELECT * FROM comment_likes WHERE like_comment_author_id = ? AND comment_id = ?", 
+        cursor.execute("SELECT * FROM comment_likes WHERE like_comment_author_id = %s AND comment_id = %s", 
                        (like_comment_author_id, comment_id))
+        
         like = cursor.fetchone()
+        
 
         if like:
             # Like exists, so unlike it
-            cursor.execute("DELETE FROM comment_likes WHERE like_comment_author_id = ? AND comment_id = ?", 
+            cursor.execute("DELETE FROM comment_likes WHERE like_comment_author_id = %s AND comment_id = %s", 
                            (like_comment_author_id, comment_id))
         else:
             # Like doesn't exist, so add it
-            cursor.execute("INSERT INTO comment_likes (like_comment_author_id, comment_id, time_liked) VALUES (?, ?, CURRENT_TIMESTAMP)", 
+            cursor.execute("INSERT INTO comment_likes (like_comment_author_id, comment_id, time_liked) VALUES (%s, %s, CURRENT_TIMESTAMP)", 
                            (like_comment_author_id, comment_id))
 
         conn.commit()
@@ -368,18 +543,18 @@ def toggle_like(author_id, post_id, comment_id):
 
 
 
-@bp.route('/<author_id>/posts/<post_id>/comments/<comment_id>/likes', methods=['GET'])
+@bp.route('/authors/<author_id>/posts/<post_id>/comments/<comment_id>/likes', methods=['GET'])
 
 
 def get_comments_likes(comment_id):
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        conn, cursor = get_db_connection()
+        
         query = """
             SELECT a.username, c.time_liked
             FROM comment_likes c
             INNER JOIN authors a ON c.like_comment_author_id = a.author_id
-            WHERE c.comment_id = ?
+            WHERE c.comment_id = %s
         """
 
         cursor.execute(query, (comment_id ))

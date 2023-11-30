@@ -6,11 +6,11 @@ import SetVisibilityDialog from '../components/SetVisibilityDialog';
 import RestrictedUser from '../components/RestrictedUser';
 import { UserContext } from '../App';
 
-const managePostsUrl = 'http://127.0.0.1:5000/posts/manage'
-const updateVisibilityUrl = 'http://127.0.0.1:5000/posts/visibility'
-const restrictUrl = 'http://127.0.0.1:5000/posts/restrict'
-const restrictionListUrl = 'http://127.0.0.1:5000/posts/restricted/'
-const editUrl = 'http://127.0.0.1:5000/posts/authors/'
+const managePostsUrl = 'http://127.0.0.1:5000/api/posts/manage'
+const updateVisibilityUrl = 'http://127.0.0.1:5000/api/posts/visibility'
+const restrictUrl = 'http://127.0.0.1:5000/api/posts/restrict'
+const restrictionListUrl = 'http://127.0.0.1:5000/api/posts/restricted/'
+const editUrl = 'http://127.0.0.1:5000/api/authors/'
 
 function ManagePosts() {
     const styles = {
@@ -80,8 +80,15 @@ function ManagePosts() {
         // console.log(postSelected);
         // console.log(editContent);
         // console.log(editTitle);
-        // console.log(edittedContentType);
-        
+        // console.log(edittedContentType);        
+        console.log({
+            "content_type": edittedContentType,
+            "content": editContent,
+            "image_id": null,
+            "visibility": visibility,
+            "post_id": postSelected,
+            "title": editTitle
+        })
         axios.post(editUrl + authorId + "/" + postSelected + "/edit/", {
             "content_type": edittedContentType,
             "content": editContent,
@@ -100,7 +107,7 @@ function ManagePosts() {
                 }))
                 alert("The post was successfully edited.");
             } else {
-                alert("Something went wronng")
+                alert(response.data)
             }
         }).catch(error => {
             // Handle any errors that occur during the request
@@ -184,7 +191,7 @@ function ManagePosts() {
                 .then(response => {
                 // Handle the successful response here
                 console.log('Response data:', response.data);
-                    setPostsLists(response.data)
+                    setPostsLists(response.data)                    
                 })
                 .catch(error => {
                 // Handle any errors that occur during the request
@@ -311,7 +318,8 @@ function ManagePosts() {
                                     setRestrictedUsers={setRestrictedUsers}  
                                     setOpenEditDialog={setOpenEditDialog}   
                                     setEditContent={setEditContent}  
-                                    setEditTitle={setEditTitle}                     
+                                    setEditTitle={setEditTitle}        
+                                    setVisibility={setVisibility}             
                                     setEdittedContentType={setEdittedContentType}
                                     />
                 )) : <div>You have no posts</div>

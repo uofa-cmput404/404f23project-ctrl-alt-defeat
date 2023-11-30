@@ -77,7 +77,7 @@ function PostItem(props) {
       const params = {
         comment_author_id: props.loginUser // Assuming this is the user ID
       };
-      const apiUrl = `http://127.0.0.1:5000/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
+      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
   
       const response = await axios.get(apiUrl, { params });
       if (response.data && response.data.comments) {
@@ -99,7 +99,7 @@ function PostItem(props) {
   const toggleLikeComment = async (commentId) => {
     try {
       // Construct the URL for the POST request
-      const apiUrl = `http://127.0.0.1:5000/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}/toggle-like`;
+      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}/toggle-like`;
   
       // Send the POST request
       await axios.post(apiUrl, { like_comment_author_id: props.loginUser });
@@ -139,7 +139,7 @@ function PostItem(props) {
     };
   
     try {
-      const apiUrl = `http://127.0.0.1:5000/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
+      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
       await axios.post(apiUrl, commentData);
       setComment('');
       fetchComments(); // Refresh comments after posting
