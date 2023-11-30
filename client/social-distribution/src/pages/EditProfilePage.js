@@ -21,7 +21,7 @@ function EditProfilePage() {
 
 
     const handleGithubUpdate = async () => {
-      axios.post('http://localhost:5000/authors/github', {
+      axios.post('http://localhost:5000/api/authors/github', {
         
           author_id: authorId,
           github: GithubName

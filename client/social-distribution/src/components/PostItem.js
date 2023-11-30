@@ -14,8 +14,7 @@ const styles = {
   
   container: {    
     padding: 20,
-    marginTop: 10,
-    backgroundColor: "red",    
+    marginTop: 10,    
     
   },
   /*container: {
@@ -183,7 +182,7 @@ function PostItem(props) {
               placeholder="Write a comment..."
               style={styles.input}
             />
-            <button onClick={handleSendComment}>Send</button>
+            <button class="btn btn-primary" onClick={handleSendComment}>Send</button>
         </div>
 
          {/* Display comments with commenter's name, text, and like button */}

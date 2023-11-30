@@ -63,6 +63,9 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
     }
 
     const styles = {
+        posts: {
+            width: "100%"
+        },
         container: {
             margin: 20,
             display: "flex",
@@ -77,6 +80,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
             display: "flex",            
         },
         postsContainer: {
+            width: "100%",            
             marginTop: 20
         },
         card: {
@@ -122,8 +126,8 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
           }
     }
     useEffect(() => {
-        fetchData();
-        fetchLikedPosts();
+        fetchData();        
+        fetchLikedPosts();        
         if (username !== null) {
             fetchGithubActivity();
         }
@@ -133,30 +137,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
         labelLikedPosts();
     }, [responseData]);
 
-    // Check `likes` table (back-end) for all posts that logged in author has liked
-    async function fetchLikedPosts() {
-       try {
-           axios.get(likedPostsUrl)
-           .then(response => {
-               // Parse the liked posts for the post IDs exclusively
-               let fetchedLikedPostIds = [];
-               for (let i = 0; i < response.data.items.length; i++) {
-                // Assuming each liked item has an 
-                // `object` that follows URL structure per spec,
-                // i.e. http://service/authors/<author_id>/posts/<post_id>
-                fetchedLikedPostIds.push(response.data.items[i].object.split('/')[6]);
-
-               }
-
-               setLikedPostIds(fetchedLikedPostIds);
-           })
-           .catch(error => {
-               console.error('Error:', error);
-           });
-           } catch (error) {
-               console.error('Error:', error);
-           }
-   }
+    
     const labelLikedPosts = () => {
         // Label (on front-end) which posts have been liked by the logged in author
         let posts = responseData.map((item, index) => {
@@ -177,11 +158,24 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
     };
 
      // Check `likes` table (back-end) for all posts that logged in author has liked
-     async function fetchLikedPosts() {
+    // Check `likes` table (back-end) for all posts that logged in author has liked
+    async function fetchLikedPosts() {        
         try {
             axios.get(likedPostsUrl)
-            .then(response => {                
-                setLikedPostIds(response.data);
+            .then(response => {
+                    console.log("Fetched data");
+                    console.log(response.data);
+                // Parse the liked posts for the post IDs exclusively
+                let fetchedLikedPostIds = [];
+                for (let i = 0; i < response.data.items.length; i++) {
+                    // Assuming each liked item has an 
+                    // `object` that follows URL structure per spec,
+                    // i.e. http://service/authors/<author_id>/posts/<post_id>
+                    fetchedLikedPostIds.push(response.data.items[i].object.split('/')[6]);
+
+                }
+
+                setLikedPostIds(fetchedLikedPostIds);
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -189,7 +183,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
             } catch (error) {
                 console.error('Error:', error);
             }
-    }
+   }
 
     const toggleProfile = () => {
         setShowProfile(!showProfile);
@@ -206,16 +200,6 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
     function goToNewPost() {
         navigate("/newpost")
     }
-
-    const handleLogout = () => {
-        localStorage.removeItem('isAuthenticated');
-        localStorage.removeItem('username');
-        localStorage.removeItem('authorId');
-    
-        updateAuthStatus(false);
-        updateUserAndAuthorId(null,null);
-        navigate('/');
-      };
 
     return (
         <div>

@@ -7,28 +7,37 @@ function Navbar() {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const navigate = useNavigate();
-    const {username, authorId} = useContext(UserContext);    
-
-  const handleSearch = async (event) => {
-    try {
-        event.preventDefault();
-      const response = await fetch(`http://localhost:5000/follow/usersearch?query=${searchQuery}`);
-      if (response.ok) {
-        const data = await response.json();
-        const filteredResults = data.users.filter(user => user.id !== authorId);
-        
-        // Navigate to the new page with the data in the state
-        navigate('/search', { state: filteredResults });
-        console.log("here");        
-        
-        // setSearchResults(filteredResults);
-      } else {
-        console.error('Search failed');
+    const {username, authorId, updateAuthStatus, updateUserAndAuthorId} = useContext(UserContext);
+    
+    
+    const handleLogout = () => {
+      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('username');
+      localStorage.removeItem('authorId');
+  
+      updateAuthStatus(false);
+      updateUserAndAuthorId(null,null);
+      navigate('/');
+    };
+    const handleSearch = async (event) => {
+      event.preventDefault();
+      try {
+        const response = await fetch(`http://localhost:5000/api/follow/usersearch?query=${searchQuery}`);
+        if (response.ok) {
+          const data = await response.json();
+          const filteredResults = data.users.filter(user => user.id !== authorId);
+          
+          // Navigate to the new page with the data in the state
+          navigate('/search', { state: filteredResults });
+          console.log("Navigating to search");        
+          
+        } else {
+          console.error('Search failed');
+        }
+      } catch (error) {
+        console.error('Error:', error);
       }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
+    };
 
  
   return (
@@ -59,7 +68,7 @@ function Navbar() {
                         onChange={(e) => setSearchQuery(e.target.value)}/>
                     <button class="btn btn-outline-success" type="submit" onClick={(event) => handleSearch(event)}>Search</button>
                 </form>
-                    <button style={{marginLeft: 10}} type="button" class="btn btn-dark">Logout</button>
+                    <button style={{marginLeft: 10}} type="button" class="btn btn-dark" onClick={handleLogout}>Logout</button>
                 </div>
             </div>
         </nav>

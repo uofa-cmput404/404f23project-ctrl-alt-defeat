@@ -53,7 +53,7 @@ function App() {
   };
   
   return (
-    <UserContext.Provider value={{ username, authorId, setUsername, setAuthorId }}>
+    <UserContext.Provider value={{ username, authorId, setUsername, setAuthorId, updateAuthStatus, updateUserAndAuthorId }}>
       <BrowserRouter>          
       {isAuthenticated && <Navbar/>}
         <Routes>          
