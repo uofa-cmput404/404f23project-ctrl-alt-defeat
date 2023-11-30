@@ -9,7 +9,7 @@ function UserSearch() {
 
   const handleSearch = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/follow/usersearch?query=${searchQuery}`);
+      const response = await fetch(`http://localhost:5000/api/follow/usersearch?query=${searchQuery}`);
       if (response.ok) {
         const data = await response.json();
         const filteredResults = data.users.filter(user => user.id !== authorId);
@@ -24,7 +24,7 @@ function UserSearch() {
 
   const handleFollowRequest = async (recieveAuthorId) => {
     try {
-      const response = await fetch('http://localhost:5000/follow/follow_request', {
+      const response = await fetch('http://localhost:5000/api/follow/follow_request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ function UserSearch() {
 
   const handleUnfollow = async (unfollowUserId) => {
     try {
-      const response = await fetch('http://localhost:5000/follow/unfollow', {
+      const response = await fetch('http://localhost:5000/api/follow/unfollow', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

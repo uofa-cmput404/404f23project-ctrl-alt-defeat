@@ -3,7 +3,7 @@ import React from 'react'
 import Markdown from 'react-markdown';
 import './ManagePostItem.css';
 
-const deleteUrl = 'http://127.0.0.1:5000/posts/delete'
+const deleteUrl = 'http://127.0.0.1:5000/api/posts'
 function ManagePostItem(props) {
     const styles = {
         button: {marginRight: 5},     
@@ -20,9 +20,7 @@ function ManagePostItem(props) {
 
             try {
                 // Make the GET request using Axios
-                    axios.post(deleteUrl, {
-                        post_id: props.item.post_id
-                    })
+                    axios.delete(deleteUrl + "/" + props.item.post_id)
                     .then(response => {
                         props.setPostsLists(oldValues => {                
                             return oldValues.filter(item => item.post_id !== props.item.post_id);
@@ -55,12 +53,13 @@ function ManagePostItem(props) {
         props.setOpenEditDialog(true);    
         props.setEditContent(props.item.content);
         props.setPostSelected(props.item.post_id);
+        props.setVisibility(props.item.visibility);             
         props.setEditTitle(props.item.title);
         props.setEdittedContentType(props.item.content_type);
     }
 
     function getRestrictedUsers() {
-        const restrictionListUrl = `http://127.0.0.1:5000/posts/restricted?post_id=${props.item.post_id}`
+        const restrictionListUrl = `http://127.0.0.1:5000/api/posts/restricted?post_id=${props.item.post_id}`
         console.log(restrictionListUrl)
         axios.get(restrictionListUrl).then((response) => {
             console.log(response.data)
@@ -97,11 +96,13 @@ function get_content_as_elements(content_type, content){
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
         <div>
             <h3>{props.item.title}</h3>
+            
             <div><small class="text-muted">{props.item.date_posted}</small></div>
             <div><small class="text-muted">Visibility: {props.item.visibility}</small></div>                                
-            {props.item.visibility !== "private" && <a href={'http://127.0.0.1:3000/post/'+ props.item.post_id}>{'http://127.0.0.1:3000/post/'+ props.item.post_id}</a>}
+            {props.item.visibility !== "private" && <a href={'http://127.0.0.1:3000/authors/'+ props.item.author_id + "/posts/" + props.item.post_id}>{'http://127.0.0.1:3000/authors/'+ props.item.author_id + "/posts/" + props.item.post_id}</a>}
         </div>        
         <hr/>        
+        
         <div>{get_content_as_elements(props.item.content_type,props.item.content)}</div>
         
         <div style={{marginTop: 10}}>

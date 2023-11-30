@@ -45,7 +45,7 @@ function Login(props) {
       password: password.toLowerCase(), 
     };
   
-    fetch('http://localhost:5000/authors/login', {
+    fetch('http://localhost:5000/api/authors/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -58,8 +58,6 @@ function Login(props) {
           localStorage.setItem('isAuthenticated', 'true');
           const newUsername = username.toLowerCase();
           const newAuthorId = data.author_id;
-          localStorage.setItem('username', newUsername);
-          localStorage.setItem('authorId', newAuthorId); 
           props.updateAuthStatus(true);
           props.updateUserAndAuthorId(newUsername, newAuthorId);
           props.navigate('/homepage');

@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useState, useEffect }  from 'react'
 import Markdown from "react-markdown";
 import './PostItem.css';
-
+import axios from 'axios';
 import notLikedImgUrl from "../notLiked_black_24dp.svg";
 import likedImgUrl from "../liked_black_24dp.svg";
 
@@ -14,8 +14,33 @@ const styles = {
   
   container: {    
     padding: 20,
-    marginTop: 10
-  }
+    marginTop: 10,
+    backgroundColor: "red",    
+    
+  },
+  /*container: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '5px 0px 5px 5px',
+    fontSize: '16px',
+    cursor: 'pointer',
+    backgroundColor: '#808080',
+    color: 'white',
+    border: 'none',
+    width: '85px',
+    borderRadius: '4px',
+    justifyCenter: 'center'
+  }*/
+  commentBox: {
+    margin: '10px 0',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  input: {
+    flex: 1,
+    marginRight: '10px',
+  },
+
 }
 
 
@@ -40,6 +65,10 @@ function get_content_as_elements(content_type, content){
 }
 
 function PostItem(props) {
+
+  const [comment, setComment] = useState('');
+  const [comments, setComments] = useState([]);
+
   const selectToggleLike = async () => {
     console.log('toggle');
 
@@ -48,6 +77,85 @@ function PostItem(props) {
     props.setPostSelectedLiked(props.item.liked);
     props.setPostSelectedAuthor(props.item.author_id);
   }
+
+  const fetchComments = async () => {
+    try {
+      const params = {
+        comment_author_id: props.loginUser // Assuming this is the user ID
+      };
+      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
+  
+      const response = await axios.get(apiUrl, { params });
+      if (response.data && response.data.comments) {
+        // Map through each comment and add a 'liked' property based on the user's like status
+        const updatedComments = response.data.comments.map(comment => ({
+          ...comment,
+          liked: comment.isLikedByCurrentUser 
+        }));
+        setComments(updatedComments);
+      } else {
+        setComments([]);
+      }
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    }
+  };
+  
+
+  const toggleLikeComment = async (commentId) => {
+    try {
+      // Construct the URL for the POST request
+      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}/toggle-like`;
+  
+      // Send the POST request
+      await axios.post(apiUrl, { like_comment_author_id: props.loginUser });
+  
+      // Update the like status in the local state
+      const updatedComments = comments.map(comment => {
+        if (comment.comment_id === commentId) {
+          return { ...comment, liked: !comment.liked };
+        }
+        return comment;
+      });
+  
+      setComments(updatedComments);
+    } catch (error) {
+      console.error('Error toggling like status:', error);
+      // Optionally, handle the error more visibly to the user
+    }
+  };
+  
+  useEffect(() => {
+    fetchComments();
+  }, [props.item, props.loginUser]); // Refetch comments when item or loginUser changes
+  
+  const handleCommentChange = (e) => {
+    setComment(e.target.value);
+  };
+
+
+  //send comment to database
+  const handleSendComment = async () => {
+    if (!comment) return;
+  
+    const commentData = {
+      comment_author_id: props.loginUser, //get user id
+      comment_text: comment
+
+    };
+  
+    try {
+      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
+      await axios.post(apiUrl, commentData);
+      setComment('');
+      fetchComments(); // Refresh comments after posting
+    } catch (error) {
+      console.error('Error posting comment:', error);
+      // Optionally, handle the error more visibly to the user
+    }
+  };
+  
+  
 
   return (
     <div style={styles.container} class="card">
@@ -67,8 +175,42 @@ function PostItem(props) {
           
         }
         </div>
+        <div style={styles.commentBox}>
+            <input
+              type="text"
+              value={comment}
+              onChange={handleCommentChange}
+              placeholder="Write a comment..."
+              style={styles.input}
+            />
+            <button onClick={handleSendComment}>Send</button>
+        </div>
+
+         {/* Display comments with commenter's name, text, and like button */}
+         <div>
+        {comments.map((comment, index) => (
+          <div key={`${comment.comment_id}-${index}`} 
+               style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <div>
+              <span style={{ fontWeight: 'bold' }}>{comment.comment_name}:</span>
+              <span style={{ marginLeft: '8px' }}>{comment.comment_text}</span>
+            </div>
+            <button 
+              onClick={() => toggleLikeComment(comment.comment_id)}
+              style={{ border: 'none', background: 'none', cursor: 'pointer' }}
+            >
+              <img 
+                src={comment.liked ? likedImgUrl : notLikedImgUrl} 
+                alt="Like" 
+                style={{ width: '24px', height: '24px' }}
+              />
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
+
 
 export default PostItem

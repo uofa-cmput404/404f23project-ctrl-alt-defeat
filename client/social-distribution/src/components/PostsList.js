@@ -21,7 +21,7 @@ function PostsList(props) {
     console.log("heard postsLists", changeLike, postSelected, postSelectedLiked, postSelectedAuthor);
 
     // URL goes to AUTHOR of post, NOT the author who is logged in/sending like
-    const sendLikeUrl = "http://127.0.0.1:5000/authors/" + postSelectedAuthor + '/inbox';
+    const sendLikeUrl = "http://127.0.0.1:5000/api/authors/" + postSelectedAuthor + '/inbox';
 
     if (postSelectedLiked === true) {
       console.log("unlike");
@@ -93,7 +93,8 @@ function PostsList(props) {
                 setChangeLike = {setChangeLike} 
                 setPostSelected = {setPostSelected}
                 setPostSelectedLiked={setPostSelectedLiked}
-                setPostSelectedAuthor={setPostSelectedAuthor} />
+                setPostSelectedAuthor={setPostSelectedAuthor} 
+                loginUser = {props.authorId}/>
             ))
         }
     </div>

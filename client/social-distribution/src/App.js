@@ -69,14 +69,16 @@ function App() {
           />
           <Route
             path="/homepage"
-            element={isAuthenticated ? <Stream username={username} authorId={authorId} setUsername={setUsername} /> : <Navigate to="/" />}
-          />
-          <Route path="/post/:id" element={<IndividualPost/>}/> /* Merge with /posts? */
-          <Route path="/manageposts" element={<ManagePosts/>}/> /* Merge with /posts? */
-          <Route path="/manageposts/restrictions" element={<Restrictions/>}/> /* Merge with /posts? */
-          <Route path="/newpost" element={<NewPost/>}/> /* Merge with /posts?*/
+            element={isAuthenticated ? <Stream username={username} authorId={authorId} setUsername={setUsername} updateAuthStatus={updateAuthStatus} updateUserAndAuthorId={updateUserAndAuthorId}/> : <Navigate to="/" />}
+          />          
+
+          <Route path="/authors/:author_id/posts/:post_id" element={<IndividualPost/>}/>
+          <Route path="/manageposts" element={<ManagePosts/>}/>
+          <Route path="/manageposts/restrictions" element={<Restrictions/>}/> 
+          <Route path="/newpost" element={<NewPost/>}/> 
           <Route path="/search" element={<SearchPage/>}/>
           <Route path="/edit" element={<EditProfilePage/>}/>
+          
         </Routes>
         <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       </BrowserRouter>
