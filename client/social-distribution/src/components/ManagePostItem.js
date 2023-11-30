@@ -3,7 +3,7 @@ import React from 'react'
 import Markdown from 'react-markdown';
 import './ManagePostItem.css';
 
-const deleteUrl = 'http://127.0.0.1:5000/api/posts/delete'
+const deleteUrl = 'http://127.0.0.1:5000/api/posts'
 function ManagePostItem(props) {
     function processDelete() {
         if (window.confirm("Are you sure you want to delete this post?")) {

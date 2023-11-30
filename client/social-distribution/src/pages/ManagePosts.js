@@ -10,7 +10,7 @@ const managePostsUrl = 'http://127.0.0.1:5000/api/posts/manage'
 const updateVisibilityUrl = 'http://127.0.0.1:5000/api/posts/visibility'
 const restrictUrl = 'http://127.0.0.1:5000/api/posts/restrict'
 const restrictionListUrl = 'http://127.0.0.1:5000/api/posts/restricted/'
-const editUrl = 'http://127.0.0.1:5000/api/posts/authors/'
+const editUrl = 'http://127.0.0.1:5000/api/authors/'
 
 function ManagePosts() {
     const styles = {
