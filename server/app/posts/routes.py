@@ -199,7 +199,7 @@ def get_my_posts():
         posts = curr.fetchall()                             
 
         posts = [dict(row) for row in posts]
-        print(posts)       
+        #print(posts)       
 
         data = posts
         # data = json.dumps(posts, indent=4, sort_keys=True, default=str)

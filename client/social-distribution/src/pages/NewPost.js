@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { UserContext } from '../App';
+import { toast } from 'react-toastify';
 
 const newPostUrl = 'http://127.0.0.1:5000/api/posts/new'
 
@@ -29,15 +30,9 @@ export default function NewPost(props) {
         width: '400px'
       },
       button_post: {
-        padding: '10px 20px',
-        margin: '10px 0px',
-        fontSize: '16px',
-        cursor: 'pointer',
-        backgroundColor: '#808080',
-        color: 'white',
-        border: 'none',
-        borderRadius: '4px',
-        width: '25vw'
+        width: "30vw",
+        padding: 10,
+        marginTop: 10
       },
       button_goback: {
         padding: '10px 20px',
@@ -74,7 +69,7 @@ export default function NewPost(props) {
   const handleNewPost = async () => {
     // Send POST request with new post info
     if (title === "" || content === "") {
-      alert("Please enter a title and content.");
+      toast.error("Please enter a title and content.");
     
     } else {
     
@@ -94,8 +89,8 @@ export default function NewPost(props) {
           }
         })
         .then(response => {
-          if (response.data === "success") {
-            alert("Post successfully posted");
+          if (response.data === "success") {            
+            toast.success("Post successfully posted!");
             navigate("/homepage");
           }
         })
@@ -188,7 +183,8 @@ export default function NewPost(props) {
       </form>
 
       <hr></hr>
-      <button style={{width: '20vw'}} onClick={restrictUser}>Set restrictions</button>
+      <button style={{width: '20vw'}} class="btn btn-warning" onClick={restrictUser}>Set restrictions</button>
+      <hr></hr>
 
       <p>How would you like to format your post?</p>
       <form method="dialog">
@@ -198,6 +194,7 @@ export default function NewPost(props) {
           <option value="UNKNOWN-IMAGE-TYPE">Image Only</option>
         </select>
       </form>
+      <hr></hr>
 
       <p>Title</p>
       <input   
@@ -207,22 +204,18 @@ export default function NewPost(props) {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
+      <hr></hr>
 
       <p>Content</p>
       {contentType === 'text/plain' || contentType === 'text/markdown' ? <textarea id="freeform" type="text" placeholder="What's on your mind?" name="freeform" rows="4" cols="50" style={styles.content} value={content} onChange={(e) => setContent(e.target.value)}/> 
       
-      : <input type="file" id="img" name="img" accept="image/jpeg, image/png" onChange={handleImageChange}></input>} 
-
-      <button style={styles.button_post} 
-      onClick={handleNewPost}
-      onMouseOver={(e) => e.currentTarget.style.backgroundColor = styles.buttonHover_post.backgroundColor}
-      onMouseOut={(e) => e.currentTarget.style.backgroundColor = styles.button_post.backgroundColor}>
+      : <input type="file" id="img" name="img" accept="image/jpeg, image/png" onChange={handleImageChange}></input>}       
+      <button class="btn btn-success" style={styles.button_post}
+      onClick={handleNewPost}>
         Post
       </button>
-      <button style={styles.button_goback} 
-      onClick={handleGoBack}
-      onMouseOver={(e) => e.currentTarget.style.backgroundColor = styles.buttonHover_goback.backgroundColor}
-      onMouseOut={(e) => e.currentTarget.style.backgroundColor = styles.button_goback.backgroundColor}>
+      <button class="btn btn-danger" style={styles.button_post}
+      onClick={handleGoBack}>
         Cancel
       </button>
     </div>

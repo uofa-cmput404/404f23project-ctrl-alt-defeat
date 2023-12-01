@@ -1,0 +1,12 @@
+body { 
+    padding-top: 50px; 
+}
+
+/* Add a specific class to the body for the specific page */
+.body-no-padding {
+    padding-top: 0 !important; /* Override the default padding for this class */
+  }
+  
+img {
+    border-radius: 2%;
+}

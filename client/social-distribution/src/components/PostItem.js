@@ -12,6 +12,11 @@ const styles = {
     cursor: 'pointer'
   },
   
+  container: {    
+    padding: 20,
+    marginTop: 10,    
+    
+  },
   /*container: {
     display: 'flex',
     alignItems: 'center',
@@ -168,20 +173,23 @@ function PostItem(props) {
   
 
   return (
-    <li key={props.key}>
-        <h3>{props.item.title}</h3>
-        <div>Posted by: {props.item.username}</div>
-        <div>{props.item.date_posted}</div>
-        <div>{get_content_as_elements(props.item.content_type, props.item.content)}</div>
+    <div style={styles.container} class="card">
+        <h3><a href={"http://localhost:3000/authors/" + props.item.author_id + "/posts/" + props.item.post_id}   >{props.item.title}</a></h3>
+        <small class="text-muted">Posted by: {props.item.username}</small>        
+        <small class="text-muted">{props.item.date_posted}</small>        
+        <hr/>
+        <div>{get_content_as_elements(props.item.content_type,props.item.content)}</div>
         
-        <div style={styles.container} onClick={selectToggleLike}>
-          {props.item.liked ?
-            <img style={styles.img} src={likedImgUrl} /> :
-            <img style={styles.img} src={notLikedImgUrl} onClick={selectToggleLike} /> 
-          }
-        </div>
+        <div onClick={selectToggleLike}>
+        {// Show like icon as liked or not based on if logged in author has liked the post
+        props.item.liked ?
 
-        {/* Comment box and send button */}
+            <img style={styles.img} src={likedImgUrl} />
+          
+            : <img style={styles.img} src={notLikedImgUrl} onClick={selectToggleLike} /> 
+          
+        }
+        </div>
         <div style={styles.commentBox}>
             <input
               type="text"
@@ -190,7 +198,7 @@ function PostItem(props) {
               placeholder="Write a comment..."
               style={styles.input}
             />
-            <button onClick={handleSendComment}>Send</button>
+            <button class="btn btn-primary" onClick={handleSendComment}>Send</button>
         </div>
  {/* Display comments with commenter's name, text, like button, and delete button */}
  <div>
@@ -224,8 +232,8 @@ function PostItem(props) {
           </div>
         ))}
       </div>
-    </li>
-  );
+    </div>
+  )
 }
 
 

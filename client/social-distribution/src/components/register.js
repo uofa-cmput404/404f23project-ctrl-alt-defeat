@@ -11,8 +11,7 @@ function Register(props) {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      height: '100vh',
-      backgroundColor: '#f2f2f2',
+      height: '100vh',      
     },
     input: {
       margin: '10px',
