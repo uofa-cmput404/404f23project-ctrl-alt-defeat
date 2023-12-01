@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import './global.css';
 
 import Navbar from '../components/Navbar';
+import GithubIcon from '../components/GithubIcon';
 
 const postsUrl = 'http://127.0.0.1:5000/api/posts';
 
@@ -22,6 +23,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
     const [likedPostIds, setLikedPostIds] = useState({});
     const [responseData, setResponseData] = useState([]);
     const [fetchDone, setFetchDone] = useState(false);
+    const [fetchGithubDone, setFetchGithubDone] = useState(false);
     
     const [postsLists, setPostsLists] = useState([]);
     const [activityList, setActivityList] = useState([]);
@@ -56,6 +58,8 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
                 .catch(error => {
                 // Handle any errors that occur during the request
                 console.error('Error:', error);
+                }).finally(() => {
+                    setFetchGithubDone(true);
                 });
           } catch (error) {
             console.error('Error:', error);
@@ -214,8 +218,14 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
         <div style={styles.container}> 
             <div style={styles.sidebar}>                
                 <div class="card" style={styles.card}>                                  
-                        <h3>My Github Activity</h3>                          
-                        {activityList.length ? <div>
+                        <div style={{display: "flex", alignItems: "center"}}><GithubIcon/><h3 style={{marginLeft: 10, paddingTop: 10, alignSelf: "center" }}>Activity</h3></div>
+                        <hr/>
+                                                    
+                        {
+                            !fetchGithubDone ? <div class="spinner-border" role="status">
+                                        <span class="sr-only"></span>
+                                    </div>
+                        : activityList.length ? <div>
                             {activityList.map(e => {
                                 return <div>
                                     <b>{e.repo.name}</b>
@@ -247,8 +257,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
                 </div>
             </div>
             <div></div>         
-            </div>
-            <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+            </div>            
         </div>
     );
 }

@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { UserContext } from '../App';
+import { toast } from 'react-toastify';
 
 const newPostUrl = 'http://127.0.0.1:5000/api/posts/new'
 
@@ -68,7 +69,7 @@ export default function NewPost(props) {
   const handleNewPost = async () => {
     // Send POST request with new post info
     if (title === "" || content === "") {
-      alert("Please enter a title and content.");
+      toast.error("Please enter a title and content.");
     
     } else {
     
@@ -88,8 +89,8 @@ export default function NewPost(props) {
           }
         })
         .then(response => {
-          if (response.data === "success") {
-            alert("Post successfully posted");
+          if (response.data === "success") {            
+            toast.success("Post successfully posted!");
             navigate("/homepage");
           }
         })

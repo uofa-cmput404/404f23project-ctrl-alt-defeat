@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 function FollowRequests({ authorId }) {
   const [followRequests, setFollowRequests] = useState([]);
@@ -54,7 +55,9 @@ function FollowRequests({ authorId }) {
       .then((response) => {
         if (response.ok) {
           setFollowRequests((prevRequests) => prevRequests.filter((request) => request.id !== requestId));
+          toast.success('Accepted follow request!');
         } else {
+          toast.error('Accepted follow request!');
           console.error('Failed to accept follow request');
         }
       })

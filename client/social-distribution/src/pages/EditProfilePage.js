@@ -57,27 +57,28 @@ function EditProfilePage() {
     const handleUsernameUpdate = async (e) => {
         e.preventDefault();
         if (!newUsername) {
-          toast.error('Username cannot be empty');
-          return;
-        }
-        console.log(authorId);
-        const response = await fetch('http://localhost:5000/authors/update_username', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ new_username: newUsername, authorId }),
-        });
-    
-        const data = await response.json();
-    
-        if (data.error) {
-          toast.error(data.error);
-        } else {          
-          localStorage.setItem('username', newUsername);
-          toast.success(data.message);
-        }
-        setNewUsername('');
+        toast.error('Username cannot be empty');
+        return;
+      }
+
+      const response = await fetch('http://localhost:5000/api/authors/update_username', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ new_username: newUsername, authorId }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        toast.error(data.error);
+      } else {
+        
+        localStorage.setItem('username', newUsername);
+        toast.success(data.message);
+      }
+    setNewUsername('');
       };
     
       const handlePasswordUpdate = async (e) => {
@@ -87,7 +88,7 @@ function EditProfilePage() {
           return;
         }
     
-        const response = await fetch('http://localhost:5000/authors/update_password', {
+        const response = await fetch('http://localhost:5000/api/authors/update_password', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

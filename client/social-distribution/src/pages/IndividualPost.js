@@ -21,6 +21,7 @@ export default function IndividualPost() {;
     const [username, setUsername] = useState("");
     const navigate = useNavigate();
     let { post_id, author_id } = useParams();
+    const [fetchDone, setFetchDone] = useState(false);
 
     const styles = {
         container: {
@@ -42,7 +43,9 @@ export default function IndividualPost() {;
                 // Handle any errors that occur during the request
                 console.error('Error:', error);
                 setPostSelected("invalid"); 
-                });
+                }).finally(() => {
+                    setFetchDone(true);
+                });;
           } catch (error) {
             console.error('Error:', error);
           }
@@ -74,15 +77,20 @@ export default function IndividualPost() {;
     
     return (
         <div style={styles.container}>
-            <button style={{width: '20vw'}} onClick={() => navigate("/homepage")}>Back to Homepage</button>
-             {postSelected !== "invalid" ?
+            <button class="btn btn-secondary" style={{width: '20vw'}} onClick={() => navigate("/homepage")}>Back to Homepage</button>
+            { !fetchDone ?
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only"></span>
+                        </div> :
+             
+             (postSelected !== "invalid" ?
                 <div>
                     <h3>{postSelected.title}</h3>
                     <div>Posted by: {username}</div>
                     <div>{postSelected.published}</div>
                     <div>{get_content_as_elements(postSelected.contentType,postSelected.content)}</div>                
                 </div>
-                : <h1>Post not found</h1>
+                : <h1>Post not found</h1> )
              }
         </div>
     );
