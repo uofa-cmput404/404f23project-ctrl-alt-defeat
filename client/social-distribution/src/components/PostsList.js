@@ -16,6 +16,14 @@ function PostsList(props) {
   // Author of post selected
   const [postSelectedAuthor, setPostSelectedAuthor] = useState('');
     
+  const styles = {
+    container: {
+      // backgroundColor: "red",
+      width: "100%"
+    }
+  }
+
+
   // Listen for each PostItem if logged in author presses like button
   if (changeLike === true) {
     console.log("heard postsLists", changeLike, postSelected, postSelectedLiked, postSelectedAuthor);
@@ -86,7 +94,7 @@ function PostsList(props) {
   }
 
   return (
-    <ul>
+    <div style={styles.container}>
         {
             props.postsLists.map((item, index) => (
                 <PostItem item={item} index={index} 
@@ -97,7 +105,7 @@ function PostsList(props) {
                 loginUser = {props.authorId}/>
             ))
         }
-    </ul>
+    </div>
     
   )
 }

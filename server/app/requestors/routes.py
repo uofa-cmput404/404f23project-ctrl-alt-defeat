@@ -26,7 +26,7 @@ def register():
         existing_requestor = cur.fetchone()
         cur.execute("SELECT * FROM authors WHERE username = %s", (username,))
         existing_author = cur.fetchone()
-
+       
         if existing_requestor or existing_author:
             return jsonify({'error': 'Username already exists'})
         

@@ -9,6 +9,10 @@ import { Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import IndividualPost from './pages/IndividualPost';
+import Navbar from './components/Navbar';
+import SearchPage from './pages/SearchPage';
+import EditProfilePage from './pages/EditProfilePage';
+import Register from './pages/RegistrationPage';
 
 export const UserContext = createContext();
 
@@ -50,9 +54,10 @@ function App() {
   };
   
   return (
-    <UserContext.Provider value={{ username, authorId, setUsername, setAuthorId }}>
-      <BrowserRouter>
-        <Routes>
+    <UserContext.Provider value={{ username, authorId, setUsername, setAuthorId, updateAuthStatus, updateUserAndAuthorId }}>
+      <BrowserRouter>          
+      {isAuthenticated && <Navbar/>}
+        <Routes>          
           <Route
             path="/"
             element={
@@ -63,14 +68,19 @@ function App() {
               />
             }
           />
+          <Route path="/register" element={<Register/>}/>
           <Route
             path="/homepage"
             element={isAuthenticated ? <Stream username={username} authorId={authorId} setUsername={setUsername} updateAuthStatus={updateAuthStatus} updateUserAndAuthorId={updateUserAndAuthorId}/> : <Navigate to="/" />}
-          />
+          />          
+
           <Route path="/authors/:author_id/posts/:post_id" element={<IndividualPost/>}/>
           <Route path="/manageposts" element={<ManagePosts/>}/>
           <Route path="/manageposts/restrictions" element={<Restrictions/>}/> 
           <Route path="/newpost" element={<NewPost/>}/> 
+          <Route path="/search" element={<SearchPage/>}/>
+          <Route path="/edit" element={<EditProfilePage/>}/>
+          
         </Routes>
         <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       </BrowserRouter>
