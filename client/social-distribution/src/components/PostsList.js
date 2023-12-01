@@ -103,7 +103,7 @@ function PostsList(props) {
   }
 
   return (
-    <ul>
+    <div style={styles.container}>
         {
             props.postsLists.map((item, index) => (
                 <PostItem item={item} index={index} 
@@ -111,7 +111,7 @@ function PostsList(props) {
                 loginUser = {props.authorId}/>
             ))
         }
-    </ul>
+    </div>
     
   )
 }

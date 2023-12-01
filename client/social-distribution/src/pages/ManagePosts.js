@@ -14,8 +14,12 @@ const editUrl = 'http://127.0.0.1:5000/api/authors/'
 
 function ManagePosts() {
     const styles = {
+        container: {
+            margin: 20
+        },
         dialog: {
-            position: 'fixed'
+            position: 'fixed',
+            zIndex: 2
         },
         text: {
             width: "100%",
@@ -74,6 +78,7 @@ function ManagePosts() {
     const [editContent, setEditContent] = useState(""); 
     const [editTitle, setEditTitle] = useState(""); 
     const [edittedContentType, setEdittedContentType] = useState("");
+    const [fetchDone, setFetchDone] = useState(false);
 
     const editRequest = async () => {
         // console.log(authorId);
@@ -196,7 +201,10 @@ function ManagePosts() {
                 .catch(error => {
                 // Handle any errors that occur during the request
                 console.error('Error:', error);
-                });
+                })
+                .finally(() => {
+                    setFetchDone(true);
+                })
           } catch (error) {
             console.error('Error:', error);
           }
@@ -252,9 +260,9 @@ function ManagePosts() {
     };
 
   return (
-    <div>
+    <div style={styles.container}>
         <h1>My posts:</h1>
-            <dialog open={openVisibilityDialog} style={styles.dialog}>
+            <dialog  open={openVisibilityDialog} style={styles.dialog}>
             <h1>Change visibility</h1>
             <form method="dialog">
                 <select id="visibility" name="visibility" onChange={handleSelectChange}>
@@ -304,9 +312,13 @@ function ManagePosts() {
                 <button style={styles.cancel} onClick={() => setRestrictionsDialog(false)}>Close</button>
             </form>
             </dialog>
-        <ul>
+        <div>
             {
-                postsLists.length ? 
+                !fetchDone ?
+                <div class="spinner-border" role="status">
+                    {/* <span class="sr-only">Loading...</span> */}
+                </div> :
+                (postsLists.length ? 
                 postsLists.map((item, index) => (
                     <ManagePostItem postLists={postsLists} 
                                     setPostsLists={setPostsLists} 
@@ -322,9 +334,9 @@ function ManagePosts() {
                                     setVisibility={setVisibility}             
                                     setEdittedContentType={setEdittedContentType}
                                     />
-                )) : <div>You have no posts</div>
+                )) : <div>You have no posts</div>)
             }
-        </ul>
+        </div>
 
     </div>
   )

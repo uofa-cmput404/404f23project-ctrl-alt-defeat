@@ -1,7 +1,26 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 function FollowRequests({ authorId }) {
   const [followRequests, setFollowRequests] = useState([]);
+
+  const styles = {
+    container: {
+      padding: 20,
+      minHeight: 300
+    },
+    follow: {
+      display: "flex",
+      alignItems: "center",                
+
+    },
+    username: {
+      width: 100
+    },
+    box: {
+      padding: 10
+    }
+  }
 
   useEffect(() => {
     // Fetch follow requests for the current user (authorId)
@@ -36,7 +55,9 @@ function FollowRequests({ authorId }) {
       .then((response) => {
         if (response.ok) {
           setFollowRequests((prevRequests) => prevRequests.filter((request) => request.id !== requestId));
+          toast.success('Accepted follow request!');
         } else {
+          toast.error('Accepted follow request!');
           console.error('Failed to accept follow request');
         }
       })
@@ -72,17 +93,24 @@ function FollowRequests({ authorId }) {
   
 
   return (
-    <div>
-      <h1>Follow Requests:</h1>
-      <ul>
-        {followRequests.map((request) => (
-          <li key={request.id}>
-            {request.username}
-            <button onClick={() => acceptFollowRequest(request.id)}>Accept</button>
-            <button onClick={() => rejectFollowRequest(request.id)}>Reject</button>
-          </li>
+    <div style={styles.box}>
+    {followRequests.length > 0 ? 
+       <ul>
+       {followRequests.map((request) => (
+         <li key={request.id}>
+           <div style={styles.follow}>
+            <p style={styles.username}>{request.username}</p>   
+            <div>
+              <button onClick={() => acceptFollowRequest(request.id)} class="btn"><i style={{color: "green"}} class="fa fa-check"></i></button>
+              <button onClick={() => rejectFollowRequest(request.id)} class="btn"><i style={{color: "red"}} class="fa fa-close"></i></button>                       
+            </div>
+           </div>
+         </li>
         ))}
-      </ul>
+      </ul>    
+      : <li>Empty! 😅</li> 
+    }
+     
     </div>
   );
 }
