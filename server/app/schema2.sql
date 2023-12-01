@@ -66,7 +66,7 @@ CREATE TABLE likes (
     post_id TEXT NOT NULL,
     time_liked TIMESTAMP NOT NULL,
     FOREIGN KEY (like_author_id) REFERENCES authors(author_id) ON DELETE CASCADE,
-    FOREIGN KEY (post_id) REFERENCES posts(post_id)
+    FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE
 );
 
 CREATE TABLE comments (
@@ -120,5 +120,6 @@ CREATE TABLE inbox_items (
     recipient_id TEXT NOT NULL,
     inbox_item_id TEXT NOT NULL,
     object_id TEXT NOT NULL,
-    type TEXT NOT NULL
+    type TEXT NOT NULL,
+    date_received TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
