@@ -90,7 +90,7 @@ function SearchPage() {
           </ul>
         </div>
       ) : (
-        <p></p>
+        <p>No results found</p>
       )}
     </div>
   )
