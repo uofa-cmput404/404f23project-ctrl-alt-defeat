@@ -31,12 +31,6 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
     
     const [github, setGithub] = useState("");
 
-    const styles = {
-        container: {
-            margin: "20px"
-        }
-    }
-
     const fetchGithubActivity = async () => {        
         try {
             // Make the GET request using Axios
@@ -260,7 +254,11 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
                         !fetchDone ?
                         <div class="spinner-border" role="status">
                             <span class="sr-only">Loading...</span>
-                        </div> :  (postsLists.length !== 0 ? <PostsList postsLists={postsLists} setPostsLists={setPostsLists} authorId={authorId} /> : <div>There are no posts</div>)
+                        </div> :  (postsLists.length !== 0 ? <PostsList postsLists={postsLists} 
+                        setPostsLists={setPostsLists} 
+                        authorId={authorId}
+                        username={username}
+                        github={github} /> : <div>There are no posts</div>)
                     }
                 </div>
             </div>

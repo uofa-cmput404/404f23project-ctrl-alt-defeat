@@ -182,9 +182,9 @@ export default function NewPost(props) {
         </select>
       </form>
 
-      <hr></hr>
+      <br></br>
       <button style={{width: '20vw'}} class="btn btn-warning" onClick={restrictUser}>Set restrictions</button>
-      <hr></hr>
+      <br></br>
 
       <p>How would you like to format your post?</p>
       <form method="dialog">
@@ -194,7 +194,7 @@ export default function NewPost(props) {
           <option value="UNKNOWN-IMAGE-TYPE">Image Only</option>
         </select>
       </form>
-      <hr></hr>
+      <br></br>
 
       <p>Title</p>
       <input   
@@ -204,7 +204,7 @@ export default function NewPost(props) {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
-      <hr></hr>
+      <br></br>
 
       <p>Content</p>
       {contentType === 'text/plain' || contentType === 'text/markdown' ? <textarea id="freeform" type="text" placeholder="What's on your mind?" name="freeform" rows="4" cols="50" style={styles.content} value={content} onChange={(e) => setContent(e.target.value)}/> 

@@ -103,7 +103,7 @@ function PostsList(props) {
   }
 
   return (
-    <div style={styles.container}>
+    <div>
         {
             props.postsLists.map((item, index) => (
                 <PostItem item={item} index={index} 

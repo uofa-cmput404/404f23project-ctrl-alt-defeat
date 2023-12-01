@@ -68,7 +68,7 @@ function PostItem(props) {
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
 
-  const selectToggleLike = async () => {
+  const handleToggleLike = async () => {
     console.log('toggle');
 
     props.togglePostLike(props.item.post_id, props.item.liked, props.item.author_id);
@@ -177,7 +177,7 @@ function PostItem(props) {
         <hr/>
         <div>{get_content_as_elements(props.item.content_type,props.item.content)}</div>
         
-        <div onClick={selectToggleLike}>
+        <div onClick={handleToggleLike}>
         {// Show like icon as liked or not based on if logged in author has liked the post
         props.item.liked ?
 
