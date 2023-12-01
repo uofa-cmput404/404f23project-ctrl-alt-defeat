@@ -478,17 +478,16 @@ def send_comments(author_id, post_id):
 
         #Check if the authors are friends
         check_friends_query = """
-        SELECT CASE WHEN (
-                SELECT COUNT(*) FROM friends 
-                WHERE author_followee = %s AND author_following = %s
-                ) + (
-                SELECT COUNT(*) FROM friends 
-                WHERE author_followee = %s AND author_following = %s
-                ) = 2 THEN 'private'
+            SELECT CASE 
+                WHEN EXISTS (
+                    SELECT 1 FROM friends 
+                    WHERE author_followee = %s AND author_following = %s
+                ) THEN 'private'
                 ELSE 'public'
-        END AS status
+            END AS status
         """
-        cur.execute(check_friends_query, (author_id, comment_author_id, comment_author_id, author_id))
+
+        cur.execute(check_friends_query, (author_id, comment_author_id))
         status = dict(cur.fetchone())['status']
         print(status)
         query = "INSERT INTO comments " \

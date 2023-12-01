@@ -17,6 +17,7 @@ const styles = {
     marginTop: 10,    
     
   },
+  
   /*container: {
     display: 'flex',
     alignItems: 'center',
@@ -41,6 +42,24 @@ const styles = {
   },
 
 }
+const buttonContainerStyle = {
+  position: 'absolute',  // Position it relative to its first positioned ancestor
+  top: '10px',          // 10px from the top of the container
+  right: '10px',         // 10px from the right of the container
+  zIndex: '1000'        // Ensure it's above other content
+};
+const buttonStyle = {
+  padding: '5px 10px',          // Padding around the text
+  fontSize: '12px',             // Smaller font size for a little button
+  cursor: 'pointer',            // Cursor pointer to indicate it's clickable
+  backgroundColor: '#f2f2f2',   // Very light grey background
+  color: '#333',                // Text color, adjust as needed
+  border: '1px solid #d9d9d9',  // Lighter border color than the button
+  borderRadius: '5px',         // Rounded edges, adjust radius as needed
+  outline: 'none',              // Remove default focus outline
+  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' // Optional: subtle shadow for depth
+};
+
 
 
 function get_content_as_elements(content_type, content){
@@ -144,7 +163,19 @@ function PostItem(props) {
   const handleCommentChange = (e) => {
     setComment(e.target.value);
   };
+  const handleSharePost = async () => {
+    if (props.item.author_id === props.loginUser) return;
 
+    try {
+      const shareApiUrl = `http://127.0.0.1:5000/api/share/post/${props.item.post_id}`;
+      await axios.post(shareApiUrl, { shared_by: props.loginUser });
+
+      // Display notification 
+      alert('Share Success');
+    } catch (error) {
+      console.error('Error sharing post:', error);
+    }
+  };
 
   //send comment to database
   const handleSendComment = async () => {
@@ -163,7 +194,6 @@ function PostItem(props) {
       fetchComments(); // Refresh comments after posting
     } catch (error) {
       console.error('Error posting comment:', error);
-      // Optionally, handle the error more visibly to the user
     }
   };
   
@@ -187,6 +217,14 @@ function PostItem(props) {
           
         }
         </div>
+        {/* Share Button - Visible only if the post is made by another author */}
+        {props.item.author_id !== props.loginUser && (<div style={buttonContainerStyle}>
+        <button style={buttonStyle} onClick={handleSharePost}>
+          share
+        </button>
+        </div>)}
+       
+
         <div style={styles.commentBox}>
             <input
               type="text"
@@ -197,6 +235,7 @@ function PostItem(props) {
             />
             <button class="btn btn-primary" onClick={handleSendComment}>Send</button>
         </div>
+        
  {/* Display comments with commenter's name, text, like button, and delete button */}
  <div>
         {comments.map((comment, index) => (
@@ -225,6 +264,7 @@ function PostItem(props) {
                   Delete
                 </button>
               )}
+              
             </div>
           </div>
         ))}
