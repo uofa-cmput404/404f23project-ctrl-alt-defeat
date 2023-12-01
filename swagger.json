@@ -6,7 +6,7 @@
       "description": "API for our backend"
     },
     "paths": {
-      "/api/authors": {
+      "/api/authors/": {
         "get": {
           "summary": "Get all authors (REMOTE)",
           "parameters": [
@@ -78,7 +78,7 @@
           "tags": ["Author"]
         }
       },
-      "/api/authors/{author_id}": {
+      "/api/authors/{author_id}/": {
         "get": {
           "summary": "Get a specific author (REMOTE)",
           "parameters": [
@@ -241,7 +241,36 @@
             "200": {
               "description": "Successful response",
               "schema": {
-                "type": "object"
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "@context": { "type": "string" },
+                        "author": {
+                          "type": "object",
+                          "properties": {
+                            "displayName": { "type": "string" },
+                            "github": { "type": "string" },
+                            "host": { "type": "string" },
+                            "id": { "type": "string" },
+                            "profileImage": { "type": "string" },
+                            "type": { "type": "string" },
+                            "url": { "type": "string" }
+                          }
+                        },
+                        "object": { "type": "string" },
+                        "summary": { "type": "string" },
+                        "type": { "type": "string" }
+                      },
+                      "required": ["@context", "author", "object", "summary", "type"]
+                    }
+                  },
+                  "type": { "type": "string" }
+                },
+                "required": ["items", "type"]
               }
             }
           },
@@ -673,7 +702,64 @@
                 "200": {
                   "description": "Successful response",
                   "schema": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "author": {
+                              "type": "object",
+                              "properties": {
+                                "displayName": { "type": "string" },
+                                "github": { "type": "string" },
+                                "host": { "type": "string" },
+                                "id": { "type": "string" },
+                                "profileImage": { "type": "string" },
+                                "type": { "type": "string" },
+                                "url": { "type": "string" }
+                              }
+                            },
+                            "categories": { "type": "array", "items": { "type": "string" } },
+                            "comments": { "type": "string" },
+                            "commentsSrc": { "example": [] },
+                            "content": { "type": "string" },
+                            "contentType": { "type": "string" },
+                            "count": { "type": "integer" },
+                            "description": { "type": "string" },
+                            "id": { "type": "string" },
+                            "origin": { "type": "string" },
+                            "published": { "type": "string" },
+                            "source": { "type": "string" },
+                            "title": { "type": "string" },
+                            "type": { "type": "string" },
+                            "unlisted": { "type": "boolean" },
+                            "visibility": { "type": "string" }
+                          },
+                          "required": [
+                            "author",
+                            "categories",
+                            "comments",
+                            "commentsSrc",
+                            "content",
+                            "contentType",
+                            "count",
+                            "description",
+                            "id",
+                            "origin",
+                            "published",
+                            "source",
+                            "title",
+                            "type",
+                            "unlisted",
+                            "visibility"
+                          ]
+                        }
+                      },
+                      "type": { "type": "string" }
+                    },
+                    "required": ["items", "type"]
                   }
                 }
               },
@@ -949,6 +1035,9 @@
                               "type": "string"
                             },
                             "github": {
+                              "type": "string"
+                            },
+                            "profileImage": {
                               "type": "string"
                             }
                           }

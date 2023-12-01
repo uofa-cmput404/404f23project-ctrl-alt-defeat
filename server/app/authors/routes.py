@@ -1,6 +1,6 @@
 from . import bp
 import json
-from flask import request, g, jsonify
+from flask import request, g, jsonify, abort
 import sqlite3
 from ..dbase import get_db_connection
 from random import randrange
@@ -84,8 +84,8 @@ def get_author(author_id):
         item = dict()
         item["type"] = "author"
         item["host"] = request.url_root
-        item["id"] = request.url_root + "api/" + res["author_id"]
-        item["url"] = request.url_root + "api/" + res["author_id"]
+        item["id"] = request.url_root + "api/authors/" + res["author_id"]
+        item["url"] = request.url_root + "api/authors/" + res["author_id"]
         item["displayName"] = res["username"]
         item["github"] = "http://github.com/" + res["github"] if res["github"] is not None else None
         item["profileImage"] = None
@@ -181,6 +181,16 @@ def get_posts_liked(author_id):
     try:
         conn, curr = get_db_connection()
 
+        query = "SELECT username " \
+                "FROM authors " \
+                "WHERE author_id = %s"         
+        
+        curr.execute(query, (author_id,))
+        author = curr.fetchone()
+
+        if author == None:
+            abort(404, "Author not found")
+
         query = "SELECT l.post_id, p.author_id,  a.username, a.github " \
                 "FROM likes l " \
                 "JOIN posts p " \
@@ -200,13 +210,14 @@ def get_posts_liked(author_id):
 
         for like in likes:
             item = dict()
-            item["context"] = None
+            item["@context"] = None
             item["summary"] = like["username"] + " Likes your post"
             item["type"] = "Like"
             item["author"] = dict()
                                     
             item["author"]["type"] = "author"
             item["author"]["id"] = request.root_url + "api/authors/" + like["author_id"]
+            item["author"]["url"] = request.root_url + "api/authors/" + like["author_id"]
             item["author"]["host"] = request.root_url
             item["author"]["displayName"] = like["username"]
             item["author"]["profileImage"] = None
@@ -216,13 +227,16 @@ def get_posts_liked(author_id):
             payload["items"].append(item)        
 
         data = payload
-        conn.commit()
-        conn.close()
-
 
     except Exception as e:
-        print("Getting likes error: ", e)
-        data = "error"
+        print(f"An error occurred: {str(e)}")
+        # Re-raise the exception to propagate it
+        raise
+
+    finally:
+        # Close database connection in the finally block to ensure it's closed
+        if conn:
+            conn.close()
     
     return jsonify(data)
 
@@ -282,10 +296,12 @@ def get_liked_posts(author_id, post_id):
     
     return jsonify(data)
 
+# (LOCAL/REMOTE)
 @bp.route('/authors/<author_id>/inbox', methods=['POST'])
 def send(author_id):
     try:
         request_data = request.get_json()
+        print(request_data)
         message_type = request_data["type"]
 
         if message_type == "Like":
@@ -312,7 +328,8 @@ def send(author_id):
                         "sender_display_name, recipient_id, " \
                         "inbox_item_id, object_id, type) VALUES " \
                         "(%s, %s, %s, %s, %s, %s, %s)"
-            curr.execute(inbox_query, (likeAuthorId, likeHost, displayName, author_id, inboxItemId, likeId, "Like"))
+            
+            curr.execute(inbox_query, (likeAuthorId, request.base_url, displayName, author_id, inboxItemId, likeId, "Like"))
 
             conn.commit()
             conn.close()
@@ -408,11 +425,11 @@ def delete_like(author_id):
 
 
 
-
+# REMOTE
 @bp.route('/authors/<author_id>/posts/<post_id>/comments', methods=['GET'])
-def get_post_comments(author_id, post_id):
+def get_post_comments(author_id, post_id):    
     comment_author_id = request.args.get('comment_author_id')
-    if not comment_author_id:
+    if not comment_author_id:        
         return jsonify({'comments': []})
 
     try:
@@ -438,6 +455,7 @@ def get_post_comments(author_id, post_id):
 
         cursor.execute(query, (comment_author_id, post_id, author_id, comment_author_id, comment_author_id))
         comment_info = cursor.fetchall()
+        print("fetch:")
         comment_info = [dict(i) for i in comment_info]
         print(comment_info)
         conn.close()

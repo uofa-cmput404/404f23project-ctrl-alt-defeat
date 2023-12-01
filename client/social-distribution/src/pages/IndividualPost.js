@@ -32,7 +32,7 @@ export default function IndividualPost() {;
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
-                axios.get(postsUrl + "authors/" + author_id + "/posts/" + post_id)
+                axios.get(postsUrl + "authors/" + author_id + "/posts/" + post_id + "/display")
                 .then(response => {
                 // Handle the successful response here
                 

@@ -211,10 +211,11 @@ def get_followers(author_id):
         followers_list = [
             {
                 "type": "author",
-                "id": follower['author_id'],
-                "url": f"{request.root_url}/authors/{follower['author_id']}",
+                "id": f"{request.root_url}api/authors/{follower['author_id']}",
+                "url": f"{request.root_url}api/authors/{follower['author_id']}",
                 "host": request.root_url,
                 "displayName": follower['username'],
+                "profileImage": None,
                 "github": f"https://github.com/{follower['github']}" if follower['github'] is not None else None,
             }
             for follower in followers
