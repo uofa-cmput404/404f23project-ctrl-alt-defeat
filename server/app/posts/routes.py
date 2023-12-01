@@ -167,9 +167,27 @@ def delete_post(post_id):
 
     try:
         conn, curr = get_db_connection()
+
+        # Delete likes *in inbox table* associated with this post
+        ## Get like IDs associated with this post
+        like_query = "SELECT like_id FROM likes " \
+                     "WHERE post_id = %s"
+        curr.execute(like_query, (post_id,))
+        likes = curr.fetchall()
+        likes = [dict(i) for i in likes]
+
+        ## Delete all like ids from inbox associated with post
+        for like in likes:
+            inbox_query = "DELETE FROM inbox_items " \
+                        "WHERE object_id = %s"
+            curr.execute(inbox_query, (like["like_id"],))
+
+        # Delete actual post
+        # Note that likes associated w/post are automatically deleted by cascade
         query = f"DELETE FROM posts " \
                 f"WHERE post_id = %s "
         curr.execute(query, (post_id, ))
+
         
         conn.commit()
         conn.close()

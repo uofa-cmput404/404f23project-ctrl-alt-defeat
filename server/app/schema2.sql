@@ -11,6 +11,7 @@ DROP TABLE IF EXISTS requestors;
 DROP TABLE IF EXISTS posts CASCADE;
 DROP TABLE IF EXISTS nodes;
 DROP TABLE IF EXISTS authors CASCADE;
+DROP TABLE IF EXISTS inbox_items;
 
 CREATE TABLE authors (
     author_id TEXT PRIMARY KEY,
@@ -65,7 +66,7 @@ CREATE TABLE likes (
     post_id TEXT NOT NULL,
     time_liked TIMESTAMP NOT NULL,
     FOREIGN KEY (like_author_id) REFERENCES authors(author_id) ON DELETE CASCADE,
-    FOREIGN KEY (post_id) REFERENCES posts(post_id)
+    FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE
 );
 
 CREATE TABLE comments (
@@ -110,4 +111,15 @@ CREATE TABLE nodes (
     node_name TEXT,
     username TEXT NOT NULL,
     password TEXT NOT NULL   
+);
+
+CREATE TABLE inbox_items (
+    sender_id TEXT NOT NULL,
+    sender_display_name TEXT NOT NULL,
+    sender_host TEXT NOT NULL,
+    recipient_id TEXT NOT NULL,
+    inbox_item_id TEXT NOT NULL,
+    object_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    date_received TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

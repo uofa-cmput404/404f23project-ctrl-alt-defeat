@@ -27,8 +27,9 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
     
     const [postsLists, setPostsLists] = useState([]);
     const [activityList, setActivityList] = useState([]);
-    const [showProfile, setShowProfile] = useState(false);     
-
+    const [showProfile, setShowProfile] = useState(false);
+    
+    const [github, setGithub] = useState("");
 
     const fetchGithubActivity = async () => {        
         try {
@@ -41,7 +42,8 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
                                 // Make the GET request using Axios
                                     axios.get('https://api.github.com/users/' + response.data.github + '/events')
                                     .then(response => {
-                                    // Handle the successful response here                
+                                    // Handle the successful response here  
+                                    setGithub(response.data.github);
                                     setActivityList(response.data.slice(0, 5));         
                                     //console.log(response.data);   
                                     })
@@ -252,7 +254,11 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
                         !fetchDone ?
                         <div class="spinner-border" role="status">
                             <span class="sr-only">Loading...</span>
-                        </div> :  (postsLists.length !== 0 ? <PostsList postsLists={postsLists} setPostsLists={setPostsLists} authorId={authorId} /> : <div>There are no posts</div>)
+                        </div> :  (postsLists.length !== 0 ? <PostsList postsLists={postsLists} 
+                        setPostsLists={setPostsLists} 
+                        authorId={authorId}
+                        username={username}
+                        github={github} /> : <div>There are no posts</div>)
                     }
                 </div>
             </div>
