@@ -118,7 +118,23 @@ function PostItem(props) {
       // Optionally, handle the error more visibly to the user
     }
   };
-  
+  const deleteComment = async (commentId) => {
+    try {
+      // API URL to delete the comment
+      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}`;
+      
+      // Send the DELETE request
+      await axios.delete(apiUrl);
+
+      // Update the comments in the local state to reflect the deletion
+      const updatedComments = comments.filter(comment => comment.comment_id !== commentId);
+      setComments(updatedComments);
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      // Optionally, handle the error more visibly to the user
+    }
+  };
+
   useEffect(() => {
     fetchComments();
   }, [props.item, props.loginUser]); // Refetch comments when item or loginUser changes
@@ -176,9 +192,8 @@ function PostItem(props) {
             />
             <button onClick={handleSendComment}>Send</button>
         </div>
-
-         {/* Display comments with commenter's name, text, and like button */}
-         <div>
+ {/* Display comments with commenter's name, text, like button, and delete button */}
+ <div>
         {comments.map((comment, index) => (
           <div key={`${comment.comment_id}-${index}`} 
                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
@@ -186,16 +201,26 @@ function PostItem(props) {
               <span style={{ fontWeight: 'bold' }}>{comment.comment_name}:</span>
               <span style={{ marginLeft: '8px' }}>{comment.comment_text}</span>
             </div>
-            <button 
-              onClick={() => toggleLikeComment(comment.comment_id)}
-              style={{ border: 'none', background: 'none', cursor: 'pointer' }}
-            >
-              <img 
-                src={comment.liked ? likedImgUrl : notLikedImgUrl} 
-                alt="Like" 
-                style={{ width: '24px', height: '24px' }}
-              />
-            </button>
+            <div>
+              <button 
+                onClick={() => toggleLikeComment(comment.comment_id)}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', marginRight: '10px' }}
+              >
+                <img 
+                  src={comment.liked ? likedImgUrl : notLikedImgUrl} 
+                  alt="Like" 
+                  style={{ width: '24px', height: '24px' }}
+                />
+              </button>
+              {comment.comment_author_id === props.loginUser && (
+                <button 
+                  onClick={() => deleteComment(comment.comment_id)}
+                  style={{ border: 'none', background: 'none', cursor: 'pointer' }}
+                >
+                  Delete
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
