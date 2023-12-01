@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { UserContext } from '../App';
 
-const newPostUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/posts/new'
+const newPostUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/new'
 
 export default function NewPost(props) {
 
@@ -87,7 +87,7 @@ export default function NewPost(props) {
           content: content,
           visibility: visibility,
           image_id: imageId
-        },{headers: {'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='}})
+        },{headers: {'Authorization' : process.env.REACT_APP_AUTHORIZATION}})
         .then(response => {
           if (response.data === "success") {
             alert("Post successfully posted");

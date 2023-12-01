@@ -8,13 +8,13 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
-const postsUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/posts';
+const postsUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts';
 
 
 export default function Stream({ username, authorId, setUsername, updateAuthStatus, updateUserAndAuthorId }) {;
     const navigate = useNavigate();
-    const likedPostsUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/authors/' + authorId + '/liked';
-    const githubIdLink = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/authors/github/' + authorId;
+    const likedPostsUrl = process.env.REACT_APP_API_HOSTNAME + '/api/authors/' + authorId + '/liked';
+    const githubIdLink = process.env.REACT_APP_API_HOSTNAME + '/api/authors/github/' + authorId;
     
     const [likedPostIds, setLikedPostIds] = useState({});
     const [responseData, setResponseData] = useState([]);
@@ -66,7 +66,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
         try {
             // Make the GET request using Axios
                 axios.get(postsUrl + `?author_id=${authorId}`,{
-                    headers: {'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='}})
+                    headers: {'Authorization' : process.env.REACT_APP_AUTHORIZATION}})
                 .then(response => {
                 // Handle the successful response here
                 //console.log('Response data:', response.data);
@@ -117,7 +117,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
      // Check `likes` table (back-end) for all posts that logged in author has liked
      async function fetchLikedPosts() {
         try {
-            axios.get(likedPostsUrl,{headers: {'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='}})
+            axios.get(likedPostsUrl,{headers: {'Authorization' : process.env.REACT_APP_AUTHORIZATION}})
             .then(response => {
                 //console.log('liked ids:', response.data);
                 setLikedPostIds(response.data);

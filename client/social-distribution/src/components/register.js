@@ -54,7 +54,7 @@ function Register(props) {
     };
     
     try {
-      const response = await fetch('https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/requestors/register', {
+      const response = await fetch(process.env.REACT_APP_API_HOSTNAME + '/api/requestors/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -6,11 +6,11 @@ import SetVisibilityDialog from '../components/SetVisibilityDialog';
 import RestrictedUser from '../components/RestrictedUser';
 import { UserContext } from '../App';
 
-const managePostsUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/posts/manage'
-const updateVisibilityUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/posts/visibility'
-const restrictUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/posts/restrict'
-const restrictionListUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/posts/restricted'
-const editUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/posts/authors/'
+const managePostsUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/manage'
+const updateVisibilityUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/visibility'
+const restrictUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/restrict'
+const restrictionListUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/restricted'
+const editUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/authors/'
 
 function ManagePosts() {
     const styles = {
@@ -89,7 +89,7 @@ function ManagePosts() {
             "visibility": visibility,
             "post_id": postSelected,
             "title": editTitle
-        },{headers: {'Authorization' : 'Basic ' + 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com'}}).then((response) => {
+        },{headers: {'Authorization' : 'Basic ' + process.env.REACT_APP_API_HOSTNAME}}).then((response) => {
             if (response.data === "Post Updated Successfully") {
                 
                 setPostsLists(postsLists.map(item => {
@@ -122,7 +122,7 @@ function ManagePosts() {
                     post_id: postSelected,
                     username: restrictedUsername
                 }, {headers:{
-                    'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='
+                    'Authorization' : process.env.REACT_APP_AUTHORIZATION
                     }})
                 .then(response => {
                 // Handle the successful response here            
@@ -159,7 +159,7 @@ function ManagePosts() {
                 post_id: postSelected,
                 visibility: visibility
             }, {headers:{
-                'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='
+                'Authorization' : process.env.REACT_APP_AUTHORIZATION
                 }})
             .then(response => {
             // Handle the successful response here            
@@ -185,7 +185,7 @@ function ManagePosts() {
         try {
             // Make the GET request using Axios
                 axios.get(managePostsUrl + `?author_id=${authorId}`,{headers:
-                        {'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='}
+                        {'Authorization' : process.env.REACT_APP_AUTHORIZATION}
                 })
                 .then(response => {
                 // Handle the successful response here

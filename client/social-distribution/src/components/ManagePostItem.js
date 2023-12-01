@@ -3,7 +3,7 @@ import React from 'react'
 import Markdown from 'react-markdown';
 import './ManagePostItem.css';
 
-const deleteUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + '/api/posts/'
+const deleteUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/'
 function ManagePostItem(props) {
     function processDelete() {
         if (window.confirm("Are you sure you want to delete this post?")) {
@@ -13,7 +13,7 @@ function ManagePostItem(props) {
             try {
                 // Make the DELETE request using Axios
                     axios.delete(deleteUrl + props.item.post_id,{headers: {
-                        'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='
+                        'Authorization' : process.env.REACT_APP_AUTHORIZATION
                         }})
                     .then(response => {
                         props.setPostsLists(oldValues => {                
@@ -52,10 +52,10 @@ function ManagePostItem(props) {
     }
 
     function getRestrictedUsers() {
-        const restrictionListUrl = 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com' + `/api/posts/restricted?post_id=${props.item.post_id}`
+        const restrictionListUrl = process.env.REACT_APP_API_HOSTNAME + `/api/posts/restricted?post_id=${props.item.post_id}`
         console.log(restrictionListUrl)
         axios.get(restrictionListUrl, {headers:{
-            'Authorization' : 'Basic ' + 'Q3RybENDdHJsVjpwYXNzd29yZA=='
+            'Authorization' : process.env.REACT_APP_AUTHORIZATION
             }}).then((response) => {
             console.log(response.data)
             props.setRestrictedUsers(response.data)
