@@ -65,9 +65,9 @@ def is_local_user(author_id):
     connection.close()
 
     return exists
-    
-def get_remote_author_info(author_id, server_url):
-    auth = ('cross-server', 'password')
+
+def get_remote_author_info(author_id, server_url, username, password):
+    auth = (username, password)
     response = requests.get(
         f'{server_url}/authors/{author_id}',
         auth=auth
@@ -83,12 +83,10 @@ def get_follow_requests():
     if not author_id:
         return jsonify({'followRequests': []})
     
-    server_urls = ['https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com', 'https://cmput-average-21-b54788720538.herokuapp.com/api']
-
     connection, cursor = get_db_connection()   
 
     cursor.execute(
-        "SELECT f.author_send FROM follow_requests f "
+        "SELECT f.author_send, f.host FROM follow_requests f "
         "WHERE f.author_receive = %s",
         (author_id,)    
     )
@@ -112,29 +110,47 @@ def get_follow_requests():
 
     for request_entry in follow_requests:
         author_send = request_entry['author_send']
+        host = request_entry['host']
 
-        # Check if the author_send is local or remote
-        if is_local_user(author_send):
-            # If local, use the username from the pre-fetched data
+        if host == 'local':
             print('local', author_send)
             username = usernames.get(author_send)
             if username:
                 follow_requests_list.append({'id': author_send, 'username': username})
-        else:
-            print('remote', author_send)
-            # Iterate over each server URL
-            for server_url in server_urls:
-                # Try fetching from the current server URL
-                remote_user_info = get_remote_author_info(author_send, server_url)
-                if remote_user_info:
-                    follow_requests_list.append({
-                        'id': remote_user_info['id'].split('/')[-1],
-                        'username': remote_user_info['displayName']
-                    })
-                    break  # Break out of the loop if user is found on any server
-    
+        elif host == 'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/':
+            print('tian', author_send)
+            host = host.rstrip('/') #strip last slash
+            remote_user_info = get_remote_author_info(
+                author_send,
+                host,
+                username='cross-server',
+                password='password'
+            )
+            if remote_user_info:
+                follow_requests_list.append({
+                    'id': remote_user_info['id'].split('/')[-1],
+                    'username': remote_user_info['displayName']
+                })
+        elif host == 'https://cmput-average-21-b54788720538.herokuapp.com/api':
+            print('tian', author_send)
+            remote_user_info = get_remote_author_info(
+                author_send,
+                host,
+                username='CtrlAltDefeat', 
+                password='string' 
+            )
+            if remote_user_info:
+                follow_requests_list.append({
+                    'id': remote_user_info['id'].split('/')[-1],
+                    'username': remote_user_info['displayName']
+                })
+
+        elif host == 'team3':
+            pass
+
     print(follow_requests_list)
     return jsonify({'followRequests': follow_requests_list})
+
 
 @bp.route('/follow/accept_request', methods=['POST'])
 def accept_follow_request():
