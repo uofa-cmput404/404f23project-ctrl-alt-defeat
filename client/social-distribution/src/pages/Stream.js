@@ -7,7 +7,7 @@ import axios from 'axios';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
-import './global.css';
+import './page.css';
 
 import Navbar from '../components/Navbar';
 import GithubIcon from '../components/GithubIcon';
