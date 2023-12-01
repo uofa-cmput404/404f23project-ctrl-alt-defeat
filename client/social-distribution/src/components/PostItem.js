@@ -66,10 +66,7 @@ function PostItem(props) {
   const selectToggleLike = async () => {
     console.log('toggle');
 
-    props.setChangeLike(true);
-    props.setPostSelected(props.item.post_id);
-    props.setPostSelectedLiked(props.item.liked);
-    props.setPostSelectedAuthor(props.item.author_id);
+    props.togglePostLike(props.item.post_id, props.item.liked, props.item.author_id);
   }
 
   const fetchComments = async () => {
@@ -161,7 +158,7 @@ function PostItem(props) {
         <div style={styles.container} onClick={selectToggleLike}>
           {props.item.liked ?
             <img style={styles.img} src={likedImgUrl} /> :
-            <img style={styles.img} src={notLikedImgUrl} onClick={selectToggleLike} /> 
+            <img style={styles.img} src={notLikedImgUrl} /> 
           }
         </div>
 

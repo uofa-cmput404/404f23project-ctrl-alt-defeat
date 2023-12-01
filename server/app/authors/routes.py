@@ -8,6 +8,7 @@ from flask_bcrypt import Bcrypt
 
 from flask_bcrypt import check_password_hash
 from flask_bcrypt import generate_password_hash
+import uuid
 
 
 
@@ -287,20 +288,31 @@ def send(author_id):
         request_data = request.get_json()
         message_type = request_data["type"]
 
-        if message_type == "like":
-            like_author_id = request_data["like_author_id"]
-            post_id = request_data["post_id"]
-            like_id = str(randrange(0, 100000))
+        if message_type == "Like":
+            likeAuthorId = request_data["author"]["id"].split('/')[-1]
+            likeHost = request_data["author"]["host"]
+            displayName = request_data["author"]["displayName"]
+            likedPost = request_data["object"].split('/')[-1]
+
+            likeId = str(uuid.uuid4()) 
+            inboxItemId = str(uuid.uuid4())
 
             conn, curr = get_db_connection()
 
-            query = "INSERT INTO likes " \
+            like_query = "INSERT INTO likes " \
                     "(like_id, like_author_id, " \
                     "post_id, time_liked) " \
                     "VALUES (%s, %s, %s, " \
                     "CURRENT_TIMESTAMP)"
 
-            curr.execute(query, (like_id, like_author_id, post_id))
+            curr.execute(like_query, (likeId, likeAuthorId, likedPost))
+
+            inbox_query = "INSERT INTO inbox_items " \
+                        "(sender_id, sender_host, " \
+                        "sender_display_name, recipient_id, " \
+                        "inbox_item_id, object_id, type) VALUES " \
+                        "(%s, %s, %s, %s, %s, %s, %s)"
+            curr.execute(inbox_query, (likeAuthorId, likeHost, displayName, author_id, inboxItemId, likeId, "Like"))
 
             conn.commit()
             conn.close()
@@ -354,21 +366,36 @@ def send(author_id):
 
     return jsonify(data)
 
-@bp.route('/authors/<author_id>/inbox/unlike', methods=['POST'])
-# DELETE LIKE
+@bp.route('/authors/<author_id>/inbox/unlike', methods=['DELETE'])
+# DELETE LIKE ON A POST
 def delete_like(author_id):
     request_data = request.get_json()
-    like_author_id = request_data["like_author_id"]
-    post_id = request_data["post_id"]
+    likeAuthorId = request_data["author"]["id"].split('/')[-1]
+    likeHost = request_data["author"]["host"]
+    likedPost = request_data["object"].split('/')[-1]
+
     
     data = ""
     try:
         conn, curr = get_db_connection()
 
-        query = "DELETE FROM likes " \
+        get_like_id_query = "SELECT like_id FROM likes " \
+                            "WHERE like_author_id = %s " \
+                            "AND post_id = %s"
+        
+        curr.execute(get_like_id_query, (likeAuthorId, likedPost))
+        likeId = curr.fetchone()["like_id"]
+        print("likeid",likeId)
+
+        like_query = "DELETE FROM likes " \
                 "WHERE like_author_id = %s AND post_id = %s"
         
-        curr.execute(query, (like_author_id, post_id))
+        curr.execute(like_query, (likeAuthorId, likedPost))
+
+        inbox_query = "DELETE FROM inbox_items " \
+                    "WHERE type = 'Like' AND sender_id = %s " \
+                    "AND sender_host = %s AND object_id = %s"
+        curr.execute(inbox_query, (likeAuthorId, likeHost, likeId))
 
         data = "success"
 
