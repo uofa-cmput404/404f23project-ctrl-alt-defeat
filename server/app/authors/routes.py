@@ -489,6 +489,8 @@ def send_comments(author_id, post_id):
 
         cur.execute(check_friends_query, (author_id, comment_author_id))
         status = dict(cur.fetchone())['status']
+        if author_id == comment_author_id:
+            status = 'private'
         print(status)
         query = "INSERT INTO comments " \
                 "(comment_id, comment_author_id, " \
