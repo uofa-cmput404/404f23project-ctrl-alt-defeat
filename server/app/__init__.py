@@ -1,9 +1,9 @@
 
-from flask import Flask, redirect, url_for, render_template, jsonify
+from flask import Flask, redirect, url_for, render_template, jsonify, request, flash, session
 from flask_cors import CORS, cross_origin
 
 from flask_sqlalchemy import SQLAlchemy
-from flask_admin import Admin
+from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.actions import action
 from flask_admin import expose
@@ -24,7 +24,8 @@ bcrypt = Bcrypt()
 
 db = SQLAlchemy()
 basic_auth = HTTPBasicAuth()
-admin = Admin()
+
+
 
 # This is to verify back-end access for nodes.
 @basic_auth.verify_password
@@ -48,13 +49,25 @@ def verify_backend_access(username, password):
 
     return response
 
+class MyAdminIndexView(AdminIndexView):
+    def is_accessible(self):
+        return session.get('logged_in', False)
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('login', next=request.url))
+
+    @expose('/')
+    def index(self):
+        if not self.is_accessible():
+            return redirect(url_for('login', next=request.url))
+        return self.render('admin/custom_admin.html')
+
 class Author(db.Model):
     __tablename__ = "authors"
     author_id = db.Column(db.Text, primary_key=True)
     username = db.Column(db.Text)
     password = db.Column(db.Text)
     posts = db.relationship('Post', backref='author', lazy=True, cascade="all, delete-orphan")
-    images = db.relationship('Image', backref='author', lazy=True, cascade="all, delete-orphan")
 
 class AuthorView(ModelView):
     can_delete = True
@@ -114,24 +127,7 @@ class PostView(ModelView):
     column_list = ["post_id", "title", "content", "author_id"]  
     column_searchable_list = ["author_id","title"]
 
-class Image(db.Model):
-    __tablename__ = "image_post"
-    img_id = db.Column(db.Text, primary_key=True)
-    img_url = db.Column(db.Text, nullable=False)  
-    author_id = db.Column(db.Text, db.ForeignKey('authors.author_id'))
 
-class ImageView(ModelView):
-    can_delete = True
-    form_columns = ["img_id", "img_url", "author_id"]
-    column_list = ["img_id", "author_id", "view_button"]
-    column_searchable_list = ["author_id"]
-    def view_button(view, context, model, name):
-        return Markup(f'<a href="{model.img_url}" target="_blank">View</a>')
-    
-    column_formatters = {
-        'view_button': view_button
-    }
-    column_labels = dict(view_button='View Image')
 class Friend(db.Model):
     __tablename__ = 'friends'
     author_followee = db.Column(db.Text, db.ForeignKey('authors.author_id'), primary_key=True)
@@ -150,10 +146,11 @@ class NodeView(ModelView):
     column_list = ["node_id", "node_name", "username"]
     column_searchable_list = ["node_name"]  
 
+admin = Admin(index_view=MyAdminIndexView(), template_mode='bootstrap3')
 admin.add_view(AuthorView(Author, db.session))
 admin.add_view(RequestorView(Requestor, db.session))
 admin.add_view(PostView(Post, db.session))
-admin.add_view(ImageView(Image, db.session))
+
 admin.add_view(NodeView(Node, db.session))
 
 
@@ -231,6 +228,21 @@ def create_app():
         with open(swagger_path, 'r') as f:
             swagger_json = f.read()
         return swagger_json
+    
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        if request.method == 'POST':
+            username = request.form.get('username')
+            password = request.form.get('password')
+            if username == 'admin' and password == 'password':
+                session['logged_in'] = True
+                return redirect(url_for('admin.index'))
+        return render_template('login.html')
+    
+    @app.route('/logout')
+    def logout():
+        session.pop('logged_in', None)
+        return redirect(url_for('login'))
 
 
     app.register_blueprint(swaggerui_blueprint)
