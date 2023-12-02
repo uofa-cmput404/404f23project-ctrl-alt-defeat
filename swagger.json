@@ -241,11 +241,155 @@
           "200": {
             "description": "Successful response",
             "schema": {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "author": {
+                        "type": "object",
+                        "properties": {
+                          "displayName": {
+                            "type": "string"
+                          },
+                          "github": {
+                            "type": "string"
+                          },
+                          "host": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "profileImage": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["displayName", "github", "host", "id", "profileImage", "type"]
+                      },
+                      "context": {
+                        "type": "string"
+                      },
+                      "object": {
+                        "type": "string"
+                      },
+                      "summary": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["author", "context", "object", "summary", "type"]
+                  }
+                }
+              },
+              "required": ["items"]
             }
           }
         },
         "tags": ["Author"]
+      }
+    },
+    "/api/authors/{author_id}/posts/{post_id}/likes": {
+      "get": {
+        "tags": ["Author"],
+        "summary": "Get a list of likes from other authors on a specific post (REMOTE)",
+        "description": "Retrieve likes information for the specified post",
+        "parameters": [
+          {
+            "name": "author_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the author"
+          },
+          {
+            "name": "post_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the post"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer",
+                  "description": "Number of likes"
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "@context": {
+                        "type": "string",
+                        "description": "Context information"
+                      },
+                      "summary": {
+                        "type": "string",
+                        "description": "Summary of the like"
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Type of the like"
+                      },
+                      "author": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "description": "Type of the author"
+                          },
+                          "id": {
+                            "type": "string",
+                            "description": "ID of the author"
+                          },
+                          "host": {
+                            "type": "string",
+                            "description": "Host of the author"
+                          },
+                          "displayName": {
+                            "type": "string",
+                            "description": "Display name of the author"
+                          },
+                          "profileImage": {
+                            "type": "string",
+                            "description": "URL of the author's profile image"
+                          },
+                          "github": {
+                            "type": "string",
+                            "description": "GitHub profile URL of the author"
+                          }
+                        },
+                        "required": ["type", "id", "host", "displayName", "profileImage", "github"]
+                      },
+                      "object": {
+                        "type": "string",
+                        "description": "URL of the liked post"
+                      }
+                    },
+                    "required": ["@context", "summary", "type", "author", "object"]
+                  }
+                }
+              },
+              "required": ["count", "results"]
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
       }
     },
     "/api/authors/{author_id}/inbox": {
@@ -1011,4 +1155,3 @@
       }
     }
   }
-}
