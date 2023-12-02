@@ -9,13 +9,17 @@ import { UserContext } from '../App';
 const managePostsUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/manage'
 const updateVisibilityUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/visibility'
 const restrictUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/restrict'
-const restrictionListUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/restricted'
-const editUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/authors/'
+const restrictionListUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/restricted/'
+const editUrl = process.env.REACT_APP_API_HOSTNAME + '/api/authors/'
 
 function ManagePosts() {
     const styles = {
+        container: {
+            margin: 20
+        },
         dialog: {
-            position: 'fixed'
+            position: 'fixed',
+            zIndex: 2
         },
         text: {
             width: "100%",
@@ -74,6 +78,7 @@ function ManagePosts() {
     const [editContent, setEditContent] = useState(""); 
     const [editTitle, setEditTitle] = useState(""); 
     const [edittedContentType, setEdittedContentType] = useState("");
+    const [fetchDone, setFetchDone] = useState(false);
 
     const editRequest = async () => {
         // console.log(authorId);
@@ -81,7 +86,14 @@ function ManagePosts() {
         // console.log(editContent);
         // console.log(editTitle);
         // console.log(edittedContentType);
-        
+        console.log({
+            "content_type": edittedContentType,
+            "content": editContent,
+            "image_id": null,
+            "visibility": visibility,
+            "post_id": postSelected,
+            "title": editTitle
+        })
         axios.post(editUrl + authorId + "/" + postSelected + "/edit/", {
             "content_type": edittedContentType,
             "content": editContent,
@@ -89,7 +101,11 @@ function ManagePosts() {
             "visibility": visibility,
             "post_id": postSelected,
             "title": editTitle
-        },{headers: {'Authorization' : 'Basic ' + process.env.REACT_APP_API_HOSTNAME}}).then((response) => {
+        }, {
+            headers: {
+                'Authorization' : process.env.REACT_APP_AUTHORIZATION
+            }})
+            .then((response) => {
             if (response.data === "Post Updated Successfully") {
                 
                 setPostsLists(postsLists.map(item => {
@@ -100,7 +116,7 @@ function ManagePosts() {
                 }))
                 alert("The post was successfully edited.");
             } else {
-                alert("Something went wronng")
+                alert(response.data)
             }
         }).catch(error => {
             // Handle any errors that occur during the request
@@ -121,9 +137,10 @@ function ManagePosts() {
                 axios.post(restrictUrl, {
                     post_id: postSelected,
                     username: restrictedUsername
-                }, {headers:{
-                    'Authorization' : process.env.REACT_APP_AUTHORIZATION
-                    }})
+                }, {
+                    headers: {
+                        'Authorization' : process.env.REACT_APP_AUTHORIZATION
+                }})
                 .then(response => {
                 // Handle the successful response here            
                     if (response.data === "success") {
@@ -158,9 +175,11 @@ function ManagePosts() {
             axios.post(updateVisibilityUrl, {
                 post_id: postSelected,
                 visibility: visibility
-            }, {headers:{
-                'Authorization' : process.env.REACT_APP_AUTHORIZATION
-                }})
+            }, {
+                headers: {
+                    'Authorization' : process.env.REACT_APP_AUTHORIZATION
+                }
+            })
             .then(response => {
             // Handle the successful response here            
                 setPostsLists(postsLists.map(item => {
@@ -184,8 +203,10 @@ function ManagePosts() {
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
-                axios.get(managePostsUrl + `?author_id=${authorId}`,{headers:
-                        {'Authorization' : process.env.REACT_APP_AUTHORIZATION}
+                axios.get(managePostsUrl + `?author_id=${authorId}`, {
+                    headers: {
+                        'Authorization' : process.env.REACT_APP_AUTHORIZATION
+                    }
                 })
                 .then(response => {
                 // Handle the successful response here
@@ -195,7 +216,10 @@ function ManagePosts() {
                 .catch(error => {
                 // Handle any errors that occur during the request
                 console.error('Error:', error);
-                });
+                })
+                .finally(() => {
+                    setFetchDone(true);
+                })
           } catch (error) {
             console.error('Error:', error);
           }
@@ -251,9 +275,9 @@ function ManagePosts() {
     };
 
   return (
-    <div>
+    <div style={styles.container}>
         <h1>My posts:</h1>
-            <dialog open={openVisibilityDialog} style={styles.dialog}>
+            <dialog  open={openVisibilityDialog} style={styles.dialog}>
             <h1>Change visibility</h1>
             <form method="dialog">
                 <select id="visibility" name="visibility" onChange={handleSelectChange}>
@@ -303,9 +327,13 @@ function ManagePosts() {
                 <button style={styles.cancel} onClick={() => setRestrictionsDialog(false)}>Close</button>
             </form>
             </dialog>
-        <ul>
+        <div>
             {
-                postsLists.length ? 
+                !fetchDone ?
+                <div class="spinner-border" role="status">
+                    {/* <span class="sr-only">Loading...</span> */}
+                </div> :
+                (postsLists.length ?
                 postsLists.map((item, index) => (
                     <ManagePostItem postLists={postsLists} 
                                     setPostsLists={setPostsLists} 
@@ -317,12 +345,13 @@ function ManagePosts() {
                                     setRestrictedUsers={setRestrictedUsers}  
                                     setOpenEditDialog={setOpenEditDialog}   
                                     setEditContent={setEditContent}  
-                                    setEditTitle={setEditTitle}                     
+                                    setEditTitle={setEditTitle}
+                                    setVisibility={setVisibility}
                                     setEdittedContentType={setEdittedContentType}
                                     />
-                )) : <div>You have no posts</div>
+                )) : <div>You have no posts</div>)
             }
-        </ul>
+        </div>
 
     </div>
   )

@@ -8,12 +8,13 @@ function Profile({ username, authorId, setUsername, onClose }) {
 
   const handleGithubUpdate = async () => {
     axios.post(process.env.REACT_APP_API_HOSTNAME + '/api/authors/github', {
-      
         author_id: authorId,
         github: GithubName
-      
-    },{headers: {'Authorization' : process.env.REACT_APP_AUTHORIZATION}})
-        .then((response) => {
+    },{
+        headers: {
+            'Authorization' : process.env.REACT_APP_AUTHORIZATION
+        }
+    }).then((response) => {
       toast.success(response.data);
     })
   }
@@ -24,7 +25,7 @@ function Profile({ username, authorId, setUsername, onClose }) {
       return;
     }
 
-    const response = await fetch(process.env.REACT_APP_API_HOSTNAME + '/authors/update_username', {
+    const response = await fetch(process.env.REACT_APP_API_HOSTNAME + '/api/authors/update_username', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -51,7 +52,7 @@ function Profile({ username, authorId, setUsername, onClose }) {
       return;
     }
 
-    const response = await fetch(process.env.REACT_APP_API_HOSTNAME + '/authors/update_password', {
+    const response = await fetch(process.env.REACT_APP_API_HOSTNAME + '/api/authors/update_password', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

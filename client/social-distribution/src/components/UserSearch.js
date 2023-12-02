@@ -1,21 +1,46 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
+import { UserContext } from '../App';
 
-function UserSearch({ username, authorId }) {
+function UserSearch() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const {username, authorId} = useContext(UserContext);
 
   const handleSearch = async () => {
     try {
-      const response = await fetch( process.env.REACT_APP_API_HOSTNAME + `/api/follow/usersearch?query=${searchQuery}`,{
-          headers: {'Authorization' : process.env.REACT_APP_AUTHORIZATION}});
-      if (response.ok) {
-        const data = await response.json();
-        const filteredResults = data.users.filter(user => user.id !== authorId);
-        setSearchResults(filteredResults);
-      } else {
-        console.error('Search failed');
+      // Fetch local users with the search query
+      const localResponse = await fetch(process.env.REACT_APP_API_HOSTNAME + `/api/follow/usersearch?query=${searchQuery}`);
+      if (!localResponse.ok) {
+        console.error('Local search failed');
+        return;
       }
+      const localData = await localResponse.json();
+      const localResults = localData.users.filter(user => user.id !== authorId);
+
+      // Fetch all external users
+      const externalResponse = await fetch('https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/', {
+        headers: {
+          'accept': 'application/json',
+          'Authorization': process.env.REACT_APP_AUTHORIZATION,
+        },
+      });
+      if (!externalResponse.ok) {
+        console.error('External search failed');
+        return;
+      }
+      const externalData = await externalResponse.json();
+      const externalResults = externalData.items.map(item => ({
+        id: item.id.split('/').pop(), // Extracting just the ID from the URL
+        username: item.displayName,
+      }));
+
+      // Filter external results based on the search query
+      const filteredExternalResults = externalResults.filter(user => user.username.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      // Combine local and filtered external results
+      const combinedResults = [...localResults, ...filteredExternalResults];
+      setSearchResults(combinedResults);
     } catch (error) {
       console.error('Error:', error);
     }

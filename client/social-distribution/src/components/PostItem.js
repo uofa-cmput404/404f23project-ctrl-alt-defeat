@@ -12,6 +12,11 @@ const styles = {
     cursor: 'pointer'
   },
   
+  container: {
+    padding: 20,
+    marginTop: 10,
+
+  },
   /*container: {
     display: 'flex',
     alignItems: 'center',
@@ -38,7 +43,7 @@ const styles = {
 }
 
 
-function getContentAsElements(content_type, content){
+function get_content_as_elements(content_type, content){
     if (content_type === "text/plain"){
         return(<p>{content}</p>);
     }
@@ -63,13 +68,10 @@ function PostItem(props) {
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
 
-  const selectToggleLike = async () => {
+  const handleToggleLike = async () => {
     console.log('toggle');
 
-    props.setChangeLike(true);
-    props.setPostSelected(props.item.post_id);
-    props.setPostSelectedLiked(props.item.liked);
-    props.setPostSelectedAuthor(props.item.author_id);
+    props.togglePostLike(props.item.post_id, props.item.liked, props.item.author_id);
   }
 
   const fetchComments = async () => {
@@ -103,8 +105,11 @@ function PostItem(props) {
       const apiUrl = process.env.REACT_APP_API_HOSTNAME + `/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}/toggle-like`;
   
       // Send the POST request
-      await axios.post(apiUrl, { like_comment_author_id: props.loginUser }, {headers: {
-          'Authorization' : process.env.REACT_APP_AUTHORIZATION
+      await axios.post(apiUrl, {
+          like_comment_author_id: props.loginUser
+      }, {
+          headers: {
+              'Authorization' : process.env.REACT_APP_AUTHORIZATION
           }});
   
       // Update the like status in the local state
@@ -121,7 +126,23 @@ function PostItem(props) {
       // Optionally, handle the error more visibly to the user
     }
   };
-  
+  const deleteComment = async (commentId) => {
+    try {
+      // API URL to delete the comment
+      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}`;
+
+      // Send the DELETE request
+      await axios.delete(apiUrl);
+
+      // Update the comments in the local state to reflect the deletion
+      const updatedComments = comments.filter(comment => comment.comment_id !== commentId);
+      setComments(updatedComments);
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      // Optionally, handle the error more visibly to the user
+    }
+  };
+
   useEffect(() => {
     fetchComments();
   }, [props.item, props.loginUser]); // Refetch comments when item or loginUser changes
@@ -143,7 +164,11 @@ function PostItem(props) {
   
     try {
       const apiUrl = process.env.REACT_APP_API_HOSTNAME + `/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
-      await axios.post(apiUrl, commentData, {headers: {'Authorization' : process.env.REACT_APP_AUTHORIZATION}});
+      await axios.post(apiUrl, commentData, {
+          headers: {
+              'Authorization' : process.env.REACT_APP_AUTHORIZATION
+          }
+      });
       setComment('');
       fetchComments(); // Refresh comments after posting
     } catch (error) {
@@ -155,20 +180,23 @@ function PostItem(props) {
   
 
   return (
-    <li key={props.key}>
-        <h3>{props.item.title}</h3>
-        <div>Posted by: {props.item.username}</div>
-        <div>{props.item.date_posted}</div>
-        <div>{getContentAsElements(props.item.content_type, props.item.content)}</div>
+    <div style={styles.container} class="card">
+        <h3><a href={"http://localhost:3000/authors/" + props.item.author_id + "/posts/" + props.item.post_id}   >{props.item.title}</a></h3>
+        <small class="text-muted">Posted by: {props.item.username}</small>
+        <small class="text-muted">{props.item.date_posted}</small>
+        <hr/>
+        <div>{getContentAsElements(props.item.content_type,props.item.content)}</div>
         
-        <div style={styles.container} onClick={selectToggleLike}>
-          {props.item.liked ?
-            <img style={styles.img} src={likedImgUrl} /> :
-            <img style={styles.img} src={notLikedImgUrl} onClick={selectToggleLike} /> 
-          }
-        </div>
+        <div onClick={handleToggleLike}>
+        {// Show like icon as liked or not based on if logged in author has liked the post
+        props.item.liked ?
 
-        {/* Comment box and send button */}
+            <img style={styles.img} src={likedImgUrl} />
+
+            : <img style={styles.img} src={notLikedImgUrl} />
+
+        }
+        </div>
         <div style={styles.commentBox}>
             <input
               type="text"
@@ -177,11 +205,10 @@ function PostItem(props) {
               placeholder="Write a comment..."
               style={styles.input}
             />
-            <button onClick={handleSendComment}>Send</button>
+            <button class="btn btn-primary" onClick={handleSendComment}>Send</button>
         </div>
-
-         {/* Display comments with commenter's name, text, and like button */}
-         <div>
+ {/* Display comments with commenter's name, text, like button, and delete button */}
+ <div>
         {comments.map((comment, index) => (
           <div key={`${comment.comment_id}-${index}`} 
                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
@@ -189,21 +216,31 @@ function PostItem(props) {
               <span style={{ fontWeight: 'bold' }}>{comment.comment_name}:</span>
               <span style={{ marginLeft: '8px' }}>{comment.comment_text}</span>
             </div>
-            <button 
-              onClick={() => toggleLikeComment(comment.comment_id)}
-              style={{ border: 'none', background: 'none', cursor: 'pointer' }}
-            >
-              <img 
-                src={comment.liked ? likedImgUrl : notLikedImgUrl} 
-                alt="Like" 
-                style={{ width: '24px', height: '24px' }}
-              />
-            </button>
+            <div>
+              <button
+                onClick={() => toggleLikeComment(comment.comment_id)}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', marginRight: '10px' }}
+              >
+                <img
+                  src={comment.liked ? likedImgUrl : notLikedImgUrl}
+                  alt="Like"
+                  style={{ width: '24px', height: '24px' }}
+                />
+              </button>
+              {comment.comment_author_id === props.loginUser && (
+                <button
+                  onClick={() => deleteComment(comment.comment_id)}
+                  style={{ border: 'none', background: 'none', cursor: 'pointer' }}
+                >
+                  Delete
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
-    </li>
-  );
+    </div>
+  )
 }
 
 

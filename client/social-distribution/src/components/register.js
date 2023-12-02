@@ -12,7 +12,6 @@ function Register(props) {
       alignItems: 'center',
       justifyContent: 'center',
       height: '100vh',
-      backgroundColor: '#f2f2f2',
     },
     input: {
       margin: '10px',
@@ -57,8 +56,8 @@ function Register(props) {
       const response = await fetch(process.env.REACT_APP_API_HOSTNAME + '/api/requestors/register', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization' : 'Basic '  + 'Q3RybEFsdERlZmVhdDpmcm9udGVuZA=='
+            'Content-Type': 'application/json',
+            'Authorization' : process.env.REACT_APP_AUTHORIZATION
         },
         body: JSON.stringify(registrationData),
       });

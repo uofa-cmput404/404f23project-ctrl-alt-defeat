@@ -3,18 +3,28 @@ import React from 'react'
 import Markdown from 'react-markdown';
 import './ManagePostItem.css';
 
-const deleteUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/'
+const deleteUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts'
 function ManagePostItem(props) {
+    const styles = {
+        button: {marginRight: 5},
+        container: {
+            padding: 20,
+            maxWidth: "50%",
+            marginTop: 10
+        }
+    }
     function processDelete() {
         if (window.confirm("Are you sure you want to delete this post?")) {
             console.log("Delete");
             console.log(props.item.post_id)
 
             try {
-                // Make the DELETE request using Axios
-                    axios.delete(deleteUrl + props.item.post_id,{headers: {
-                        'Authorization' : process.env.REACT_APP_AUTHORIZATION
-                        }})
+                // Make the GET request using Axios
+                    axios.delete(deleteUrl + "/" + props.item.post_id,{
+                        headers: {
+                            'Authorization' : process.env.REACT_APP_AUTHORIZATION
+                        }
+                    })
                     .then(response => {
                         props.setPostsLists(oldValues => {                
                             return oldValues.filter(item => item.post_id !== props.item.post_id);
@@ -47,6 +57,7 @@ function ManagePostItem(props) {
         props.setOpenEditDialog(true);    
         props.setEditContent(props.item.content);
         props.setPostSelected(props.item.post_id);
+        props.setVisibility(props.item.visibility);
         props.setEditTitle(props.item.title);
         props.setEdittedContentType(props.item.content_type);
     }
@@ -54,9 +65,11 @@ function ManagePostItem(props) {
     function getRestrictedUsers() {
         const restrictionListUrl = process.env.REACT_APP_API_HOSTNAME + `/api/posts/restricted?post_id=${props.item.post_id}`
         console.log(restrictionListUrl)
-        axios.get(restrictionListUrl, {headers:{
-            'Authorization' : process.env.REACT_APP_AUTHORIZATION
-            }}).then((response) => {
+        axios.get(restrictionListUrl, {
+            headers: {
+                'Authorization' : process.env.REACT_APP_AUTHORIZATION
+            }})
+            .then((response) => {
             console.log(response.data)
             props.setRestrictedUsers(response.data)
         })
@@ -85,19 +98,28 @@ function getContentAsElements(content_type, content){
     
 
     return (
-    <li key={props.key}>
+    <div style={styles.container} class="card">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"/>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
         <div>
             <h3>{props.item.title}</h3>
-            <div>{props.item.date_posted}</div>
-            <div>Visibility: {props.item.visibility}</div>
-            {props.item.visibility !== "private" && <a href={process.env.REACT_HOSTNAME +'/post/'+ props.item.post_id}>{process.env.REACT_HOSTNAME+ '/post/'+ props.item.post_id}</a>}
+
+            <div><small class="text-muted">{props.item.date_posted}</small></div>
+            <div><small class="text-muted">Visibility: {props.item.visibility}</small></div>
+            {props.item.visibility !== "private" && <a href={"http://localhost:3000/authors/" + props.item.author_id + "/posts/" + props.item.post_id}>{'http://127.0.0.1:3000/authors/'+ props.item.author_id + "/posts/" + props.item.post_id}</a>}
         </div>
-        <button onClick={selectEdit}>Edit</button>
-        <button onClick={processDelete}>Delete this post</button>
-        <button onClick={selectVisibility}>Change visibility</button>
-        <button onClick={selectRestriction}>Restrictions</button>
+        <hr/>
+
         <div>{getContentAsElements(props.item.content_type,props.item.content)}</div>
-    </li>
+
+        <div style={{marginTop: 10}}>
+            <button style={styles.button} onClick={selectEdit} type="button" class="btn btn-primary"><i class="fa fa-edit"></i> Edit</button>
+            <button style={styles.button} onClick={processDelete} type="button" class="btn btn-primary"><i class="fa fa-trash"></i> Delete</button>
+            <button style={styles.button} onClick={selectVisibility} type="button" class="btn btn-warning"><i class="fa fa-eye"></i> Visibility</button>
+            <button style={styles.button} onClick={selectRestriction}type="button" class="btn btn-danger"><i class="fa fa-ban"></i> Restrictions</button>
+        </div>
+    </div>
   )
 }
 

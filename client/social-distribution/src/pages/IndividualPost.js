@@ -13,13 +13,15 @@ import Markdown from "react-markdown";
 import notLikedImgUrl from "../notLiked_black_24dp.svg";
 import likedImgUrl from "../liked_black_24dp.svg";
 
-const postsUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/';
+const postsUrl = process.env.REACT_APP_API_HOSTNAME + '/api/';
 
 
-export default function IndividualPost({ username, authorId, setUsername }) {;    
+export default function IndividualPost() {;
     const [postSelected, setPostSelected] = useState([]);
+    const [username, setUsername] = useState("");
     const navigate = useNavigate();
-    let { id } = useParams();
+    let { post_id, author_id } = useParams();
+    const [fetchDone, setFetchDone] = useState(false);
 
     const styles = {
         container: {
@@ -30,22 +32,24 @@ export default function IndividualPost({ username, authorId, setUsername }) {;
     const fetchData = async () => {
         try {
             // Make the GET request using Axios
-                axios.get(postsUrl + id, {
-                    author_id: authorId,
+                axios.get(postsUrl + "authors/" + author_id + "/posts/" + post_id, {
                     headers: {
                         'Authorization' : process.env.REACT_APP_AUTHORIZATION
                     }
-                })
-                .then(response => {
+                }
+                ).then(response => {
                 // Handle the successful response here
-                //console.log('Response data:', response.data);                      
-                console.log(response.data)
-                setPostSelected(response.data);      
+
+                setPostSelected(response.data);
+                setUsername(response.data.author.displayName);
                 })
                 .catch(error => {
                 // Handle any errors that occur during the request
                 console.error('Error:', error);
-                });
+                setPostSelected("invalid");
+                }).finally(() => {
+                    setFetchDone(true);
+                });;
           } catch (error) {
             console.error('Error:', error);
           }
@@ -77,15 +81,20 @@ export default function IndividualPost({ username, authorId, setUsername }) {;
     
     return (
         <div style={styles.container}>
-            <button style={{width: '20vw'}} onClick={() => navigate("/homepage")}>Back to Homepage</button>
-             {postSelected !== "invalid" ?
+            <button class="btn btn-secondary" style={{width: '20vw'}} onClick={() => navigate("/homepage")}>Back to Homepage</button>
+            { !fetchDone ?
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only"></span>
+                        </div> :
+
+             (postSelected !== "invalid" ?
                 <div>
                     <h3>{postSelected.title}</h3>
-                    <div>Posted by: {postSelected.username}</div>
-                    <div>{postSelected.date_posted}</div>
-                    <div>{getContentAsElements(postSelected.content_type,postSelected.content)}</div>
+                    <div>Posted by: {username}</div>
+                    <div>{postSelected.published}</div>
+                    <div>{getContentAsElements(postSelected.contentType,postSelected.content)}</div>
                 </div>
-                : <h1>Post not found</h1>
+                : <h1>Post not found</h1> )
              }
         </div>
     );

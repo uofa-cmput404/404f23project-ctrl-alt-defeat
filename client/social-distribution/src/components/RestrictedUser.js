@@ -21,9 +21,7 @@ function RestrictedUser(props) {
             else {
               alert("Something went wrong")
             }
-        }).catch(error => {
-          console.error('Error:', error);
-          });
+        })
     }
 
   return (

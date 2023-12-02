@@ -1,5 +1,5 @@
 from flask import render_template
-from app.sample import bp
+from . import bp
 
 @bp.route('/')
 def index():
