@@ -171,7 +171,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
         try {
             axios.get(likedPostsUrl, {
                 headers: {
-                    'Authorization' : REACT_APP_AUTHORIZATION
+                    'Authorization' : process.env.REACT_APP_AUTHORIZATION
                 }
             })
             .then(response => {

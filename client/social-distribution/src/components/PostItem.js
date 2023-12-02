@@ -43,7 +43,7 @@ const styles = {
 }
 
 
-function get_content_as_elements(content_type, content){
+function getContentAsElements(content_type, content){
     if (content_type === "text/plain"){
         return(<p>{content}</p>);
     }
