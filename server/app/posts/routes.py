@@ -326,8 +326,10 @@ def get_image(author_id, post_id):
     final_message = Response(500,"Nothing happened.")
     try:
         query = "SELECT content, content_type,visibility from posts WHERE post_id = %s AND author_id = %s"
+        #curr.execute(query, (post_id, author_id))
         curr.execute(query, (post_id, author_id))
-        row = curr.execute(query, (post_id, author_id)).fetchone()
+        row = curr.fetchone()
+        #row = curr.execute(query, (post_id, author_id)).fetchone()
         if row is None:
             abort(404, "The post with this post_id does not exist.")
         print("Successfully found post.")
@@ -339,6 +341,7 @@ def get_image(author_id, post_id):
 
         content_type = row["content_type"]
         content = row["content"]
+        print(content)
 
         image_bytes = io.BytesIO(base64.b64decode(content))
         #final_message = f"data:{content_type},{content}"
@@ -349,7 +352,7 @@ def get_image(author_id, post_id):
     except Exception as e:
         print(e)
     finally:
-        conn.close()
+        curr.close()
         return final_message
 
 
