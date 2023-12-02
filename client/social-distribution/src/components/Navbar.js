@@ -29,8 +29,12 @@ function Navbar() {
           return;
         }
         const localData = await localResponse.json();
-        const localResults = localData.users.filter(user => user.id !== authorId);
-    
+        const localResults = localData.users.filter(user => user.id !== authorId).map(user => ({
+          id: user.id,
+          username: user.username,
+          host: 'local',
+        }));
+        console.log('local',localResults)
         // External API 1
         const externalResponse1 = await fetch('https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/', {
           headers: {
@@ -46,8 +50,9 @@ function Navbar() {
         const externalResults1 = externalData1.items.map(item => ({
           id: item.id.split('/').pop(),
           username: item.displayName,
+          host: 'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/',
         }));
-
+        console.log('e1',externalResults1)
         // External API 2 - Pagination
         let nextLink = 'https://cmput-average-21-b54788720538.herokuapp.com/api/authors/?page=1&page_size=5';
         let allExternalResults2 = [];
@@ -67,8 +72,9 @@ function Navbar() {
 
           const externalData2 = await externalResponse2.json();
           const externalResults2 = externalData2.items.map(item => ({
-            id: item.id.split('/').pop(),
+            id: item.id.match(/\/([^/]+)\/?$/)[1], //stupid slash at the end
             username: item.displayName,
+            host: 'https://cmput-average-21-b54788720538.herokuapp.com/api',
           }));
 
           // Update the next link for the next iteration
@@ -76,12 +82,12 @@ function Navbar() {
 
           allExternalResults2 = [...allExternalResults2, ...externalResults2];
         }
-
+        console.log('e2',allExternalResults2)
         const filteredExternalResults1 = externalResults1.filter(user => user.username.toLowerCase().includes(searchQuery.toLowerCase()));
         const filteredExternalResults2 = allExternalResults2.filter(user => user.username.toLowerCase().includes(searchQuery.toLowerCase()));
 
         const combinedResults = [...localResults, ...filteredExternalResults1, ...filteredExternalResults2];
-
+        console.log('combined',combinedResults)
         navigate('/search', { state: combinedResults });
       } catch (error) {
         console.error('Error:', error);
