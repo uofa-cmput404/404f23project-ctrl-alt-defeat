@@ -975,39 +975,6 @@
           }
         },
         "/api/authors/{author_id}/followers/{foreign_author_id}": {
-          "put": {
-            "tags": ["Follow"],
-            "summary": "Add follower",
-            "parameters": [
-              {
-                "name": "author_id",
-                "in": "path",
-                "type": "string",
-                "description": "Author ID",
-                "required": true
-              },
-              {
-                "name": "foreign_author_id",
-                "in": "path",
-                "type": "string",
-                "description": "Foreign Author ID",
-                "required": true
-              }
-            ],
-            "responses": {
-              "200": {
-                "description": "Follower added",
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "get": {
             "tags": ["Follow"],
             "summary": "Check if user is a follower (REMOTE)",
@@ -1040,39 +1007,7 @@
                 }
               }
             }
-          },
-          "delete": {
-            "tags": ["Follow"],
-            "summary": "Remove follower",
-            "parameters": [
-              {
-                "name": "author_id",
-                "in": "path",
-                "type": "string",
-                "description": "Author ID",
-                "required": true
-              },
-              {
-                "name": "foreign_author_id",
-                "in": "path",
-                "type": "string",
-                "description": "Foreign Author ID",
-                "required": true
-              }
-            ],
-            "responses": {
-              "200": {
-                "description": "Follower removed",
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
+          }
       }
     }
   }

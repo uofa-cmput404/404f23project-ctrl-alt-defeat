@@ -4,6 +4,7 @@ import sqlite3
 from ..dbase import get_db_connection
 import flask
 import requests
+import psycopg2
 
 
 def get_db():
@@ -209,7 +210,25 @@ def unfollow():
 
     return jsonify({'message': 'Unfollowed successfully'})
 
+# REMOTE
+@bp.route('/authors/<string:author_id>/followers/<string:foreign_author_id>', methods=['GET'])
+def check_follower(author_id, foreign_author_id):
+    conn, cursor = get_db_connection()
 
+    try:
+        # Check if the friendship exists
+        cursor.execute("SELECT * FROM friends WHERE author_following = %s AND author_followee = %s", (foreign_author_id, author_id))
+        existing_friendship = cursor.fetchone()
+
+        if existing_friendship:
+            return jsonify({'is_follower': True}), 200
+        else:
+            return jsonify({'is_follower': False}), 200
+
+    finally:
+        cursor.close()
+        conn.close()
+        
 # REMOTE
 @bp.route('/authors/<string:author_id>/followers', methods=['GET'])
 def get_followers(author_id):
@@ -245,75 +264,75 @@ def get_followers(author_id):
     finally:
         db.close()
 
-# REMOTE
-@bp.route('/authors/<string:author_id>/followers/<string:foreign_author_id>', methods=['PUT'])
-def add_follower(author_id, foreign_author_id):
-    db = get_db()
-    cursor = db.cursor()
 
-    # Check if the authors exist
-    cursor.execute("SELECT * FROM authors WHERE author_id = ? OR author_id = ?", (author_id, foreign_author_id))
-    authors_exist = cursor.fetchall()
+# @bp.route('/authors/<string:author_id>/followers/<string:foreign_author_id>', methods=['PUT'])
+# def add_follower(author_id, foreign_author_id):
+#     db = get_db()
+#     cursor = db.cursor()
 
-    if len(authors_exist) != 2:
-        return jsonify({'message': 'One or both authors do not exist'}), 404
+#     # Check if the authors exist
+#     cursor.execute("SELECT * FROM authors WHERE author_id = ? OR author_id = ?", (author_id, foreign_author_id))
+#     authors_exist = cursor.fetchall()
 
-    # Check if the friendship already exists
-    cursor.execute("SELECT * FROM friends WHERE author_following = ? AND author_followee = ?", (foreign_author_id, author_id))
-    existing_friendship = cursor.fetchone()
+#     if len(authors_exist) != 2:
+#         return jsonify({'message': 'One or both authors do not exist'}), 404
 
-    if existing_friendship:
-        return jsonify({'message': 'The foreign author is already a follower'}), 400
+#     # Check if the friendship already exists
+#     cursor.execute("SELECT * FROM friends WHERE author_following = ? AND author_followee = ?", (foreign_author_id, author_id))
+#     existing_friendship = cursor.fetchone()
 
-    # Insert the new friendship
-    cursor.execute("INSERT INTO friends (author_following, author_followee) VALUES (?, ?)", (foreign_author_id, author_id))
-    db.commit()
+#     if existing_friendship:
+#         return jsonify({'message': 'The foreign author is already a follower'}), 400
 
-    return jsonify({'message': f'{foreign_author_id} is now a follower of {author_id}'}), 200
+#     # Insert the new friendship
+#     cursor.execute("INSERT INTO friends (author_following, author_followee) VALUES (?, ?)", (foreign_author_id, author_id))
+#     db.commit()
 
-# REMOTE
-@bp.route('/authors/<string:author_id>/followers/<string:foreign_author_id>', methods=['GET'])
-def check_follower(author_id, foreign_author_id):
-    db = get_db()
-    cursor = db.cursor()
+#     return jsonify({'message': f'{foreign_author_id} is now a follower of {author_id}'}), 200
 
-    # Check if the authors exist
-    cursor.execute("SELECT * FROM authors WHERE author_id = ? OR author_id = ?", (author_id, foreign_author_id))
-    authors_exist = cursor.fetchall()
+# # REMOTE
+# @bp.route('/authors/<string:author_id>/followers/<string:foreign_author_id>', methods=['GET'])
+# def check_follower(author_id, foreign_author_id):
+#     db = get_db()
+#     cursor = db.cursor()
 
-    if len(authors_exist) != 2:
-        return jsonify({'message': 'One or both authors do not exist'}), 404
+#     # Check if the authors exist
+#     cursor.execute("SELECT * FROM authors WHERE author_id = ? OR author_id = ?", (author_id, foreign_author_id))
+#     authors_exist = cursor.fetchall()
 
-    # Check if the friendship exists
-    cursor.execute("SELECT * FROM friends WHERE author_following = ? AND author_followee = ?", (foreign_author_id, author_id))
-    existing_friendship = cursor.fetchone()
+#     if len(authors_exist) != 2:
+#         return jsonify({'message': 'One or both authors do not exist'}), 404
 
-    if existing_friendship:
-        return jsonify({'is_follower': True}), 200
-    else:
-        return jsonify({'is_follower': False}), 200
+#     # Check if the friendship exists
+#     cursor.execute("SELECT * FROM friends WHERE author_following = ? AND author_followee = ?", (foreign_author_id, author_id))
+#     existing_friendship = cursor.fetchone()
 
-@bp.route('/authors/<string:author_id>/followers/<string:foreign_author_id>', methods=['DELETE'])
-def remove_follower(author_id, foreign_author_id):
-    db = get_db()
-    cursor = db.cursor()
+#     if existing_friendship:
+#         return jsonify({'is_follower': True}), 200
+#     else:
+#         return jsonify({'is_follower': False}), 200
 
-    # Check if the authors exist
-    cursor.execute("SELECT * FROM authors WHERE author_id = ? OR author_id = ?", (author_id, foreign_author_id))
-    authors_exist = cursor.fetchall()
+# @bp.route('/authors/<string:author_id>/followers/<string:foreign_author_id>', methods=['DELETE'])
+# def remove_follower(author_id, foreign_author_id):
+#     db = get_db()
+#     cursor = db.cursor()
 
-    if len(authors_exist) != 2:
-        return jsonify({'message': 'One or both authors do not exist'}), 404
+#     # Check if the authors exist
+#     cursor.execute("SELECT * FROM authors WHERE author_id = ? OR author_id = ?", (author_id, foreign_author_id))
+#     authors_exist = cursor.fetchall()
 
-    # Check if the friendship exists
-    cursor.execute("SELECT * FROM friends WHERE author_following = ? AND author_followee = ?", (foreign_author_id, author_id))
-    existing_friendship = cursor.fetchone()
+#     if len(authors_exist) != 2:
+#         return jsonify({'message': 'One or both authors do not exist'}), 404
 
-    if existing_friendship:
-        # Remove the friendship
-        cursor.execute("DELETE FROM friends WHERE author_following = ? AND author_followee = ?", (foreign_author_id, author_id))
-        db.commit()
+#     # Check if the friendship exists
+#     cursor.execute("SELECT * FROM friends WHERE author_following = ? AND author_followee = ?", (foreign_author_id, author_id))
+#     existing_friendship = cursor.fetchone()
 
-        return jsonify({'message': f'{foreign_author_id} is no longer a follower of {author_id}'}), 200
-    else:
-        return jsonify({'message': 'The foreign author is not a follower'}), 400
+#     if existing_friendship:
+#         # Remove the friendship
+#         cursor.execute("DELETE FROM friends WHERE author_following = ? AND author_followee = ?", (foreign_author_id, author_id))
+#         db.commit()
+
+#         return jsonify({'message': f'{foreign_author_id} is no longer a follower of {author_id}'}), 200
+#     else:
+#         return jsonify({'message': 'The foreign author is not a follower'}), 400
