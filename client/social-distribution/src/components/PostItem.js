@@ -167,6 +167,8 @@ function PostItem(props) {
     if (props.item.author_id === props.loginUser) return;
 
     try {
+
+      // not right for now, wait for inbox
       const shareApiUrl = `http://127.0.0.1:5000/api/share/post/${props.item.post_id}`;
       await axios.post(shareApiUrl, { shared_by: props.loginUser });
 
