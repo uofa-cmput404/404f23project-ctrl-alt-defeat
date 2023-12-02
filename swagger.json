@@ -300,7 +300,7 @@
         "tags": ["Author"]
       }
     },
-    "/api/{author_id}/inbox/unlike": {
+    "/api/authors/{author_id}/inbox/unlike": {
       "post": {
         "summary": "Delete like",
         "parameters": [
@@ -1010,5 +1010,4 @@
           }
       }
     }
-  }
 }
