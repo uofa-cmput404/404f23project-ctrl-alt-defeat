@@ -113,12 +113,16 @@ CREATE TABLE nodes (
     password TEXT NOT NULL   
 );
 
+-- inbox_item_id = unique identifier within inbox_items
+-- object_id = posts: post_id, follow request: follow_request_id*
+--             post/comment likes: like_id*, comments: comment_id
+--             *these ids only exist in our database
 CREATE TABLE inbox_items (
+    inbox_item_id TEXT NOT NULL PRIMARY KEY,
     sender_id TEXT NOT NULL,
     sender_display_name TEXT NOT NULL,
     sender_host TEXT NOT NULL,
     recipient_id TEXT NOT NULL,
-    inbox_item_id TEXT NOT NULL,
     object_id TEXT NOT NULL,
     type TEXT NOT NULL,
     date_received TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
