@@ -12,11 +12,12 @@ const styles = {
     cursor: 'pointer'
   },
   
-  container: {
+  container: {    
     padding: 20,
-    marginTop: 10,
-
+    marginTop: 10,    
+    
   },
+
   /*container: {
     display: 'flex',
     alignItems: 'center',
@@ -41,6 +42,24 @@ const styles = {
   },
 
 }
+const buttonContainerStyle = {
+  position: 'absolute',  // Position it relative to its first positioned ancestor
+  top: '10px',          // 10px from the top of the container
+  right: '10px',         // 10px from the right of the container
+  zIndex: '1000'        // Ensure it's above other content
+};
+const buttonStyle = {
+  padding: '5px 10px',          // Padding around the text
+  fontSize: '12px',             // Smaller font size for a little button
+  cursor: 'pointer',            // Cursor pointer to indicate it's clickable
+  backgroundColor: '#f2f2f2',   // Very light grey background
+  color: '#333',                // Text color, adjust as needed
+  border: '1px solid #d9d9d9',  // Lighter border color than the button
+  borderRadius: '5px',         // Rounded edges, adjust radius as needed
+  outline: 'none',              // Remove default focus outline
+  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' // Optional: subtle shadow for depth
+};
+
 
 
 function getContentAsElements(content_type, content){
@@ -105,16 +124,15 @@ function PostItem(props) {
       const apiUrl = process.env.REACT_APP_API_HOSTNAME + `/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}/toggle-like`;
   
       // Send the POST request
-      await axios.post(apiUrl, {
-          like_comment_author_id: props.loginUser
-      }, {
+      await axios.post(apiUrl, { like_comment_author_id: props.loginUser },{
           headers: {
               'Authorization' : process.env.REACT_APP_AUTHORIZATION
-          }});
+          }
+      });
   
       // Update the like status in the local state
       const updatedComments = comments.map(comment => {
-        if (comment.comment_id === commentId) {
+        if (comment.id === commentId) {
           return { ...comment, liked: !comment.liked };
         }
         return comment;
@@ -130,12 +148,12 @@ function PostItem(props) {
     try {
       // API URL to delete the comment
       const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}`;
-
+      
       // Send the DELETE request
       await axios.delete(apiUrl);
 
       // Update the comments in the local state to reflect the deletion
-      const updatedComments = comments.filter(comment => comment.comment_id !== commentId);
+      const updatedComments = comments.filter(comment => comment.id !== commentId);
       setComments(updatedComments);
     } catch (error) {
       console.error('Error deleting comment:', error);
@@ -150,7 +168,25 @@ function PostItem(props) {
   const handleCommentChange = (e) => {
     setComment(e.target.value);
   };
+  const handleSharePost = async () => {
+    if (props.item.author_id === props.loginUser) return;
 
+    try {
+
+      // not right for now, wait for inbox
+      const shareApiUrl = process.env.REACT_APP_API_HOSTNAME `/api/share/post/${props.item.post_id}`;
+      await axios.post(shareApiUrl, { shared_by: props.loginUser }, {
+          headers: {
+              'Authorization' : process.env.REACT_APP_AUTHORIZATION
+          }
+      });
+
+      // Display notification
+      alert('Share Success');
+    } catch (error) {
+      console.error('Error sharing post:', error);
+    }
+  };
 
   //send comment to database
   const handleSendComment = async () => {
@@ -173,7 +209,6 @@ function PostItem(props) {
       fetchComments(); // Refresh comments after posting
     } catch (error) {
       console.error('Error posting comment:', error);
-      // Optionally, handle the error more visibly to the user
     }
   };
   
@@ -182,8 +217,8 @@ function PostItem(props) {
   return (
     <div style={styles.container} class="card">
         <h3><a href={"http://localhost:3000/authors/" + props.item.author_id + "/posts/" + props.item.post_id}   >{props.item.title}</a></h3>
-        <small class="text-muted">Posted by: {props.item.username}</small>
-        <small class="text-muted">{props.item.date_posted}</small>
+        <small class="text-muted">Posted by: {props.item.username}</small>        
+        <small class="text-muted">{props.item.date_posted}</small>        
         <hr/>
         <div>{getContentAsElements(props.item.content_type,props.item.content)}</div>
         
@@ -192,11 +227,19 @@ function PostItem(props) {
         props.item.liked ?
 
             <img style={styles.img} src={likedImgUrl} />
-
-            : <img style={styles.img} src={notLikedImgUrl} />
-
+          
+            : <img style={styles.img} src={notLikedImgUrl} /> 
+          
         }
         </div>
+        {/* Share Button - Visible only if the post is made by another author */}
+        {props.item.author_id !== props.loginUser && (<div style={buttonContainerStyle}>
+        <button style={buttonStyle} onClick={handleSharePost}>
+          share
+        </button>
+        </div>)}
+
+
         <div style={styles.commentBox}>
             <input
               type="text"
@@ -207,34 +250,36 @@ function PostItem(props) {
             />
             <button class="btn btn-primary" onClick={handleSendComment}>Send</button>
         </div>
+
  {/* Display comments with commenter's name, text, like button, and delete button */}
  <div>
         {comments.map((comment, index) => (
-          <div key={`${comment.comment_id}-${index}`} 
+          <div key={`${comment.id}-${index}`}
                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
             <div>
-              <span style={{ fontWeight: 'bold' }}>{comment.comment_name}:</span>
-              <span style={{ marginLeft: '8px' }}>{comment.comment_text}</span>
+              <span style={{ fontWeight: 'bold' }}>{comment.author.displayName}:</span>
+              <span style={{ marginLeft: '8px' }}>{comment.comment}</span>
             </div>
             <div>
-              <button
-                onClick={() => toggleLikeComment(comment.comment_id)}
+              <button 
+                onClick={() => toggleLikeComment(comment.id)}
                 style={{ border: 'none', background: 'none', cursor: 'pointer', marginRight: '10px' }}
               >
-                <img
-                  src={comment.liked ? likedImgUrl : notLikedImgUrl}
-                  alt="Like"
+                <img 
+                  src={comment.liked ? likedImgUrl : notLikedImgUrl} 
+                  alt="Like" 
                   style={{ width: '24px', height: '24px' }}
                 />
               </button>
-              {comment.comment_author_id === props.loginUser && (
+              {comment.author.id === props.loginUser && (
                 <button
-                  onClick={() => deleteComment(comment.comment_id)}
+                  onClick={() => deleteComment(comment.id)}
                   style={{ border: 'none', background: 'none', cursor: 'pointer' }}
                 >
                   Delete
                 </button>
               )}
+
             </div>
           </div>
         ))}
