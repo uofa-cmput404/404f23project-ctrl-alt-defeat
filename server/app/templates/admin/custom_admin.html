@@ -1,0 +1,30 @@
+<!-- templates/admin/custom_admin.html -->
+{% extends 'admin/master.html' %}
+
+{% block head %}
+    {{ super() }}
+    <style>
+        .logout-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            background-color: #0000008d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            background-color: #0000008d;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+    {{ super() }}
+{% endblock %}
