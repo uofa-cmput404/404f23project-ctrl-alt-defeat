@@ -127,7 +127,7 @@ function PostItem(props) {
   
       // Update the like status in the local state
       const updatedComments = comments.map(comment => {
-        if (comment.comment_id === commentId) {
+        if (comment.id === commentId) {
           return { ...comment, liked: !comment.liked };
         }
         return comment;
@@ -148,7 +148,7 @@ function PostItem(props) {
       await axios.delete(apiUrl);
 
       // Update the comments in the local state to reflect the deletion
-      const updatedComments = comments.filter(comment => comment.comment_id !== commentId);
+      const updatedComments = comments.filter(comment => comment.id !== commentId);
       setComments(updatedComments);
     } catch (error) {
       console.error('Error deleting comment:', error);
@@ -239,15 +239,15 @@ function PostItem(props) {
  {/* Display comments with commenter's name, text, like button, and delete button */}
  <div>
         {comments.map((comment, index) => (
-          <div key={`${comment.comment_id}-${index}`} 
+          <div key={`${comment.id}-${index}`} 
                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
             <div>
-              <span style={{ fontWeight: 'bold' }}>{comment.comment_name}:</span>
-              <span style={{ marginLeft: '8px' }}>{comment.comment_text}</span>
+              <span style={{ fontWeight: 'bold' }}>{comment.author.displayName}:</span>
+              <span style={{ marginLeft: '8px' }}>{comment.comment}</span>
             </div>
             <div>
               <button 
-                onClick={() => toggleLikeComment(comment.comment_id)}
+                onClick={() => toggleLikeComment(comment.id)}
                 style={{ border: 'none', background: 'none', cursor: 'pointer', marginRight: '10px' }}
               >
                 <img 
@@ -256,9 +256,9 @@ function PostItem(props) {
                   style={{ width: '24px', height: '24px' }}
                 />
               </button>
-              {comment.comment_author_id === props.loginUser && (
+              {comment.author.id === props.loginUser && (
                 <button 
-                  onClick={() => deleteComment(comment.comment_id)}
+                  onClick={() => deleteComment(comment.id)}
                   style={{ border: 'none', background: 'none', cursor: 'pointer' }}
                 >
                   Delete
