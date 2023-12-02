@@ -235,7 +235,7 @@ def get_my_posts():
 @basic_auth.login_required
 def index():
     print("index")
-    data = ""
+    data = []
     try:
         # Retrieve data from the request's JSON body
         author_id = request.args.get('author_id')        
@@ -252,7 +252,6 @@ def index():
         row = curr.fetchall()                                
         posts = [dict(i) for i in row]        
         
-        local_posts = list() # Turn this into a tupple after
         payload = list()        
 
         # posts.author_id, username, posts.post_id, date_posted, title, content_type, content, image_id, visibility
@@ -269,8 +268,7 @@ def index():
 
             elif post['sender_host'] == 'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/':
                 try:                    
-                    new_item = rf.get_post('https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/', post['sender_id'], post['object_id'], 'cross-server', 'password')
-                    
+                    new_item = rf.get_post('https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/', post['sender_id'], post['object_id'], 'cross-server', 'password')                    
                     payload.append(new_item)
 
                 except Exception as e:
@@ -278,27 +276,30 @@ def index():
                     print(e)
                     pass # Skip if it somehow does not work
             else:                          
-                local_posts.append(post["object_id"])
+                query = "SELECT posts.*, username FROM posts " \
+                        "JOIN authors " \
+                        "on posts.author_id = authors.author_id " \
+                        "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  %s) " \
+                        f"WHERE post_id = %s"
 
-        print("hi")
-        print("local:", local_posts)
+                print("checking", post["object_id"])
+                curr.execute(query, (post["recipient_id"], post["object_id"] ))
 
-        if len(local_posts):
-            query = "SELECT posts.*, username FROM posts " \
-                    "JOIN authors " \
-                    "on posts.author_id = authors.author_id " \
-                    "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  %s) " \
-                    f"WHERE post_id in %s"
-            
-            curr.execute(query, (author_id, tuple(local_posts)))
+                row = curr.fetchone()        
+                print(row)        
 
-            row = curr.fetchall()                                
-            local_results = [dict(i) for i in row]       
-
-            payload.extend(local_results)
+                # If we can't find it anywhere else then the post has been deleted
+                if row is None:
+                    query = "DELETE FROM inbox_items " \
+                            "WHERE object_id = %s"
+                    print("deleting",post["object_id"])
+                    curr.execute(query, (post["object_id"],))
+                    conn.commit()
+                else: 
+                    local_result = dict(row)                    
+                    payload.append(local_result)
 
         data = payload        
-        print("data:", data)
 
     except Exception as e:
         print(e)
