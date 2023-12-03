@@ -402,7 +402,7 @@ def send(author_id):
             conn.commit()
             conn.close()
 
-            data = "like success"
+            data = "Successfully added comment."
 
     except Exception as e:
         print("send error: ", e)
