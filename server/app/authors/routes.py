@@ -427,7 +427,11 @@ def send(author_id):
                 "post_id, author_id, comment_text, status, date_commented) " \
                 "VALUES (%s, %s, %s, %s, %s, %s ,CURRENT_TIMESTAMP)" 
 
-            curr.execute(query, (comment_id, comment_author_id,  request_data["id"].split('/')[-1], author_id, request_data["comment"], status))
+            post_url = request_data["id"].split("/")
+            post_index = post_url.index("posts")
+            post_id = post_url[post_index + 1]
+            print(post_id)
+            curr.execute(query, (comment_id, comment_author_id,  post_id, author_id, request_data["comment"], status))
             
             inbox_query = "INSERT INTO inbox_items " \
                             "(sender_id, sender_host, " \
@@ -447,6 +451,7 @@ def send(author_id):
             raise(Exception("'type' must be 'post', 'comment', 'Like', or 'Follow'"))
 
     except Exception as e:
+        abort(500, e)
         print("send error: ", e)
         data = "error"
 
