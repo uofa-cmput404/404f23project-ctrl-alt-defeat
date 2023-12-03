@@ -125,12 +125,12 @@ export default function IndividualPost() {;
                         <div>{get_content_as_elements(postSelected.contentType,postSelected.content)}</div>                
                         <hr/>
                         
-                        <h6>Comments:</h6>                        
+                        <h5>Comments:</h5>                        
                         <div>
                             {
                                 comments.length && comments.map((e) => {
-                                    return <div style={{display: "flex"}}>
-                                        <b style={{minWidth: "100px"}}>{e.author.displayName}:</b><div style={{marginLeft: "20px"}}/>{e.comment}
+                                    return <div style={{display: "flex", marginTop: "20px"}}>
+                                        <b>{e.author.displayName}:</b><div style={{marginLeft: "5px"}}/>{e.comment}
                                         </div>                
                                 })
                             }

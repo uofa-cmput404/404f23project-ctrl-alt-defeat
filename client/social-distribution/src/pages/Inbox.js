@@ -74,7 +74,7 @@ function Inbox() {
                                     <div style={{display: "flex"}}>
                                         {(e.type === "Like" && <><LikeSymbol/><a style={{marginLeft: "20px"}} href={e.url}>{e.summary}</a></>)}                                        
                                         {(e.type === "comment" && <div><CommentIcon/><a style={{marginLeft: "20px"}} href={e.url}>{e.summary}</a> 
-                                                    <div class="card" style={{marginTop: "10px", padding: "20px"}}>"{e.comment}"</div></div>)}   
+                                                    <div class="card" style={{marginTop: "10px", padding: "20px", marginLeft: "50px"}}>"{e.comment}"</div></div>)}   
                                     </div></li>
                             })
                         }                
