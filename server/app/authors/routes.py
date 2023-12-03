@@ -360,8 +360,49 @@ def send(author_id):
         elif message_type == "post":
             pass
 
-        elif message_type == "comment":
-            pass
+        elif message_type == "comment":     
+            conn, curr = get_db_connection()                               
+            #Check if the authors are friends
+            
+            comment_author_id = request_data["author"]["id"].split("/")[-1]
+            check_friends_query = """
+                SELECT CASE 
+                    WHEN EXISTS (
+                        SELECT 1 FROM friends 
+                        WHERE author_followee = %s AND author_following = %s
+                    ) THEN 'private'
+                    ELSE 'public'
+                END AS status
+            """
+
+            curr.execute(check_friends_query, (author_id, comment_author_id))
+            status = dict(curr.fetchone())['status']
+            
+            if author_id == comment_author_id:
+                status = 'private'
+
+            comment_id = str(uuid.uuid4()) 
+
+            query = "INSERT INTO comments " \
+                "(comment_id, comment_author_id, " \
+                "post_id, author_id, comment_text, status, date_commented) " \
+                "VALUES (%s, %s, %s, %s, %s, %s ,CURRENT_TIMESTAMP)" 
+
+            curr.execute(query, (comment_id, comment_author_id,  request_data["id"].split('/')[-1], author_id, request_data["comment"], status))
+            
+            inbox_query = "INSERT INTO inbox_items " \
+                            "(sender_id, sender_host, " \
+                            "sender_display_name, recipient_id, " \
+                            "inbox_item_id, object_id, type) VALUES " \
+                            "(%s, %s, %s, %s, %s, %s, %s)"
+            
+            inboxItemId = str(uuid.uuid4())
+            curr.execute(inbox_query, (comment_id,  request_data["author"]["host"], request_data["author"]["displayName"], author_id, inboxItemId, comment_id, "comment"))
+
+            conn.commit()
+            conn.close()
+
+            data = "like success"
 
     except Exception as e:
         print("send error: ", e)
