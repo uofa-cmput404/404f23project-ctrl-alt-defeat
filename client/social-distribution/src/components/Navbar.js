@@ -19,21 +19,95 @@ function Navbar() {
       updateUserAndAuthorId(null,null);
       navigate('/');
     };
+
     const handleSearch = async (event) => {
       event.preventDefault();
       try {
-        const response = await fetch(`http://localhost:5000/api/follow/usersearch?query=${searchQuery}`);
-        if (response.ok) {
-          const data = await response.json();
-          const filteredResults = data.users.filter(user => user.id !== authorId);
-          
-          // Navigate to the new page with the data in the state
-          navigate('/search', { state: filteredResults });
-          console.log("Navigating to search");        
-          
-        } else {
-          console.error('Search failed');
+        const localResponse = await fetch(`http://localhost:5000/api/follow/usersearch?query=${searchQuery}`);
+        if (!localResponse.ok) {
+          console.error('Local search failed');
+          return;
         }
+        const localData = await localResponse.json();
+        const localResults = localData.users.filter(user => user.id !== authorId).map(user => ({
+          id: user.id,
+          username: user.username,
+          host: 'local',
+        }));
+        console.log('local',localResults)
+        // External API 1
+        const externalResponse1 = await fetch('https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/', {
+          headers: {
+            'accept': 'application/json',
+            'Authorization': 'Basic Y3Jvc3Mtc2VydmVyOnBhc3N3b3Jk',
+          },
+        });
+        if (!externalResponse1.ok) {
+          console.error('External search 1 failed');
+          return;
+        }
+        const externalData1 = await externalResponse1.json();
+        const externalResults1 = externalData1.items.map(item => ({
+          id: item.id.split('/').pop(),
+          username: item.displayName,
+          host: 'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/',
+        }));
+        console.log('e1',externalResults1)
+
+        // External API 2 - Pagination
+        let nextLink = 'https://cmput-average-21-b54788720538.herokuapp.com/api/authors/?page=1&page_size=5';
+        let allExternalResults2 = [];
+
+        while (nextLink) {
+          const externalResponse2 = await fetch(nextLink, {
+            headers: {
+              'accept': 'application/json',
+              'Authorization': 'Basic Q3RybEFsdERlZmVhdDpzdHJpbmc=',
+            },
+          });
+          if (!externalResponse2.ok) {
+            console.error('External search 2 failed');
+            return;
+          }
+          const externalData2 = await externalResponse2.json();
+          const externalResults2 = externalData2.items.map(item => ({
+            id: item.id.match(/\/([^/]+)\/?$/)[1], //stupid slash at the end
+            username: item.displayName,
+            host: 'https://cmput-average-21-b54788720538.herokuapp.com/api',
+          }));
+
+          // Update the next link for the next iteration
+          nextLink = externalData2.next;
+          allExternalResults2 = [...allExternalResults2, ...externalResults2];
+        }
+        console.log('e2',allExternalResults2)
+
+        //External API 3
+        const externalResponse3 = await fetch('https://chimp-chat-1e0cca1cc8ce.herokuapp.com/authors/?page=1&size=1000', {
+          headers: {
+            'accept': 'application/json',
+            'Authorization': 'Basic bm9kZS1jdHJsLWFsdC1kZWZlYXQ6Y2hpbXBjaGF0YXBp',
+          },
+        });
+        if (!externalResponse3.ok) {
+          console.error('External search 3 failed');
+          return;
+        }
+        const externalData3 = await externalResponse3.json();
+        const externalResults3 = externalData3.items.map(item => ({
+          id: item.id.split('/').pop(),
+          username: item.displayName,
+          host: 'https://chimp-chat-1e0cca1cc8ce.herokuapp.com/',
+        }));
+        console.log('e3',externalResults3)
+
+        const filteredExternalResults1 = externalResults1.filter(user => user.username.toLowerCase().includes(searchQuery.toLowerCase()));
+        const filteredExternalResults2 = allExternalResults2.filter(user => user.username.toLowerCase().includes(searchQuery.toLowerCase()));
+        const filteredExternalResults3 = externalResults3.filter(user => user.username.toLowerCase().includes(searchQuery.toLowerCase()));
+        
+        const combinedResults = [...localResults, ...filteredExternalResults1, ...filteredExternalResults2, ...filteredExternalResults3];
+        console.log('combined', combinedResults)
+        navigate('/search', { state: combinedResults });
       } catch (error) {
         console.error('Error:', error);
       }
