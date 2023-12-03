@@ -84,7 +84,7 @@ function SearchPage() {
                   host: 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/',
                   displayName: username,
                   github: null,
-                  profileImage: null,
+                  profileImage: null
                 },
                 object: {
                   type: 'author',
@@ -93,7 +93,7 @@ function SearchPage() {
                   displayName: displayName,
                   url: `${host}/authors/${receiveAuthorId}`,
                   github: null,
-                  profileImage: null,
+                  profileImage: null
                 }
               }
             };
@@ -114,20 +114,31 @@ function SearchPage() {
           console.log(JSON.stringify(object))
 
           if (!response.ok) {
+            if (host === 'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/') {
+              if (response.status === 400) {
+                console.log('400');
+                toast.error('Follow request already sent')
+                return;
+              }
+              console.log('not 400');
+            }
             console.error('Remote follow request failed:', response.statusText);
             console.log('Response body:', await response.text());
             return;
-          }
-          
-          const data = await response.json();
-    
-          if (data) {
-            toast.success('Follow Request Sent');
-            console.log('Remote follow working');
-            console.log(data);
           } else {
-              console.error('Response does not contain valid JSON');
-          }
+            if (host === 'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/') {
+              toast.success('Follow Request Sent');
+              return;
+            }
+            const data = await response.json();
+            if (data) {
+              toast.success('Follow Request Sent');
+              console.log('Remote follow working');
+              console.log(data);
+            } else {
+                console.error('Response does not contain valid JSON');
+            }
+          }    
         }
       } catch (error) {
         console.error('Error:', error);
