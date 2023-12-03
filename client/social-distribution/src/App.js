@@ -12,7 +12,7 @@ import IndividualPost from './pages/IndividualPost';
 import Navbar from './components/Navbar';
 import SearchPage from './pages/SearchPage';
 import EditProfilePage from './pages/EditProfilePage';
-import Register from './pages/RegistrationPage';
+import Register from './pages/RegistrationPage'; 
 
 export const UserContext = createContext();
 
