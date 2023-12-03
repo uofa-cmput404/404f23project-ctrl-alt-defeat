@@ -577,6 +577,7 @@ def get_image(author_id, post_id):
         print(final_message)
     except Exception as e:
         print(e)
+        abort(500, e)
     finally:
         conn.close()
         return final_message
@@ -728,6 +729,7 @@ def get_post(author_id, post_id):
     except Exception as e:
         print(e)
         data = e
+        abort(500, e)
     
     return jsonify(data) 
 
@@ -823,9 +825,11 @@ def get_posts(author_id):
     except IndexError as e:
         print(e)
         data = "invalid"
+        abort(500, e)
 
     except Exception as e:
         print(e)
         data = "error"
+        abort(500, e)
     
     return jsonify(data)
