@@ -1,6 +1,6 @@
 from . import bp
 import json
-from flask import request, g, jsonify
+from flask import request, g, jsonify, abort
 import sqlite3
 from ..dbase import get_db_connection
 from random import randrange
@@ -61,6 +61,7 @@ def get_authors():
     except Exception as e:
         print("Error getting authors: ", e)
         data = "error"
+        abort(500, e)
     
     print("data here")
     return jsonify(data)
@@ -95,6 +96,7 @@ def get_author(author_id):
     except Exception as e:
         print("Error getting authors: ", e)
         data = "error"
+        abort(500, e)
     
     return jsonify(data)
 
@@ -282,6 +284,7 @@ def get_liked_posts(author_id, post_id):
     except Exception as e:
         print("Getting likes error: ", e)
         data = "error"
+        abort(500, e)
     
     return jsonify(data)
 
