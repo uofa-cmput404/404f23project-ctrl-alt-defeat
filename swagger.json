@@ -537,6 +537,134 @@
       }
     
     },
+    "/api/authors/{author_id}/posts/{post_id}/comments": {
+      "get": {
+        "tags": ["Posts"],
+        "summary": "Get comments for a post",
+        "parameters": [
+          {
+            "name": "author_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the post author"
+          },
+          {
+            "name": "post_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the post"
+          },
+          {
+            "name": "comment_author_id",
+            "in": "query",
+            "type": "string",
+            "description": "ID of the comment author"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "integer",
+            "description": "Page number for pagination"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "type": "integer",
+            "description": "Number of comments per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "size": {
+                  "type": "integer"
+                },
+                "post": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "comments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "author": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "host": {
+                            "type": "string"
+                          },
+                          "displayName": {
+                            "type": "string"
+                          },
+                          "github": {
+                            "type": "string"
+                          },
+                          "profileImage": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "comment": {
+                        "type": "string"
+                      },
+                      "contentType": {
+                        "type": "string"
+                      },
+                      "published": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "isLikedByCurrentUser": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
         "/api/restricted": {
           "get": {
             "tags": ["Posts"],

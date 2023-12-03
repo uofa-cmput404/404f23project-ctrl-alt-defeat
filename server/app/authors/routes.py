@@ -417,8 +417,6 @@ def get_post_comments(author_id, post_id):
     comment_author_id = request.args.get('comment_author_id')
     page = request.args.get('page')
     size = request.args.get('size')
-    if not comment_author_id:
-        return jsonify({'comments': []})
 
     try:
         
@@ -480,7 +478,7 @@ def get_post_comments(author_id, post_id):
                 'isLikedByCurrentUser': comment['islikedbycurrentuser']
             } for comment in comment_info
         ]
-        comments_total = {"type":"comments","page":page, "size":size, "post":request.url_root+'api/authors/' + author_id+'/posts/' + post_id, "id": post_id, 'comments': comments_list}
+        comments_total = {"type":"comments","page":page, "size":size, "post":request.url_root+'api/authors/' + author_id+'/posts/' + post_id, "id": post_id, 'items': comments_list}
         print(comments_total)
         return jsonify(comments_total)
 
