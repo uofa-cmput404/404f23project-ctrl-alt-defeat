@@ -61,6 +61,7 @@ def get_authors():
     except Exception as e:
         print("Error getting authors: ", e)
         data = "error"
+        raise
     
     print("data here")
     return jsonify(data)
@@ -95,6 +96,7 @@ def get_author(author_id):
     except Exception as e:
         print("Error getting authors: ", e)
         data = "error"
+        raise
     
     return jsonify(data)
 
@@ -143,7 +145,8 @@ def update_username():
 
         return jsonify({'message': 'Username updated successfully'})
     except Exception as e:
-        return jsonify({'error': 'An error occurred while updating the username.'})
+        raise
+        # return jsonify({'error': 'An error occurred while updating the username.'})
     finally:
         conn.close()
 
@@ -282,6 +285,7 @@ def get_liked_posts(author_id, post_id):
     except Exception as e:
         print("Getting likes error: ", e)
         data = "error"
+        raise
     
     return jsonify(data)
 

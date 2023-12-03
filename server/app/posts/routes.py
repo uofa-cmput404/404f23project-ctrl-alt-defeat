@@ -15,6 +15,7 @@ import requests
 import uuid
 import io,base64
 from .. import basic_auth
+import app.utils.remote_funcs as rf
 
 @bp.route("/posts/restricted", methods=["GET"])
 def get_restricted_users():    
@@ -229,6 +230,83 @@ def get_my_posts():
 
     return jsonify(data) # data
 
+# # Grabs posts that were sent from an author's inbox
+# @bp.route('/posts', methods=['GET'])
+# @basic_auth.login_required
+# def index():
+#     print("index")
+#     data = []
+#     try:
+#         # Retrieve data from the request's JSON body
+#         author_id = request.args.get('author_id')        
+#         # print(author_id)
+#         conn, curr = get_db_connection()
+        
+#         # Get all the posts from people who I'm following + posts who are public + posts that are mine
+#         # Do not include posts that I'm restricted from
+#         query = "SELECT * FROM inbox_items " \
+#                 "WHERE recipient_id = %s " \
+#                 "AND type = 'Post' "
+        
+#         curr.execute(query, (author_id,))
+#         row = curr.fetchall()                                
+#         posts = [dict(i) for i in row]        
+        
+#         payload = list()        
+
+#         # posts.author_id, username, posts.post_id, date_posted, title, content_type, content, image_id, visibility
+#         for post in posts:
+#             if post['sender_host'] == 'https://cmput-average-21-b54788720538.herokuapp.com/':
+#                 try:                    
+#                     new_item = rf.get_post('https://cmput-average-21-b54788720538.herokuapp.com/api/', post['sender_id'], post['object_id'], 'CtrlAltDefeat', 'string')
+#                     payload.append(new_item)
+
+#                 except Exception as e:
+#                     print("Api call error")
+#                     print(e)
+#                     pass # Skip if it somehow does not work
+
+#             elif post['sender_host'] == 'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/':
+#                 try:                    
+#                     new_item = rf.get_post('https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/', post['sender_id'], post['object_id'], 'cross-server', 'password')                    
+#                     payload.append(new_item)
+
+#                 except Exception as e:
+#                     print("Api call error")
+#                     print(e)
+#                     pass # Skip if it somehow does not work
+#             else:                          
+#                 query = "SELECT posts.*, username FROM posts " \
+#                         "JOIN authors " \
+#                         "on posts.author_id = authors.author_id " \
+#                         "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  %s) " \
+#                         f"WHERE post_id = %s"
+
+#                 print("checking", post["object_id"])
+#                 curr.execute(query, (post["recipient_id"], post["object_id"] ))
+
+#                 row = curr.fetchone()        
+#                 print(row)        
+
+#                 # If we can't find it anywhere else then the post has been deleted
+#                 if row is None:
+#                     query = "DELETE FROM inbox_items " \
+#                             "WHERE object_id = %s"
+#                     print("deleting",post["object_id"])
+#                     curr.execute(query, (post["object_id"],))
+#                     conn.commit()
+#                 else: 
+#                     local_result = dict(row)                    
+#                     payload.append(local_result)
+
+#         data = payload        
+
+#     except Exception as e:
+#         print(e)
+#         data = str(e)
+
+#     return jsonify(data) # data
+
 @bp.route('/posts', methods=['GET'])
 @basic_auth.login_required
 def index():
@@ -348,6 +426,7 @@ def get_image(author_id, post_id):
         print(final_message)
     except Exception as e:
         print(e)
+        raise
     finally:
         conn.close()
         return final_message
@@ -416,6 +495,31 @@ def edit_post(author_id, post_id):
 @bp.route('/test/')
 def categories():
     return "Test route for /posts"
+
+# (LOCAL) Call this instead for getting individual posts in the front end
+@bp.route("/authors/<author_id>/posts/<post_id>/display", methods=["GET"])
+def get_post_display(author_id, post_id):   
+    print(request.root_url + "api/authors/" + author_id + "/posts/" + post_id) 
+    data = requests.get(request.root_url + "api/authors/" + author_id + "/posts/" + post_id)
+    
+    if data.status_code == 404: # If post not found, try remote posts
+        try:
+            data = requests.get("https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com" + "/authors/" + author_id + "/posts/" + post_id, auth=("cross-server", "password"))
+            
+            if data.status_code == 200:
+                return data.json()
+        except Exception as e:
+            print(e)
+        
+        try:
+            data = requests.get("https://cmput-average-21-b54788720538.herokuapp.com/api" + "/authors/" + author_id + "/posts/" + post_id, auth=("CtrlAltDefeat", "string"))
+            
+            if data.status_code == 200:
+                return data.json()
+        except Exception as e:
+            print(e)
+
+    return data.json() if data.status_code == 200 else abort(404)
 
 # (REMOTE) 
 @bp.route("/authors/<author_id>/posts/<post_id>", methods=["GET"])
@@ -499,6 +603,7 @@ def get_post(author_id, post_id):
     except Exception as e:
         print(e)
         data = e
+        raise
     
     return jsonify(data) 
 
@@ -529,6 +634,9 @@ def get_posts(author_id):
         curr.execute(query, (author_id, size, offset))
         row = curr.fetchall()                                        
         posts = [dict(i) for i in row]    
+
+        if len(posts) == 0:
+            abort(404, "Post not found")
 
         payload = dict()
         payload["type"] = "posts"
@@ -594,9 +702,11 @@ def get_posts(author_id):
     except IndexError as e:
         print(e)
         data = "invalid"
+        raise
 
     except Exception as e:
         print(e)
         data = "error"
+        raise
     
     return jsonify(data)
