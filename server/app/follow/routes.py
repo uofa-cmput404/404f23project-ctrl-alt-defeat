@@ -133,7 +133,7 @@ def get_follow_requests():
                     'username': remote_user_info['displayName']
                 })
         elif host == 'https://cmput-average-21-b54788720538.herokuapp.com/api':
-            print('tian', author_send)
+            print('21', author_send)
             remote_user_info = get_remote_author_info(
                 author_send,
                 host,
@@ -146,8 +146,20 @@ def get_follow_requests():
                     'username': remote_user_info['displayName']
                 })
 
-        elif host == 'team3':
-            pass
+        elif host == 'https://chimp-chat-1e0cca1cc8ce.herokuapp.com/':
+            print('monkey', author_send)
+            host = host.rstrip('/') #strip last slash
+            remote_user_info = get_remote_author_info(
+                author_send,
+                host,
+                username='node-ctrl-alt-defeat',
+                password='chimpchatapi'
+            )
+            if remote_user_info:
+                follow_requests_list.append({
+                    'id': remote_user_info['id'].split('/')[-1],
+                    'username': remote_user_info['displayName']
+                })
 
     print(follow_requests_list)
     return jsonify({'followRequests': follow_requests_list})

@@ -58,7 +58,7 @@ function SearchPage() {
                 host: 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/',
                 displayName: username,
                 github: null,
-                profileImage: null,
+                profileImage: null
               },
               object: {
                 type: 'author',
@@ -67,7 +67,7 @@ function SearchPage() {
                 displayName: displayName,
                 url: `${host}authors/${receiveAuthorId}`,
                 github: null,
-                profileImage: null,
+                profileImage: null
               }
             };
           } else if (host === 'https://cmput-average-21-b54788720538.herokuapp.com/api') {
@@ -95,6 +95,31 @@ function SearchPage() {
                   github: null,
                   profileImage: null
                 }
+              }
+            };
+          } else if (host === 'https://chimp-chat-1e0cca1cc8ce.herokuapp.com/') {
+            apiUrl = `https://chimp-chat-1e0cca1cc8ce.herokuapp.com/authors/${receiveAuthorId}/inbox/`;
+            creds = 'Basic ' + btoa('node-ctrl-alt-defeat:chimpchatapi');
+            object = {
+              type: 'Follow',
+              summary: 'Follow Request',
+              actor: {
+                type: 'author',
+                id: `https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/authors/${authorId}`,
+                url: `https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/authors/${authorId}`,
+                host: 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/',
+                displayName: username,
+                github: null,
+                profileImage: null
+              },
+              object: {
+                type: 'author',
+                id: `${host}authors/${receiveAuthorId}`,
+                host: host,
+                displayName: displayName,
+                url: `${host}authors/${receiveAuthorId}`,
+                github: null,
+                profileImage: null
               }
             };
           } else {
