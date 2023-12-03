@@ -41,7 +41,7 @@ CREATE TABLE posts (
     content_type TEXT NOT NULL DEFAULT 'text/plain',
     content TEXT NOT NULL,
     image_id TEXT,
-    visibility TEXT NOT NULL DEFAULT 'public',
+    visibility TEXT NOT NULL DEFAULT 'PUBLIC',
     FOREIGN KEY (author_id) REFERENCES authors(author_id) ON DELETE CASCADE
 );
 
