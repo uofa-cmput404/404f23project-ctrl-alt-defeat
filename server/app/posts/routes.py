@@ -470,7 +470,7 @@ def get_post(author_id, post_id):
         # We don't have these rn
         item["categories"] = []
         item["count"] = 0
-        item["comments"] = None
+        item["comments"] = request.root_url + "api/authors/" + post["author_id"] + "/posts/" + post["post_id"] + "/comments"
         item["commentsSrc"] = None
 
         # input_datetime = datetime.strptime(post["date_posted"], "%Y-%m-%d %H:%M:%S")
@@ -567,7 +567,7 @@ def get_posts(author_id):
 
             # We don't have these rn
             item["categories"] = []
-            item["comments"] = None
+            item["comments"] = request.root_url + "api/authors/" + post["author_id"] + "/posts/" + post["post_id"] + "/comments"
             item["count"] = 0
             item["commentsSrc"] = None
 
