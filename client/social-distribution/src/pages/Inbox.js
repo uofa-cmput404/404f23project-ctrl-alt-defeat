@@ -33,14 +33,8 @@ function Inbox() {
                 // Handle the successful response here
                 let responseData = response.data.items
                 for (let i = 0; i < responseData.length; i++) {
-                    let url_list = responseData[i]["object"].split("/");
-                    let author_index = url_list.findIndex(e => e === "authors");
-                    let post_index = url_list.findIndex(e => e === "posts");
-                    
-                    author_index++;
-                    post_index++;
 
-                    responseData[i]["url"] = "http://localhost:3000" + "/authors/" + url_list[author_index] + "/posts/" + url_list[post_index] 
+                    responseData[i]["url"] = "http://localhost:3000" + "/authors/" + author_id + "/posts/" + responseData[i]["post_id"] 
                 }
                 console.log(response.data.items);
                 setInboxItems(response.data.items);

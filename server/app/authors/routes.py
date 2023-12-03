@@ -383,6 +383,51 @@ def send(author_id):
 
     return jsonify(data)
 
+# MAKE POSTS
+@bp.route('/authors/<author_id>/inbox', methods=['GET'])
+def get_inbox_items(author_id):
+    data = {}
+
+    conn, cur = get_db_connection()
+    data["type"] = "inbox"
+    data["author"] = request.root_url + "api/authors/" + author_id
+    data["items"] = []
+    
+    try:
+        query = "SELECT * FROM inbox_items "\
+                "WHERE recipient_id = %s " \
+                "AND sender_id != %s"
+        
+        cur.execute(query, (author_id, author_id))
+        row = cur.fetchall()
+        
+        inbox_items = [dict(i) for i in row]
+
+        for item in inbox_items:
+            
+            if item["type"] == "Like":
+                data_item = dict()                
+                data_item["type"] = item["type"]
+                data_item["author"] = item["sender_id"]
+                data_item["displayName"] = item["sender_display_name"]
+                data_item["summary"] =  item["sender_display_name"] + " liked your post."
+
+                query = "SELECT * FROM likes " \
+                        "WHERE like_id = %s "
+                
+                cur.execute(query, (item["object_id"],))
+                row = dict(cur.fetchone())
+                
+                data_item["post_id"] = row["post_id"]
+                data["items"].append(data_item)
+
+    except Exception as e:
+
+        print(e)
+        data = str(e)
+
+    return jsonify(data)  # data
+
 @bp.route('/authors/<author_id>/inbox/unlike', methods=['DELETE'])
 # DELETE LIKE ON A POST
 def delete_like(author_id):

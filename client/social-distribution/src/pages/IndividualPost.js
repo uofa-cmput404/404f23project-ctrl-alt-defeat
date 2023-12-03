@@ -77,7 +77,9 @@ export default function IndividualPost() {;
     
     return (
         <div style={styles.container}>
-            <button class="btn btn-secondary" style={{width: '20vw'}} onClick={() => navigate("/homepage")}>Back to Homepage</button>
+            <a href="javascript:history.back()">
+                <button class="btn btn-secondary" style={{width: '20vw'}}>Back</button>
+            </a>
             { !fetchDone ?
                         <div class="spinner-border" role="status">
                             <span class="sr-only"></span>
