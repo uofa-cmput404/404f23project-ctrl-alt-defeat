@@ -275,6 +275,17 @@ def index():
                     print("Api call error")
                     print(e)
                     pass # Skip if it somehow does not work
+            
+            elif post['sender_host'] == 'https://chimp-chat-1e0cca1cc8ce.herokuapp.com/':
+                try:                    
+                    new_item = rf.get_post('https://chimp-chat-1e0cca1cc8ce.herokuapp.com/api/', post['sender_id'], post['object_id'], 'cross-server', 'password')                    
+                    payload.append(new_item)
+
+                except Exception as e:
+                    print("Api call error")
+                    print(e)
+                    pass # Skip if it somehow does not work
+
             else:                          
                 query = "SELECT posts.*, username FROM posts " \
                         "JOIN authors " \
