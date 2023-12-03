@@ -20,7 +20,7 @@ function LoginPage({ isAuthenticated, updateAuthStatus, updateUserAndAuthorId })
       password: password.toLowerCase(), 
     };
   
-    fetch('http://localhost:5000/api/authors/login', {
+    fetch(`${process.env.REACT_APP_API_HOSTNAME}/api/authors/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ function LoginPage({ isAuthenticated, updateAuthStatus, updateUserAndAuthorId })
             </div>            
             <button type="submit"  style={{width: "100%", marginTop: 10}} class="btn btn-primary" onClick={(e) => handleLogin(e)}>Submit</button>
           </form>
-            <small style={{marginTop: 10}}x class="form-text text-muted">Don't have an account yet? <a style={{textDecoration: "none"}} href='http://localhost:3000/register'>Register</a></small>        
+            <small style={{marginTop: 10}}x class="form-text text-muted">Don't have an account yet? <a style={{textDecoration: "none"}} href={"/register"}>Register</a></small>        
             </center>
         </div>
         

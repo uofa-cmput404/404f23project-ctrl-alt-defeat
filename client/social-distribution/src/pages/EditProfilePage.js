@@ -8,7 +8,7 @@ function EditProfilePage() {
   const [GithubName, setGithubName] = useState('');
   const {username, authorId} = useContext(UserContext);    
   const [newUsername, setNewUsername] = useState(username);
-  const githubIdLink = 'http://127.0.0.1:5000/api/authors/github/' + authorId;     
+  const githubIdLink = `${process.env.REACT_APP_API_HOSTNAME}/api/authors/github/` + authorId;     
 
   const fetchGithubUsername = async () => {        
     try {
@@ -43,7 +43,7 @@ function EditProfilePage() {
 
 
     const handleGithubUpdate = async () => {
-      axios.post('http://localhost:5000/api/authors/github', {
+      axios.post(`${process.env.REACT_APP_API_HOSTNAME}/api/authors/github`, {
         
           author_id: authorId,
           github: GithubName
@@ -61,7 +61,7 @@ function EditProfilePage() {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/authors/update_username', {
+      const response = await fetch(`${process.env.REACT_APP_API_HOSTNAME}/api/authors/update_username`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ function EditProfilePage() {
           return;
         }
     
-        const response = await fetch('http://localhost:5000/api/authors/update_password', {
+        const response = await fetch(`${process.env.REACT_APP_API_HOSTNAME}/api/authors/update_password`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -107,7 +107,7 @@ function getContentAsElements(content_type, content){
 
             <div><small class="text-muted">{props.item.date_posted}</small></div>
             <div><small class="text-muted">Visibility: {props.item.visibility}</small></div>
-            {props.item.visibility !== "private" && <a href={"http://localhost:3000/authors/" + props.item.author_id + "/posts/" + props.item.post_id}>{'http://127.0.0.1:3000/authors/'+ props.item.author_id + "/posts/" + props.item.post_id}</a>}
+            {props.item.visibility !== "private" && <a href={"/authors/" + props.item.author_id + "/posts/" + props.item.post_id}>{window.location.href + '/authors/'+ props.item.author_id + "/posts/" + props.item.post_id}</a>}
         </div>
         <hr/>
 

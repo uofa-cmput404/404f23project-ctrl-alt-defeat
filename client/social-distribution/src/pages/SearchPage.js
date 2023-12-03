@@ -16,7 +16,7 @@ function SearchPage() {
 
     const handleFollowRequest = async (recieveAuthorId) => {
       try {
-        const response = await fetch('http://localhost:5000/api/follow/follow_request', {
+        const response = await fetch(`${process.env.REACT_APP_API_HOSTNAME}/api/follow/follow_request`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ function SearchPage() {
   
     const handleUnfollow = async (unfollowUserId) => {
       try {
-        const response = await fetch('http://localhost:5000/api/follow/unfollow', {
+        const response = await fetch(`${process.env.REACT_APP_API_HOSTNAME}/api/follow/unfollow`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

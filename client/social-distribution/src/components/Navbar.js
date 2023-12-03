@@ -23,7 +23,7 @@ function Navbar() {
     const handleSearch = async (event) => {
       event.preventDefault();
       try {
-        const localResponse = await fetch(`http://localhost:5000/api/follow/usersearch?query=${searchQuery}`);
+        const localResponse = await fetch(`${process.env.REACT_APP_API_HOSTNAME}/api/follow/usersearch?query=${searchQuery}`);
         if (!localResponse.ok) {
           console.error('Local search failed');
           return;
