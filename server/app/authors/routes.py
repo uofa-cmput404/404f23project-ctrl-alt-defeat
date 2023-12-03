@@ -418,6 +418,9 @@ def get_post_comments(author_id, post_id):
     page = request.args.get('page')
     size = request.args.get('size')
 
+    if not comment_author_id:
+        comment_author_id = author_id
+
     try:
         
         conn, cursor = get_db_connection()
