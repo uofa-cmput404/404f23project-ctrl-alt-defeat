@@ -771,7 +771,6 @@ def share_post(post_id):
         request_data = request.get_json()
         share_option = request_data.get('share_option')  # 'public' or 'friends-only'
 
-        # Ensure that loginUser_id is provided
         if not loginUser_id:
             return jsonify({"error": "Login user ID is required"}), 400
 
@@ -783,7 +782,14 @@ def share_post(post_id):
         if not original_post:
             return jsonify({"error": "Original post not found"}), 404
 
-        # Determine new post visibility based on share option
+        # Fetch the sender's display name
+        curr.execute("SELECT username FROM authors WHERE author_id = %s", (loginUser_id,))
+        sender = curr.fetchone()
+        if not sender:
+            return jsonify({"error": "Sender not found"}), 404
+        sender_display_name = sender['username']
+
+        # Determine new post visibility
         new_visibility = 'public' if share_option == 'public' else 'friends-only'
 
         # Create a new post with the same content but different visibility
@@ -794,6 +800,13 @@ def share_post(post_id):
         """, (new_post_id, loginUser_id, original_post['title'], original_post['content_type'], 
               original_post['content'], original_post['image_id'], new_visibility))
 
+        # Insert into inbox_items
+        inbox_item_id = str(uuid.uuid4())
+        curr.execute("""
+            INSERT INTO inbox_items (inbox_item_id, sender_id, sender_display_name, sender_host, recipient_id, object_id, type)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (inbox_item_id, loginUser_id, sender_display_name, request.url_root, 'null', new_post_id, 'share'))
+              
         conn.commit()
 
         return jsonify({"message": "Post shared successfully", "new_post_id": new_post_id}), 201
