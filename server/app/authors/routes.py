@@ -611,6 +611,10 @@ def send_comments(author_id, post_id):
         status = dict(cur.fetchone())['status']
         if author_id == comment_author_id:
             status = 'private'
+
+        if comment_author_id == None:
+            status = "public"
+
         print(status)
         query = "INSERT INTO comments " \
                 "(comment_id, comment_author_id, " \

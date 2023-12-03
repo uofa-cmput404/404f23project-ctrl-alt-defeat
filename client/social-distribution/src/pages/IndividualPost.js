@@ -21,6 +21,7 @@ export default function IndividualPost() {;
     const [username, setUsername] = useState("");
     const navigate = useNavigate();
     let { post_id, author_id } = useParams();
+    const [comments, setComments] = useState([]);
     const [fetchDone, setFetchDone] = useState(false);
 
     const styles = {
@@ -42,6 +43,9 @@ export default function IndividualPost() {;
                 
                 setPostSelected(response.data);                                   
                 setUsername(response.data.author.displayName);
+                
+                fetchComments();
+
                 })
                 .catch(error => {
                 // Handle any errors that occur during the request
@@ -54,6 +58,28 @@ export default function IndividualPost() {;
             console.error('Error:', error);
           }
     }
+
+    const fetchComments = async () => {
+        try {
+            // Make the GET request using Axios
+                axios.get(postsUrl + "authors/" + author_id + "/posts/" + post_id + "/comments")
+                .then(response => {
+                // Handle the successful response here
+                
+                setComments(response.data.items)
+                })
+                .catch(error => {
+                // Handle any errors that occur during the request
+                console.error('Error:', error);
+ 
+                }).finally(() => {
+                    setFetchDone(true);
+                });
+          } catch (error) {
+            console.error('Error:', error);
+          }
+    }
+
     useEffect(() => {
         fetchData();        
     }, []);
@@ -99,7 +125,16 @@ export default function IndividualPost() {;
                         <div>{get_content_as_elements(postSelected.contentType,postSelected.content)}</div>                
                         <hr/>
                         
-                        <h4>Comments:</h4>
+                        <h6>Comments:</h6>                        
+                        <div>
+                            {
+                                comments.length && comments.map((e) => {
+                                    return <div style={{display: "flex"}}>
+                                        <b style={{minWidth: "100px"}}>{e.author.displayName}:</b><div style={{marginLeft: "20px"}}/>{e.comment}
+                                        </div>                
+                                })
+                            }
+                        </div>
                     </div>
                     : <h1>Post not found</h1> )
                 }
