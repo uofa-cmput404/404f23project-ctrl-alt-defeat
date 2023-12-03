@@ -803,17 +803,24 @@ def share_post(post_id):
         """, (new_post_id, loginUser_id, original_post['title'], original_post['content_type'], 
               original_post['content'], original_post['image_id'], new_visibility))
 
-        # Get list of friends
-        curr.execute("SELECT author_following FROM friends WHERE author_followee = %s AND host = 'local'", (loginUser_id,))
-        friends = curr.fetchall()
+        # Determine recipients based on share_option
+        if share_option == 'PUBLIC':
+            # Fetch all authors
+            curr.execute("SELECT author_id FROM authors")
+            recipients = curr.fetchall()
+        else:
+            # Fetch only friends
+            curr.execute("SELECT author_following FROM friends WHERE author_followee = %s AND host = 'local'", (loginUser_id,))
+            recipients = curr.fetchall()
 
-        # Insert into inbox_items for each friend
-        for friend in friends:
+        # Insert into inbox_items for each recipient
+        for recipient in recipients:
+            recipient_id = recipient['author_following'] if share_option == 'FRIENDS' else recipient['author_id']
             inbox_item_id = str(uuid.uuid4())
             curr.execute("""
                 INSERT INTO inbox_items (inbox_item_id, sender_id, sender_display_name, sender_host, recipient_id, object_id, type)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (inbox_item_id, loginUser_id, sender_display_name, request.url_root, friend['author_following'], new_post_id, 'share'))
+            """, (inbox_item_id, loginUser_id, sender_display_name, request.url_root, recipient_id, new_post_id, 'share'))
 
         conn.commit()
 
@@ -825,4 +832,3 @@ def share_post(post_id):
     finally:
         if conn:
             conn.close()
-
