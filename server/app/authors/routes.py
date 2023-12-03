@@ -9,6 +9,8 @@ from flask_bcrypt import Bcrypt
 from flask_bcrypt import check_password_hash
 from flask_bcrypt import generate_password_hash
 import uuid
+import requests
+import datetime
 
 
 
@@ -285,6 +287,7 @@ def get_liked_posts(author_id, post_id):
 @bp.route('/authors/<author_id>/inbox', methods=['POST'])
 def send(author_id):
     try:
+        data = ""
         request_data = request.get_json()
         message_type = request_data["type"]
 
@@ -355,10 +358,14 @@ def send(author_id):
             data = "follow sent"
 
         elif message_type == "post":
+            #post = request_data["post"][""]
             pass
 
         elif message_type == "comment":
-            pass
+            raise(Exception("comment not implemented"))
+
+        else:
+            raise(Exception("'type' must be 'post', 'comment', 'Like', or 'Follow'"))
 
     except Exception as e:
         print("send error: ", e)
