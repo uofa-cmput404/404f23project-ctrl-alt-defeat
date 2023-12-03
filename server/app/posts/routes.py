@@ -256,7 +256,7 @@ def index():
 
         # posts.author_id, username, posts.post_id, date_posted, title, content_type, content, image_id, visibility
         for post in posts:
-            if post['sender_host'] == 'https://cmput-average-21-b54788720538.herokuapp.com/':
+            if post['sender_host'] == 'https://cmput-average-21-b54788720538.herokuapp.com/api':
                 try:                    
                     new_item = rf.get_post('https://cmput-average-21-b54788720538.herokuapp.com/api/', post['sender_id'], post['object_id'], 'CtrlAltDefeat', 'string')
                     payload.append(new_item)
