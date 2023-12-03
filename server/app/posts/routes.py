@@ -230,118 +230,118 @@ def get_my_posts():
 
     return jsonify(data) # data
 
-# # Grabs posts that were sent from an author's inbox
-# @bp.route('/posts', methods=['GET'])
-# @basic_auth.login_required
-# def index():
-#     print("index")
-#     data = []
-#     try:
-#         # Retrieve data from the request's JSON body
-#         author_id = request.args.get('author_id')        
-#         # print(author_id)
-#         conn, curr = get_db_connection()
-        
-#         # Get all the posts from people who I'm following + posts who are public + posts that are mine
-#         # Do not include posts that I'm restricted from
-#         query = "SELECT * FROM inbox_items " \
-#                 "WHERE recipient_id = %s " \
-#                 "AND type = 'Post' "
-        
-#         curr.execute(query, (author_id,))
-#         row = curr.fetchall()                                
-#         posts = [dict(i) for i in row]        
-        
-#         payload = list()        
-
-#         # posts.author_id, username, posts.post_id, date_posted, title, content_type, content, image_id, visibility
-#         for post in posts:
-#             if post['sender_host'] == 'https://cmput-average-21-b54788720538.herokuapp.com/':
-#                 try:                    
-#                     new_item = rf.get_post('https://cmput-average-21-b54788720538.herokuapp.com/api/', post['sender_id'], post['object_id'], 'CtrlAltDefeat', 'string')
-#                     payload.append(new_item)
-
-#                 except Exception as e:
-#                     print("Api call error")
-#                     print(e)
-#                     pass # Skip if it somehow does not work
-
-#             elif post['sender_host'] == 'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/':
-#                 try:                    
-#                     new_item = rf.get_post('https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/', post['sender_id'], post['object_id'], 'cross-server', 'password')                    
-#                     payload.append(new_item)
-
-#                 except Exception as e:
-#                     print("Api call error")
-#                     print(e)
-#                     pass # Skip if it somehow does not work
-#             else:                          
-#                 query = "SELECT posts.*, username FROM posts " \
-#                         "JOIN authors " \
-#                         "on posts.author_id = authors.author_id " \
-#                         "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  %s) " \
-#                         f"WHERE post_id = %s"
-
-#                 print("checking", post["object_id"])
-#                 curr.execute(query, (post["recipient_id"], post["object_id"] ))
-
-#                 row = curr.fetchone()        
-#                 print(row)        
-
-#                 # If we can't find it anywhere else then the post has been deleted
-#                 if row is None:
-#                     query = "DELETE FROM inbox_items " \
-#                             "WHERE object_id = %s"
-#                     print("deleting",post["object_id"])
-#                     curr.execute(query, (post["object_id"],))
-#                     conn.commit()
-#                 else: 
-#                     local_result = dict(row)                    
-#                     payload.append(local_result)
-
-#         data = payload        
-
-#     except Exception as e:
-#         print(e)
-#         data = str(e)
-
-#     return jsonify(data) # data
-
+# Grabs posts that were sent from an author's inbox
 @bp.route('/posts', methods=['GET'])
 @basic_auth.login_required
 def index():
-    data = ""
+    print("index")
+    data = []
     try:
         # Retrieve data from the request's JSON body
-        print("data")        
         author_id = request.args.get('author_id')        
         # print(author_id)
         conn, curr = get_db_connection()
         
         # Get all the posts from people who I'm following + posts who are public + posts that are mine
         # Do not include posts that I'm restricted from
-        query = "SELECT posts.author_id, username, posts.post_id, date_posted, title, content_type, content, image_id, visibility " \
-                "FROM posts " \
-                "INNER JOIN authors ON posts.author_id = authors.author_id " \
-                "WHERE " \
-                    "(posts.visibility = 'public' " \
-                    "OR posts.author_id = %s " \
-					 "OR(posts.visibility = 'friends-only' AND posts.author_id IN (SELECT author_followee FROM friends WHERE author_following = %s))) " \
-                    "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  %s) " \
-                "ORDER BY date_posted DESC; " 
+        query = "SELECT * FROM inbox_items " \
+                "WHERE recipient_id = %s " \
+                "AND type = 'Post' "
         
-        curr.execute(query, (author_id, author_id, author_id))
+        curr.execute(query, (author_id,))
         row = curr.fetchall()                                
         posts = [dict(i) for i in row]        
+        
+        payload = list()        
 
-        data = posts
-        # data = json.dumps(posts, indent=4, sort_keys=True, default=str)
+        # posts.author_id, username, posts.post_id, date_posted, title, content_type, content, image_id, visibility
+        for post in posts:
+            if post['sender_host'] == 'https://cmput-average-21-b54788720538.herokuapp.com/':
+                try:                    
+                    new_item = rf.get_post('https://cmput-average-21-b54788720538.herokuapp.com/api/', post['sender_id'], post['object_id'], 'CtrlAltDefeat', 'string')
+                    payload.append(new_item)
+
+                except Exception as e:
+                    print("Api call error")
+                    print(e)
+                    pass # Skip if it somehow does not work
+
+            elif post['sender_host'] == 'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/':
+                try:                    
+                    new_item = rf.get_post('https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/', post['sender_id'], post['object_id'], 'cross-server', 'password')                    
+                    payload.append(new_item)
+
+                except Exception as e:
+                    print("Api call error")
+                    print(e)
+                    pass # Skip if it somehow does not work
+            else:                          
+                query = "SELECT posts.*, username FROM posts " \
+                        "JOIN authors " \
+                        "on posts.author_id = authors.author_id " \
+                        "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  %s) " \
+                        f"WHERE post_id = %s"
+
+                print("checking", post["object_id"])
+                curr.execute(query, (post["recipient_id"], post["object_id"] ))
+
+                row = curr.fetchone()        
+                print(row)        
+
+                # If we can't find it anywhere else then the post has been deleted
+                if row is None:
+                    query = "DELETE FROM inbox_items " \
+                            "WHERE object_id = %s"
+                    print("deleting",post["object_id"])
+                    curr.execute(query, (post["object_id"],))
+                    conn.commit()
+                else: 
+                    local_result = dict(row)                    
+                    payload.append(local_result)
+
+        data = payload        
 
     except Exception as e:
         print(e)
         data = str(e)
 
     return jsonify(data) # data
+
+# @bp.route('/posts', methods=['GET'])
+# @basic_auth.login_required
+# def index():
+#     data = ""
+#     try:
+#         # Retrieve data from the request's JSON body
+#         print("data")        
+#         author_id = request.args.get('author_id')        
+#         # print(author_id)
+#         conn, curr = get_db_connection()
+        
+#         # Get all the posts from people who I'm following + posts who are public + posts that are mine
+#         # Do not include posts that I'm restricted from
+#         query = "SELECT posts.author_id, username, posts.post_id, date_posted, title, content_type, content, image_id, visibility " \
+#                 "FROM posts " \
+#                 "INNER JOIN authors ON posts.author_id = authors.author_id " \
+#                 "WHERE " \
+#                     "(posts.visibility = 'public' " \
+#                     "OR posts.author_id = %s " \
+# 					 "OR(posts.visibility = 'friends-only' AND posts.author_id IN (SELECT author_followee FROM friends WHERE author_following = %s))) " \
+#                     "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  %s) " \
+#                 "ORDER BY date_posted DESC; " 
+        
+#         curr.execute(query, (author_id, author_id, author_id))
+#         row = curr.fetchall()                                
+#         posts = [dict(i) for i in row]        
+
+#         data = posts
+#         # data = json.dumps(posts, indent=4, sort_keys=True, default=str)
+
+#     except Exception as e:
+#         print(e)
+#         data = str(e)
+
+#     return jsonify(data) # data
 
 # MAKE POSTS
 @bp.route('/posts/new', methods=['POST'])
