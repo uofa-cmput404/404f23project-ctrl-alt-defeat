@@ -482,7 +482,7 @@ def get_post_comments(author_id, post_id):
             } for comment in comment_info
         ]
         comments_total = {"type":"comments","page":page, "size":size, "post":request.url_root+'api/authors/' + author_id+'/posts/' + post_id, "id": post_id, 'items': comments_list}
-        print(comments_total)
+     
         return jsonify(comments_total)
 
     except Exception as e:
@@ -691,5 +691,37 @@ def get_comments_likes(comment_id):
     except Exception as e:
         print("Getting comments error: ", e)
         return jsonify({'error': str(e)}), 500
+    
+@bp.route('/authors/<author_id>/posts/<post_id>/likes/count', methods=['GET'])
+def get_post_likes_count(author_id, post_id):
+    try:
+        conn, curr = get_db_connection()
+
+        # First, check the visibility of the post
+        visibility_query = "SELECT visibility FROM posts WHERE post_id = %s"
+        curr.execute(visibility_query, (post_id,))
+        visibility_result = curr.fetchone()
+        print("this is visibility_result")
+        print(visibility_result)
+        if not visibility_result:
+            return jsonify({"error": "Post not found"}), 404
+
+        if visibility_result['visibility'] == 'friends-only':
+            # If visibility is 'friends', count the likes
+            likes_query = "SELECT COUNT(*) as count FROM likes WHERE post_id = %s"
+            curr.execute(likes_query, (post_id,))
+            likes_count = curr.fetchone()['count']
+
+            return jsonify({"numLikes": likes_count})
+        else:
+            # If visibility is not 'friends', return null
+            return jsonify({"numLikes": None})
+
+    except Exception as e:
+        print("Error getting post likes count: ", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
 
 
