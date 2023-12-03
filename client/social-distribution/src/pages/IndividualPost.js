@@ -25,8 +25,12 @@ export default function IndividualPost() {;
 
     const styles = {
         container: {
-            margin: "20px"
-        }
+            margin: "20px",                        
+        },
+        postContainer: {
+            marginTop: "20px", 
+            width: "50%"
+        }   
     }
 
     const fetchData = async () => {
@@ -80,20 +84,26 @@ export default function IndividualPost() {;
             <a href="javascript:history.back()">
                 <button class="btn btn-secondary" style={{width: '20vw'}}>Back</button>
             </a>
-            { !fetchDone ?
-                        <div class="spinner-border" role="status">
-                            <span class="sr-only"></span>
-                        </div> :
-             
-             (postSelected !== "invalid" ?
-                <div>
-                    <h3>{postSelected.title}</h3>
-                    <div>Posted by: {username}</div>
-                    <div>{postSelected.published}</div>
-                    <div>{get_content_as_elements(postSelected.contentType,postSelected.content)}</div>                
-                </div>
-                : <h1>Post not found</h1> )
-             }
+            <div style={styles.postListContainer}>
+                { !fetchDone ?
+                            <div class="spinner-border" role="status">
+                                <span class="sr-only"></span>
+                            </div> :
+                
+                (postSelected !== "invalid" ?
+                    <div style={styles.postContainer}>
+                        <h3>{postSelected.title}</h3>
+                        <hr/>
+                        <div>Posted by: {username}</div>
+                        <div>{postSelected.published}</div>
+                        <div>{get_content_as_elements(postSelected.contentType,postSelected.content)}</div>                
+                        <hr/>
+                        
+                        <h4>Comments:</h4>
+                    </div>
+                    : <h1>Post not found</h1> )
+                }
+            </div>
         </div>
     );
 }

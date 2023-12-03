@@ -375,7 +375,14 @@ def send(author_id):
             pass
 
         elif message_type == "comment":
-            pass
+            inbox_query = "INSERT INTO inbox_items " \
+                        "(sender_id, sender_host, " \
+                        "sender_display_name, recipient_id, " \
+                        "inbox_item_id, object_id, type) VALUES " \
+                        "(%s, %s, %s, %s, %s, %s, %s)"
+            
+            curr.execute(inbox_query, (likeAuthorId, request.base_url, displayName, author_id, inboxItemId, likeId, "Like"))
+
 
     except Exception as e:
         print("send error: ", e)
@@ -400,11 +407,9 @@ def get_inbox_items(author_id):
         
         cur.execute(query, (author_id, author_id))
         row = cur.fetchall()
-        
-        inbox_items = [dict(i) for i in row]
+        inbox_items = [dict(i) for i in row]        
 
-        for item in inbox_items:
-            
+        for item in inbox_items:            
             if item["type"] == "Like":
                 data_item = dict()                
                 data_item["type"] = item["type"]
@@ -416,10 +421,34 @@ def get_inbox_items(author_id):
                         "WHERE like_id = %s "
                 
                 cur.execute(query, (item["object_id"],))
-                row = dict(cur.fetchone())
+                row = cur.fetchone()
+
+                if row is not None:
+                    row = dict(row)
                 
-                data_item["post_id"] = row["post_id"]
-                data["items"].append(data_item)
+                    data_item["post_id"] = row["post_id"]
+                    data["items"].append(data_item)
+            
+            if item["type"] == "comment":
+                data_item = dict()                
+                data_item["type"] = item["type"]
+                data_item["author"] = item["sender_id"]
+                data_item["displayName"] = item["sender_display_name"]
+                data_item["summary"] =  item["sender_display_name"] + " commented on your post: "
+
+                query = "SELECT * FROM comments " \
+                        "WHERE comment_id = %s "
+                print("comment", item["object_id"])
+                
+                cur.execute(query, (item["object_id"],))
+                row = cur.fetchone()
+                                
+                if row is not None:
+                    row = dict(row)
+                
+                    data_item["post_id"] = row["post_id"]
+                    data_item["comment"] = row["comment_text"]
+                    data["items"].append(data_item)
 
     except Exception as e:
 
