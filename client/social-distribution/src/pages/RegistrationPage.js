@@ -97,7 +97,7 @@ function Register(props) {
                     </div>            
                     <button type="submit"  style={{width: "100%", marginTop: 10}} class="btn btn-primary" onClick={(e) => handleRegistration(e)}>Submit</button>
                 </form>
-                <small style={{marginTop: 10}} class="form-text text-muted">Have an account already? <a style={{textDecoration: "none"}} href='http://localhost:3000/'>Login</a></small>        
+                <small style={{marginTop: 10}} class="form-text text-muted">Have an account already? <a style={{textDecoration: "none"}} href='/'>Login</a></small>        
             </center>     
         </div>
     </div>
