@@ -725,3 +725,43 @@ def get_post_likes_count(author_id, post_id):
             conn.close()
 
 
+@bp.route('/posts/<post_id>/share', methods=['POST'])
+def share_post(post_id):
+    try:
+        loginUser_id = request.args.get('loginUser_id')
+        request_data = request.get_json()
+        share_option = request_data.get('share_option')  # 'public' or 'friends-only'
+
+        # Ensure that loginUser_id is provided
+        if not loginUser_id:
+            return jsonify({"error": "Login user ID is required"}), 400
+
+        conn, curr = get_db_connection()
+
+        # Fetch the original post data
+        curr.execute("SELECT * FROM posts WHERE post_id = %s", (post_id,))
+        original_post = curr.fetchone()
+        if not original_post:
+            return jsonify({"error": "Original post not found"}), 404
+
+        # Determine new post visibility based on share option
+        new_visibility = 'public' if share_option == 'public' else 'friends-only'
+
+        # Create a new post with the same content but different visibility
+        new_post_id = str(uuid.uuid4())
+        curr.execute("""
+            INSERT INTO posts (post_id, author_id, title, content_type, content, image_id, visibility) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (new_post_id, loginUser_id, original_post['title'], original_post['content_type'], 
+              original_post['content'], original_post['image_id'], new_visibility))
+
+        conn.commit()
+
+        return jsonify({"message": "Post shared successfully", "new_post_id": new_post_id}), 201
+
+    except Exception as e:
+        print("Error sharing post: ", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn:
+            conn.close()

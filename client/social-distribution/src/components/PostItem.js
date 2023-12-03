@@ -180,21 +180,35 @@ function PostItem(props) {
   const handleCommentChange = (e) => {
     setComment(e.target.value);
   };
-  const handleSharePost = async () => {
-    if (props.item.author_id === props.loginUser) return;
 
+  const handleShareToPublic = async () => {
     try {
-
-      // not right for now, wait for inbox
-      const shareApiUrl = `http://127.0.0.1:5000/api/share/post/${props.item.post_id}`;
-      await axios.post(shareApiUrl, { shared_by: props.loginUser });
-
-      // Display notification 
-      alert('Share Success');
+      const shareApiUrl = `http://127.0.0.1:5000/api/posts/${props.item.post_id}/share`;
+      const payload = { share_option: 'public' };
+      await axios.post(shareApiUrl, payload, {
+        params: { loginUser_id: props.loginUser }
+      });
+  
+      alert('Post shared publicly');
     } catch (error) {
-      console.error('Error sharing post:', error);
+      console.error('Error sharing post to public:', error);
     }
   };
+  
+  const handleShareToFriends = async () => {
+    try {
+      const shareApiUrl = `http://127.0.0.1:5000/api/posts/${props.item.post_id}/share`;
+      const payload = { share_option: 'friends-only' };
+      await axios.post(shareApiUrl, payload, {
+        params: { loginUser_id: props.loginUser }
+      });
+  
+      alert('Post shared with friends');
+    } catch (error) {
+      console.error('Error sharing post to friends:', error);
+    }
+  };
+  
 
   //send comment to database
   const handleSendComment = async () => {
@@ -242,12 +256,23 @@ function PostItem(props) {
         </div>
       )}
         </div>
-        {/* Share Button - Visible only if the post is made by another author */}
-        {props.item.author_id !== props.loginUser && (<div style={buttonContainerStyle}>
-        <button style={buttonStyle} onClick={handleSharePost}>
-          share
-        </button>
-        </div>)}
+      {/* Share Button - Visible only if the post is made by another author */}
+      {props.item.author_id !== props.loginUser && (
+          <div style={buttonContainerStyle}>
+              {props.item.visibility === 'friends-only' ? (
+                  // If the post is friends-only, show only the "Share to Friends" button
+                  <button style={buttonStyle} onClick={handleShareToFriends}>Share to Friends</button>
+              ) : (
+                  // If the post is public, show both "Share to Public" and "Share to Friends" buttons
+                  <>
+                      <button style={buttonStyle} onClick={handleShareToPublic}>Share to Public</button>
+                      <button style={{ ...buttonStyle, marginLeft: '10px' }} onClick={handleShareToFriends}>Share to Friends</button>
+                  </>
+              )}
+          </div>
+      )}
+
+
        
 
         <div style={styles.commentBox}>
