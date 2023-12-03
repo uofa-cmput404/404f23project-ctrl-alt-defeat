@@ -417,8 +417,6 @@ def get_post_comments(author_id, post_id):
     comment_author_id = request.args.get('comment_author_id')
     page = request.args.get('page')
     size = request.args.get('size')
-    if not comment_author_id:
-        return jsonify({'comments': []})
 
     try:
         
