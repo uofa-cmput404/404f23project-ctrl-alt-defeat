@@ -87,8 +87,8 @@ def get_author(author_id):
         item = dict()
         item["type"] = "author"
         item["host"] = request.url_root
-        item["id"] = request.url_root + "api/" + res["author_id"]
-        item["url"] = request.url_root + "api/" + res["author_id"]
+        item["id"] = request.url_root + "api/authors/" + res["author_id"]
+        item["url"] = request.url_root + "api/authors/" + res["author_id"]
         item["displayName"] = res["username"]
         item["github"] = "http://github.com/" + res["github"] if res["github"] is not None else None
         item["profileImage"] = None
@@ -210,6 +210,7 @@ def get_posts_liked(author_id):
                                     
             item["author"]["type"] = "author"
             item["author"]["id"] = request.root_url + "api/authors/" + like["author_id"]
+            item["author"]["url"] = request.root_url + "api/authors/" + like["author_id"]
             item["author"]["host"] = request.root_url
             item["author"]["displayName"] = like["username"]
             item["author"]["profileImage"] = None
@@ -254,24 +255,26 @@ def get_liked_posts(author_id, post_id):
     
         data = dict()
         data["count"] = len(res)
-        data["results"] = []
+        data["type"] = "likes"
+        data["items"] = []
         
         for r in res:
             item = dict()
 
             item["@context"] = None # What is this?
-            item["summary"] = r["username"] + " Likes this post"
+            item["summary"] = r["username"] + " Likes your post"
             item["type"] = "Like"
             item["author"] = dict()
             item["author"]["type"] = "author"
             item["author"]["id"] = request.root_url + "api/authors/" + r["author_id"]
+            item["author"]["url"] = request.root_url + "api/authors/" + r["author_id"]
             item["author"]["host"] = request.root_url
             item["author"]["displayName"] = r["username"]
             item["author"]["profileImage"] = None
             item["author"]["github"] = "http://github.com/" + r["github"] if r["github"] is not None else None
 
-            r["object"] = request.root_url + "api/" + author_id + "/posts/" + post_id             
-            data["results"].append(item)
+            item["object"] = request.root_url + "api/" + author_id + "/posts/" + post_id             
+            data["items"].append(item)
 
         # data = json.dumps(data, indent=2)
 
@@ -451,14 +454,18 @@ def delete_like(author_id):
 @bp.route('/authors/<author_id>/posts/<post_id>/comments', methods=['GET'])
 def get_post_comments(author_id, post_id):
     comment_author_id = request.args.get('comment_author_id')
+    page = request.args.get('page')
+    size = request.args.get('size')
+
     if not comment_author_id:
-        return jsonify({'comments': []})
+        comment_author_id = author_id
 
     try:
+        
         conn, cursor = get_db_connection()
         
         query = """
-            SELECT a.username, c.comment_text,c.comment_author_id, c.comment_id, 
+            SELECT a.username, c.comment_text,c.comment_author_id, c.comment_id, c.date_commented, a.github,
                 EXISTS (
                     SELECT 1 FROM comment_likes cl 
                     WHERE cl.comment_id = c.comment_id 
@@ -473,24 +480,49 @@ def get_post_comments(author_id, post_id):
                 (c.status = 'private' AND c.comment_author_id = %s) OR
                 (c.status = 'private' AND c.author_id = %s)
             )
+            LIMIT %s OFFSET %s
         """
+        if page is not None:
+            page = int(page)
+        else: page = 1 # Set default 1
+        
+        if size is not None:
+            size = int(size)
+        else: size = 20 # Set default 20
 
-        cursor.execute(query, (comment_author_id, post_id, author_id, comment_author_id, comment_author_id))
+        offset = (page - 1) * size
+        cursor.execute(query, (comment_author_id, post_id, author_id, comment_author_id, comment_author_id, size, offset))
         comment_info = cursor.fetchall()
         comment_info = [dict(i) for i in comment_info]
-        print(comment_info)
         conn.close()
+
 
         comments_list = [
             {
-                'comment_name': comment['username'],
-                'comment_text': comment['comment_text'], 
-                'comment_id': comment['comment_id'],
-                'comment_author_id': comment['comment_author_id'],
+                "type":"comment",
+                "author":{
+                    "type":"author",
+                    # ID of the Author (UUID)
+                    "id":comment['comment_author_id'],
+                    # url to the authors information
+                    "url":request.url_root + 'api/authors/' + author_id,
+                    "host":request.url_root,
+                    "displayName":comment['username'],
+                    # HATEOS url for Github API
+                    "github": comment['github'],
+                    #set profileImage to None
+                    "profileImage": None
+                },
+                'comment': comment['comment_text'], 
+                "contentType":"text/markdown",
+                "published":comment['date_commented'], 
+                'id': comment['comment_id'],
                 'isLikedByCurrentUser': comment['islikedbycurrentuser']
             } for comment in comment_info
         ]
-        return jsonify({'comments': comments_list})
+        comments_total = {"type":"comments","page":page, "size":size, "post":request.url_root+'api/authors/' + author_id+'/posts/' + post_id, "id": post_id, 'items': comments_list}
+        print(comments_total)
+        return jsonify(comments_total)
 
     except Exception as e:
         print("Getting comments error: ", e)
@@ -507,9 +539,9 @@ def send_comments(author_id, post_id):
     comment_text = request_data["comment_text"]
 
 
-    # Create comment_id ID
-    # TODO: change method of randomization
-    comment_id = str(randrange(0, 100000))
+    # Create comment_id ID with uuid
+    
+    comment_id = str(uuid.uuid4()) 
 
     data = ""
     try:
@@ -517,18 +549,19 @@ def send_comments(author_id, post_id):
 
         #Check if the authors are friends
         check_friends_query = """
-        SELECT CASE WHEN (
-                SELECT COUNT(*) FROM friends 
-                WHERE author_followee = %s AND author_following = %s
-                ) + (
-                SELECT COUNT(*) FROM friends 
-                WHERE author_followee = %s AND author_following = %s
-                ) = 2 THEN 'private'
+            SELECT CASE 
+                WHEN EXISTS (
+                    SELECT 1 FROM friends 
+                    WHERE author_followee = %s AND author_following = %s
+                ) THEN 'private'
                 ELSE 'public'
-        END AS status
+            END AS status
         """
-        cur.execute(check_friends_query, (author_id, comment_author_id, comment_author_id, author_id))
+
+        cur.execute(check_friends_query, (author_id, comment_author_id))
         status = dict(cur.fetchone())['status']
+        if author_id == comment_author_id:
+            status = 'private'
         print(status)
         query = "INSERT INTO comments " \
                 "(comment_id, comment_author_id, " \

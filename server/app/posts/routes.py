@@ -470,7 +470,7 @@ def get_image(author_id, post_id):
     try:
         query = "SELECT content, content_type,visibility from posts WHERE post_id = %s AND author_id = %s"
         curr.execute(query, (post_id, author_id))
-        row = curr.execute(query, (post_id, author_id)).fetchone()
+        row = curr.fetchone()
         if row is None:
             abort(404, "The post with this post_id does not exist.")
         print("Successfully found post.")
@@ -573,21 +573,7 @@ def get_post(author_id, post_id):
                 "AND (visibility = 'public' OR visibility = 'unlisted')"
                 
         curr.execute(query, (post_id, ))
-        row = curr.fetchall()
-        if len(row) == 0:
-            print("not found locally, trying remote")
-            try:
-                print(f"https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/{author_id}/posts/{post_id}")
-                res = requests.get(f"https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/{author_id}/posts/{post_id}", auth=("cross-server", "password"))
-                
-                if res.status_code == 404:
-                    abort(404, "Post not found")       
-                
-                return res.json()
-
-            except Exception as e:
-                print(e)
-                print("Something went wrong")            
+        row = curr.fetchall()            
 
         post = [dict(i) for i in row][0]       
         # print(post) 
@@ -603,11 +589,11 @@ def get_post(author_id, post_id):
 
         item = dict()
         item["type"] = "post"
-        item["id"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
+        item["id"] = request.root_url + "api/authors/" + post["author_id"] + "/posts/" + post["post_id"]
         
         # No idea what these are, skip for now
-        item["source"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
-        item["origin"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
+        item["source"] = request.root_url + "api/authors/" + post["author_id"] + "/posts/" + post["post_id"]
+        item["origin"] = request.root_url + "api/authors/" + post["author_id"] + "/posts/" + post["post_id"]
         item["description"] = None
         item["contentType"] = post["content_type"]   
         item["content"] = post["content"]        
@@ -616,8 +602,8 @@ def get_post(author_id, post_id):
         author_item = dict()
         author_item["type"] = "author"
         author_item["host"] = request.root_url
-        author_item["id"] = request.root_url + row["author_id"]
-        author_item["url"] = request.root_url + row["author_id"]
+        author_item["id"] = request.root_url + "api/authors/"  + row["author_id"]
+        author_item["url"] = request.root_url + "api/authors/" + row["author_id"]
         author_item["displayName"] = row["username"]
         author_item["github"] = ("https://github.com/" + row["github"]) if row["github"] != None else None
         author_item["profileImage"] = None
@@ -625,8 +611,9 @@ def get_post(author_id, post_id):
         item["author"] = author_item
 
         # We don't have these rn
-        item["categories"] = None
-        item["comments"] = None
+        item["categories"] = []
+        item["count"] = 0
+        item["comments"] = request.root_url + "api/authors/" + post["author_id"] + "/posts/" + post["post_id"] + "/comments"
         item["commentsSrc"] = None
 
         # input_datetime = datetime.strptime(post["date_posted"], "%Y-%m-%d %H:%M:%S")
@@ -634,7 +621,14 @@ def get_post(author_id, post_id):
         # Convert datetime object to ISO 8601 format with UTC offset
         item["published"] = post["date_posted"].strftime("%Y-%m-%d %H:%M:%S") 
 
-        item["visibility"] = post["visibility"].upper()
+        visibility = post["visibility"]
+
+        # Either public or friends only. cant be private
+        if visibility == "public" or visibility == "unlisted":
+            item["visibility"] = "PUBLIC" # both are technically public?
+        else:
+            item["visibility"] = "FRIENDS"
+
         item["unlisted"] = True if post["visibility"] == "unlisted" else False
 
        #  data = json.dumps(item, indent=2)
@@ -643,7 +637,7 @@ def get_post(author_id, post_id):
 
     except IndexError as e:
         print(e)
-        data = "invalid"
+        abort(404, "Post not found")
 
     except Exception as e:
         print(e)
@@ -662,7 +656,7 @@ def get_posts(author_id):
     try:
         query = "SELECT * FROM posts " \
                 "WHERE author_id = %s " \
-                "AND (visibility = 'public') " \
+                "AND visibility != 'private' " \
                 "ORDER BY date_posted LIMIT %s OFFSET %s "
         
         if page is not None:
@@ -680,7 +674,7 @@ def get_posts(author_id):
         posts = [dict(i) for i in row]    
 
         payload = dict()
-        payload["type"] = "authors"
+        payload["type"] = "posts"
         payload["items"] = []
 
         query = "SELECT * FROM authors " \
@@ -692,11 +686,12 @@ def get_posts(author_id):
         for post in posts:
             item = dict()
             item["type"] = "post"
-            item["id"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
+            item["title"] = post["title"]
+            item["id"] = request.root_url + "api/authors/" + post["author_id"] + "/posts/" + post["post_id"]
             
             # No idea what these are, skip for now
-            item["source"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
-            item["origin"] = request.root_url + "authors/" + post["author_id"] + "/posts/" + post["post_id"]
+            item["source"] = request.root_url + "api/authors/" + post["author_id"] + "/posts/" + post["post_id"]
+            item["origin"] = request.root_url + "api/authors/" + post["author_id"] + "/posts/" + post["post_id"]
             item["description"] = None
             item["contentType"] = post["content_type"]        
             item["content"] = post["content"]        
@@ -705,8 +700,8 @@ def get_posts(author_id):
             author_item["type"] = "author"
             author_item["host"] = request.root_url
             
-            author_item["id"] = request.root_url + post["author_id"]
-            author_item["url"] = request.root_url + post["author_id"]
+            author_item["id"] = request.root_url + "api/authors/" + post["author_id"]
+            author_item["url"] = request.root_url + "api/authors/" + post["author_id"]
             author_item["displayName"] = author["username"]
             author_item["github"] = ("https://github.com/" + author["github"]) if author["github"] != None else None
             author_item["profileImage"] = None
@@ -714,8 +709,9 @@ def get_posts(author_id):
             item["author"] = author_item
 
             # We don't have these rn
-            item["categories"] = None
-            item["comments"] = None
+            item["categories"] = []
+            item["comments"] = request.root_url + "api/authors/" + post["author_id"] + "/posts/" + post["post_id"] + "/comments"
+            item["count"] = 0
             item["commentsSrc"] = None
 
             # input_datetime = post["date_posted"].strptime(post["date_posted"], "%Y-%m-%d %H:%M:%S")
@@ -723,7 +719,15 @@ def get_posts(author_id):
             # Convert datetime object to ISO 8601 format with UTC offset
             item["published"] = post["date_posted"].strftime("%Y-%m-%d %H:%M:%S") 
 
-            item["visibility"] = post["visibility"].upper()
+            # if item["visibility"]
+            visibility = post["visibility"]
+
+            # Either public or friends only. cant be private
+            if visibility == "public" or visibility == "unlisted":
+                item["visibility"] = "PUBLIC" # both are technically public?
+            else:
+                item["visibility"] = "FRIENDS"
+
             item["unlisted"] = True if post["visibility"] == "unlisted" else False
 
             payload["items"].append(item)

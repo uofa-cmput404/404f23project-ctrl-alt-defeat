@@ -45,7 +45,10 @@ CREATE TABLE posts (
     FOREIGN KEY (author_id) REFERENCES authors(author_id) ON DELETE CASCADE
 );
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE friends (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     author_followee TEXT NOT NULL,
     author_following TEXT NOT NULL,
     host TEXT NOT NULL
@@ -54,6 +57,7 @@ CREATE TABLE friends (
 );
 
 CREATE TABLE follow_requests (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     author_send TEXT NOT NULL,
     author_receive TEXT NOT NULL,    
     host TEXT DEFAULT 'local' NOT NULL,
