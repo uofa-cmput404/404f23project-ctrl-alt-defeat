@@ -24,6 +24,7 @@ function LoginPage({ isAuthenticated, updateAuthStatus, updateUserAndAuthorId })
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization' : process.env.REACT_APP_AUTHORIZATION
       },
       body: JSON.stringify(loginData),
     })
@@ -127,7 +128,7 @@ function LoginPage({ isAuthenticated, updateAuthStatus, updateUserAndAuthorId })
             </div>            
             <button type="submit"  style={{width: "100%", marginTop: 10}} class="btn btn-primary" onClick={(e) => handleLogin(e)}>Submit</button>
           </form>
-            <small style={{marginTop: 10}}x class="form-text text-muted">Don't have an account yet? <a style={{textDecoration: "none"}} href={"/register"}>Register</a></small>        
+            <small style={{marginTop: 10}}x class="form-text text-muted">Don't have an account yet? <a style={{textDecoration: "none"}} href={"/register"}>Register</a></small>
             </center>
         </div>
         
