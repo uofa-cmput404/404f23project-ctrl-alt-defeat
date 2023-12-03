@@ -252,20 +252,20 @@ function PostItem(props) {
                 onClick={() => toggleLikeComment(comment.id)}
                 style={{ border: 'none', background: 'none', cursor: 'pointer', marginRight: '10px' }}
               >
+                {comment.author.id === props.loginUser && (
+                  <button 
+                    onClick={() => deleteComment(comment.id)}
+                    style={{ border: 'none', background: 'none', cursor: 'pointer' }}
+                  >
+                    Delete
+                  </button>
+                )}
                 <img 
                   src={comment.liked ? likedImgUrl : notLikedImgUrl} 
                   alt="Like" 
                   style={{ width: '24px', height: '24px' }}
                 />
               </button>
-              {comment.author.id === props.loginUser && (
-                <button 
-                  onClick={() => deleteComment(comment.id)}
-                  style={{ border: 'none', background: 'none', cursor: 'pointer' }}
-                >
-                  Delete
-                </button>
-              )}
               
             </div>
           </div>
