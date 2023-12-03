@@ -101,9 +101,9 @@ function PostItem(props) {
       const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
   
       const response = await axios.get(apiUrl, { params });
-      if (response.data && response.data.comments) {
+      if (response.data && response.data.items) {
         // Map through each comment and add a 'liked' property based on the user's like status
-        const updatedComments = response.data.comments.map(comment => ({
+        const updatedComments = response.data.items.map(comment => ({
           ...comment,
           liked: comment.isLikedByCurrentUser 
         }));
@@ -252,20 +252,20 @@ function PostItem(props) {
                 onClick={() => toggleLikeComment(comment.id)}
                 style={{ border: 'none', background: 'none', cursor: 'pointer', marginRight: '10px' }}
               >
+                {comment.author.id === props.loginUser && (
+                  <button 
+                    onClick={() => deleteComment(comment.id)}
+                    style={{ border: 'none', background: 'none', cursor: 'pointer' }}
+                  >
+                    Delete
+                  </button>
+                )}
                 <img 
                   src={comment.liked ? likedImgUrl : notLikedImgUrl} 
                   alt="Like" 
                   style={{ width: '24px', height: '24px' }}
                 />
               </button>
-              {comment.author.id === props.loginUser && (
-                <button 
-                  onClick={() => deleteComment(comment.id)}
-                  style={{ border: 'none', background: 'none', cursor: 'pointer' }}
-                >
-                  Delete
-                </button>
-              )}
               
             </div>
           </div>
