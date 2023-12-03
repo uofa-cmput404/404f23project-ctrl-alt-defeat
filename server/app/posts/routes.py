@@ -530,9 +530,6 @@ def get_posts(author_id):
         row = curr.fetchall()                                        
         posts = [dict(i) for i in row]    
 
-        if len(posts) == 0:
-            abort(404, "Post not found")
-
         payload = dict()
         payload["type"] = "posts"
         payload["items"] = []
