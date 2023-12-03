@@ -14,31 +14,156 @@ function SearchPage() {
         }
     }
 
-    const handleFollowRequest = async (recieveAuthorId) => {
+    const handleFollowRequest = async (receiveAuthorId, displayName, host) => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_HOSTNAME}/api/follow/follow_request`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            author_send: authorId,
-            author_receive: recieveAuthorId, 
-          }),
-        });
-  
-        const data = await response.json();
-  
-        if (response.ok) {
-          if (data.message === 'Already following') {
-            toast.error('Already following');
-          } else if (data.message === 'Follow request already sent') {
-            toast.error('Follow request already sent');
+        if (host === 'local') {
+          const response = await fetch(process.env.REACT_APP_API_HOSTNAME + '/api/follow/follow_request', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              author_send: authorId,
+              author_receive: receiveAuthorId,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            if (data.message === 'Already following') {
+              toast.error('Already following');
+            } else if (data.message === 'Follow request already sent') {
+              toast.error('Follow request already sent');
+            } else {
+              toast.success('Follow Request Sent');
+            }
           } else {
-            toast.success('Follow Request Sent');
+            console.error('Local follow request failed');
           }
         } else {
-          console.error('Follow request failed');
+          let apiUrl;
+          let object;
+          let creds;
+          if (host === 'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/') {
+            apiUrl = `https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/${receiveAuthorId}/inbox`;
+            creds = 'Basic ' + btoa('cross-server:password');
+            object = {
+              type: 'Follow',
+              summary: 'Follow Request',
+              actor: {
+                type: 'author',
+                id: `https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/authors/${authorId}`,
+                url: `https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/authors/${authorId}`,
+                host: 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/',
+                displayName: username,
+                github: null,
+                profileImage: null
+              },
+              object: {
+                type: 'author',
+                id: `${host}authors/${receiveAuthorId}`,
+                host: host,
+                displayName: displayName,
+                url: `${host}authors/${receiveAuthorId}`,
+                github: null,
+                profileImage: null
+              }
+            };
+          } else if (host === 'https://cmput-average-21-b54788720538.herokuapp.com/api') {
+            apiUrl = `https://cmput-average-21-b54788720538.herokuapp.com/api/authors/${receiveAuthorId}/inbox/`;
+            creds = 'Basic ' + btoa('CtrlAltDefeat:string');
+            object = {
+              items: {
+                type: 'Follow',
+                summary: 'Follow Request',
+                actor: {
+                  type: 'author',
+                  id: `https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/authors/${authorId}`,
+                  url: `https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/authors/${authorId}`,
+                  host: 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/',
+                  displayName: username,
+                  github: null,
+                  profileImage: null
+                },
+                object: {
+                  type: 'author',
+                  id: `${host}/authors/${receiveAuthorId}`,
+                  host: host,
+                  displayName: displayName,
+                  url: `${host}/authors/${receiveAuthorId}`,
+                  github: null,
+                  profileImage: null
+                }
+              }
+            };
+          } else if (host === 'https://chimp-chat-1e0cca1cc8ce.herokuapp.com/') {
+            apiUrl = `https://chimp-chat-1e0cca1cc8ce.herokuapp.com/authors/${receiveAuthorId}/inbox/`;
+            creds = 'Basic ' + btoa('node-ctrl-alt-defeat:chimpchatapi');
+            object = {
+              type: 'Follow',
+              summary: 'Follow Request',
+              actor: {
+                type: 'author',
+                id: `https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/authors/${authorId}`,
+                url: `https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/authors/${authorId}`,
+                host: 'https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/',
+                displayName: username,
+                github: null,
+                profileImage: null
+              },
+              object: {
+                type: 'author',
+                id: `${host}authors/${receiveAuthorId}`,
+                host: host,
+                displayName: displayName,
+                url: `${host}authors/${receiveAuthorId}`,
+                github: null,
+                profileImage: null
+              }
+            };
+          } else {
+            console.error('Invalid host:', host);
+            return;
+          }
+
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': creds,
+            },
+            body: JSON.stringify(object),
+          });
+
+          console.log(JSON.stringify(object))
+
+          if (!response.ok) {
+            if (host === 'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/') {
+              if (response.status === 400) {
+                console.log('400');
+                toast.error('Follow request already sent')
+                return;
+              }
+              console.log('not 400');
+            }
+            console.error('Remote follow request failed:', response.statusText);
+            console.log('Response body:', await response.text());
+            return;
+          } else {
+            if (host === 'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/') {
+              toast.success('Follow Request Sent');
+              return;
+            }
+            const data = await response.json();
+            if (data) {
+              toast.success('Follow Request Sent');
+              console.log('Remote follow working');
+              console.log(data);
+            } else {
+                console.error('Response does not contain valid JSON');
+            }
+          }
         }
       } catch (error) {
         console.error('Error:', error);
@@ -82,7 +207,7 @@ function SearchPage() {
                 <div style={{minWidth: 200}}>
                   {user.username}
                 </div>
-                <button onClick={() => handleFollowRequest(user.id)} type="button" class="btn btn-primary">Follow</button>    
+                <button onClick={() => handleFollowRequest(user.id, user.username, user.host)} type="button" class="btn btn-primary">Follow</button>
                 <div style={{marginRight: 10}}/>
                 <button onClick={() => handleUnfollow(user.id)} type="button" class="btn btn-warning">Unfollow</button>                
               </li>

@@ -84,8 +84,8 @@ def get_author(author_id):
         item = dict()
         item["type"] = "author"
         item["host"] = request.url_root
-        item["id"] = request.url_root + "api/" + res["author_id"]
-        item["url"] = request.url_root + "api/" + res["author_id"]
+        item["id"] = request.url_root + "api/authors/" + res["author_id"]
+        item["url"] = request.url_root + "api/authors/" + res["author_id"]
         item["displayName"] = res["username"]
         item["github"] = "http://github.com/" + res["github"] if res["github"] is not None else None
         item["profileImage"] = None
@@ -207,6 +207,7 @@ def get_posts_liked(author_id):
                                     
             item["author"]["type"] = "author"
             item["author"]["id"] = request.root_url + "api/authors/" + like["author_id"]
+            item["author"]["url"] = request.root_url + "api/authors/" + like["author_id"]
             item["author"]["host"] = request.root_url
             item["author"]["displayName"] = like["username"]
             item["author"]["profileImage"] = None
@@ -251,24 +252,26 @@ def get_liked_posts(author_id, post_id):
     
         data = dict()
         data["count"] = len(res)
-        data["results"] = []
+        data["type"] = "likes"
+        data["items"] = []
         
         for r in res:
             item = dict()
 
             item["@context"] = None # What is this?
-            item["summary"] = r["username"] + " Likes this post"
+            item["summary"] = r["username"] + " Likes your post"
             item["type"] = "Like"
             item["author"] = dict()
             item["author"]["type"] = "author"
             item["author"]["id"] = request.root_url + "api/authors/" + r["author_id"]
+            item["author"]["url"] = request.root_url + "api/authors/" + r["author_id"]
             item["author"]["host"] = request.root_url
             item["author"]["displayName"] = r["username"]
             item["author"]["profileImage"] = None
             item["author"]["github"] = "http://github.com/" + r["github"] if r["github"] is not None else None
 
-            r["object"] = request.root_url + "api/" + author_id + "/posts/" + post_id             
-            data["results"].append(item)
+            item["object"] = request.root_url + "api/" + author_id + "/posts/" + post_id             
+            data["items"].append(item)
 
         # data = json.dumps(data, indent=2)
 
