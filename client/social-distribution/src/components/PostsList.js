@@ -77,7 +77,8 @@ function PostsList(props) {
           object: rootUrl + "/authors/" + props.authorId + "/posts/" + postSelected
         }, {
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic Q3RybEFsdERlZmVhdDpmcm9udGVuZA=='
           }
         })
         .then(response => {

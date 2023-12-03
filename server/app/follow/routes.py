@@ -1,5 +1,5 @@
 from . import bp
-from flask import request, g, jsonify
+from flask import request, g, jsonify, abort
 import sqlite3
 from ..dbase import get_db_connection
 import flask
@@ -273,7 +273,8 @@ def get_followers(author_id):
         return jsonify(response_data), 200
     except Exception as e:
         print(e)
-        return jsonify({"error": "Internal Server Error"}), 500
+        abort(500, e)
+        # return jsonify({"error": "Internal Server Error"}), 500
     finally:
         db.close()
 
