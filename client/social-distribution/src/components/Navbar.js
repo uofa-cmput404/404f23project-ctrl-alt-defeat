@@ -53,6 +53,7 @@ function Navbar() {
           host: 'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/',
         }));
         console.log('e1',externalResults1)
+
         // External API 2 - Pagination
         let nextLink = 'https://cmput-average-21-b54788720538.herokuapp.com/api/authors/?page=1&page_size=5';
         let allExternalResults2 = [];
@@ -64,12 +65,10 @@ function Navbar() {
               'Authorization': 'Basic Q3RybEFsdERlZmVhdDpzdHJpbmc=',
             },
           });
-
           if (!externalResponse2.ok) {
             console.error('External search 2 failed');
             return;
           }
-
           const externalData2 = await externalResponse2.json();
           const externalResults2 = externalData2.items.map(item => ({
             id: item.id.match(/\/([^/]+)\/?$/)[1], //stupid slash at the end
@@ -79,15 +78,35 @@ function Navbar() {
 
           // Update the next link for the next iteration
           nextLink = externalData2.next;
-
           allExternalResults2 = [...allExternalResults2, ...externalResults2];
         }
         console.log('e2',allExternalResults2)
+
+        //External API 3
+        const externalResponse3 = await fetch('https://chimp-chat-1e0cca1cc8ce.herokuapp.com/authors/?page=1&size=1000', {
+          headers: {
+            'accept': 'application/json',
+            'Authorization': 'Basic bm9kZS1jdHJsLWFsdC1kZWZlYXQ6Y2hpbXBjaGF0YXBp',
+          },
+        });
+        if (!externalResponse3.ok) {
+          console.error('External search 3 failed');
+          return;
+        }
+        const externalData3 = await externalResponse3.json();
+        const externalResults3 = externalData3.items.map(item => ({
+          id: item.id.split('/').pop(),
+          username: item.displayName,
+          host: 'https://chimp-chat-1e0cca1cc8ce.herokuapp.com/',
+        }));
+        console.log('e3',externalResults3)
+
         const filteredExternalResults1 = externalResults1.filter(user => user.username.toLowerCase().includes(searchQuery.toLowerCase()));
         const filteredExternalResults2 = allExternalResults2.filter(user => user.username.toLowerCase().includes(searchQuery.toLowerCase()));
-
-        const combinedResults = [...localResults, ...filteredExternalResults1, ...filteredExternalResults2];
-        console.log('combined',combinedResults)
+        const filteredExternalResults3 = externalResults3.filter(user => user.username.toLowerCase().includes(searchQuery.toLowerCase()));
+        
+        const combinedResults = [...localResults, ...filteredExternalResults1, ...filteredExternalResults2, ...filteredExternalResults3];
+        console.log('combined', combinedResults)
         navigate('/search', { state: combinedResults });
       } catch (error) {
         console.error('Error:', error);
