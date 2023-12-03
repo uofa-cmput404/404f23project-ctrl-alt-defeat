@@ -239,14 +239,14 @@ def index():
     try:
         # Retrieve data from the request's JSON body
         author_id = request.args.get('author_id')        
-        # print(author_id)
+        print(author_id)
         conn, curr = get_db_connection()
         
         # Get all the posts from people who I'm following + posts who are public + posts that are mine
         # Do not include posts that I'm restricted from
         query = "SELECT * FROM inbox_items " \
                 "WHERE recipient_id = %s " \
-                "AND type = 'Post' "
+                "AND type = 'post' "
         
         curr.execute(query, (author_id,))
         row = curr.fetchall()                                
