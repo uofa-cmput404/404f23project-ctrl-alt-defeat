@@ -184,7 +184,7 @@ function PostItem(props) {
   const handleShareToPublic = async () => {
     try {
       const shareApiUrl = `http://127.0.0.1:5000/api/posts/${props.item.post_id}/share`;
-      const payload = { share_option: 'public' };
+      const payload = { share_option: 'PUBLIC' };
       await axios.post(shareApiUrl, payload, {
         params: { loginUser_id: props.loginUser }
       });
@@ -198,7 +198,7 @@ function PostItem(props) {
   const handleShareToFriends = async () => {
     try {
       const shareApiUrl = `http://127.0.0.1:5000/api/posts/${props.item.post_id}/share`;
-      const payload = { share_option: 'friends-only' };
+      const payload = { share_option: 'FRIENDS' };
       await axios.post(shareApiUrl, payload, {
         params: { loginUser_id: props.loginUser }
       });
@@ -249,7 +249,7 @@ function PostItem(props) {
             : <img style={styles.img} src={notLikedImgUrl} /> 
           
         }
-         {/* Conditionally display number of likes for friends-only posts */}
+         {/* Conditionally display number of likes for friends only posts */}
        {numLikes != 'not show' && (
         <div>
           <span>{numLikes} Likes</span>
@@ -259,8 +259,8 @@ function PostItem(props) {
       {/* Share Button - Visible only if the post is made by another author */}
       {props.item.author_id !== props.loginUser && (
           <div style={buttonContainerStyle}>
-              {props.item.visibility === 'friends-only' ? (
-                  // If the post is friends-only, show only the "Share to Friends" button
+              {props.item.visibility === 'FRIENDS' ? (
+                  // If the post is friends only, show only the "Share to Friends" button
                   <button style={buttonStyle} onClick={handleShareToFriends}>Share to Friends</button>
               ) : (
                   // If the post is public, show both "Share to Public" and "Share to Friends" buttons

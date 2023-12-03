@@ -748,15 +748,15 @@ def get_post_likes_count(author_id, post_id):
         if not visibility_result:
             return jsonify({"error": "Post not found"}), 404
 
-        if visibility_result['visibility'] == 'friends-only':
-            # If visibility is 'friends', count the likes
+        if visibility_result['visibility'] == 'FRIENDS':
+            # If visibility is 'FRIENDS', count the likes
             likes_query = "SELECT COUNT(*) as count FROM likes WHERE post_id = %s"
             curr.execute(likes_query, (post_id,))
             likes_count = curr.fetchone()['count']
 
             return jsonify({"numLikes": likes_count})
         else:
-            # If visibility is not 'friends', return null
+            # If visibility is not 'FRIENDS', return null
             return jsonify({"numLikes": None})
 
     except Exception as e:
@@ -772,7 +772,7 @@ def share_post(post_id):
     try:
         loginUser_id = request.args.get('loginUser_id')
         request_data = request.get_json()
-        share_option = request_data.get('share_option')  # 'public' or 'friends-only'
+        share_option = request_data.get('share_option')  # 'PUBLIC' or 'FRIENDS'
 
         if not loginUser_id:
             return jsonify({"error": "Login user ID is required"}), 400
@@ -793,7 +793,7 @@ def share_post(post_id):
         sender_display_name = sender['username']
 
         # Determine new post visibility
-        new_visibility = 'public' if share_option == 'public' else 'friends-only'
+        new_visibility = 'PUBLIC' if share_option == 'PUBLIC' else 'FRIENDS'
 
         # Create a new post with the same content but different visibility
         new_post_id = str(uuid.uuid4())
@@ -803,13 +803,18 @@ def share_post(post_id):
         """, (new_post_id, loginUser_id, original_post['title'], original_post['content_type'], 
               original_post['content'], original_post['image_id'], new_visibility))
 
-        # Insert into inbox_items
-        inbox_item_id = str(uuid.uuid4())
-        curr.execute("""
-            INSERT INTO inbox_items (inbox_item_id, sender_id, sender_display_name, sender_host, recipient_id, object_id, type)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (inbox_item_id, loginUser_id, sender_display_name, request.url_root, 'null', new_post_id, 'share'))
-              
+        # Get list of friends
+        curr.execute("SELECT author_following FROM friends WHERE author_followee = %s AND host = 'local'", (loginUser_id,))
+        friends = curr.fetchall()
+
+        # Insert into inbox_items for each friend
+        for friend in friends:
+            inbox_item_id = str(uuid.uuid4())
+            curr.execute("""
+                INSERT INTO inbox_items (inbox_item_id, sender_id, sender_display_name, sender_host, recipient_id, object_id, type)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (inbox_item_id, loginUser_id, sender_display_name, request.url_root, friend['author_following'], new_post_id, 'share'))
+
         conn.commit()
 
         return jsonify({"message": "Post shared successfully", "new_post_id": new_post_id}), 201
@@ -820,3 +825,4 @@ def share_post(post_id):
     finally:
         if conn:
             conn.close()
+
