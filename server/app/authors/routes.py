@@ -476,7 +476,7 @@ def get_post_comments(author_id, post_id):
             WHERE c.post_id = %s
             AND c.author_id = %s
             AND (
-                (c.status = 'public') OR
+                (c.status = 'PUBLIC') OR
                 (c.status = 'private' AND c.comment_author_id = %s) OR
                 (c.status = 'private' AND c.author_id = %s)
             )
@@ -554,7 +554,7 @@ def send_comments(author_id, post_id):
                     SELECT 1 FROM friends 
                     WHERE author_followee = %s AND author_following = %s
                 ) THEN 'private'
-                ELSE 'public'
+                ELSE 'PUBLIC'
             END AS status
         """
 

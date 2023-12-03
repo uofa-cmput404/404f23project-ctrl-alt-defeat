@@ -61,7 +61,7 @@ export default function NewPost(props) {
   const [imageId, setImageId] = useState(null);
   // TODO: Add private, unlisted settings (public for now)
   // TODO: Add restrictions option (for unlisted)
-  const [visibility, setVisibility] = useState("public");
+  const [visibility, setVisibility] = useState("PUBLIC");
 
   const jpegDataURL = 'data:image/jpeg;base64,';
   const pngDataURL = 'data:image/png;base64,';
@@ -175,9 +175,9 @@ export default function NewPost(props) {
       <p>Visibility</p>
       <form method="dialog">
         <select id="visibility" name="visibility" onChange={handleSelectVisibility}>
-          <option value="public">Public</option>
+          <option value="PUBLIC">Public</option>
           <option value="private">Private</option>
-          <option value="friends-only">Friends-Only</option>
+          <option value="FRIENDS">Friends-Only</option>
           <option value="unlisted">Unlisted</option>
         </select>
       </form>

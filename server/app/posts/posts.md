@@ -166,7 +166,7 @@ This endpoint allows you to manage posts, specifically retrieving posts created 
         "content_type": "text/plain",
         "content": "This is the content of the post.",
         "image_id": "789",
-        "visibility": "public",
+        "visibility": "PUBLIC",
         "date_posted": "2023-10-29 12:34:56"
       },
       {
@@ -176,7 +176,7 @@ This endpoint allows you to manage posts, specifically retrieving posts created 
         "content_type": "text/plain",
         "content": "This is another post content.",
         "image_id": "790",
-        "visibility": "friends-only",
+        "visibility": "FRIENDS",
         "date_posted": "2023-10-30 14:45:00"
       }
     ]
@@ -213,7 +213,7 @@ This endpoint allows you to retrieve posts based on visibility settings and rest
         "content_type": "text/plain",
         "content": "This is the content of the post.",
         "image_id": "789",
-        "visibility": "public",
+        "visibility": "PUBLIC",
         "date_posted": "2023-10-29 12:34:56"
       },
       {
@@ -223,7 +223,7 @@ This endpoint allows you to retrieve posts based on visibility settings and rest
         "content_type": "text/plain",
         "content": "This is another post content.",
         "image_id": "790",
-        "visibility": "friends-only",
+        "visibility": "FRIENDS",
         "date_posted": "2023-10-30 14:45:00"
       }
     ]
