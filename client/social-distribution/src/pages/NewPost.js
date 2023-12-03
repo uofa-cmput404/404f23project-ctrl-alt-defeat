@@ -5,6 +5,7 @@ import { UserContext } from '../App';
 import { toast } from 'react-toastify';
 
 const newPostUrl = 'http://127.0.0.1:5000/api/posts/new'
+const newPostRemoteUrl = newPostUrl + '/remote'
 
 export default function NewPost(props) {
 
@@ -92,6 +93,34 @@ export default function NewPost(props) {
           if (response.data === "success") {            
             toast.success("Post successfully posted!");
             navigate("/homepage");
+            try {
+              console.log(JSON.stringify({author_id: authorId, content_type: contentType, title: title, content: content, visibility: visibility, image_id: imageId}));
+      
+              axios.post(newPostRemoteUrl, {
+                author_id: authorId,
+                content_type: contentType,
+                title: title,
+                content: content,
+                visibility: visibility,
+                image_id: imageId
+              }, {
+                headers: {
+                  'Authorization': 'Basic Q3RybEFsdERlZmVhdDpmcm9udGVuZA=='
+                }
+              })
+              .then(response => {
+                if (response.data === "success") {            
+                  toast.success("Post successfully posted!");
+                  navigate("/homepage");
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+              })
+            
+            } catch (error) {
+                console.error('Error:', error);
+            }
           }
         })
         .catch(error => {

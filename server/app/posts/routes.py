@@ -397,8 +397,87 @@ def new_post():
         conn.commit()
         conn.close()
 
+        data = "success"
 
-        ## REMOTE
+    except Exception as e:
+
+        print(e)
+        data = str(e)
+        abort(500, e)
+
+    return jsonify(data)  # data
+
+@bp.route('/posts/new/remote', methods=['POST'])
+@basic_auth.login_required
+def new_post_to_remote_nodes():
+    data = ""
+    try:
+        # Retrieve post data from the request's JSON body
+        # to get author_id, title, content, visibility, type
+        print("Sending a new post:")
+        request_data = request.get_json()
+        author_id = request_data["author_id"]
+        title = request_data["title"]
+        content = request_data["content"]
+        visibility = request_data["visibility"]
+        content_type = request_data["content_type"]
+
+        post_id = str(uuid.uuid4())
+
+        # validate the content_type is of the following
+        try:
+            found = ["text/plain", "text/markdown", "application/base64", "image/png;base64",
+                     "image/jpeg;base64"].index(content_type)
+        except ValueError:
+            print("Not a valid content type.")
+            abort(412)
+
+        # Check for image OR image post
+        image_id = request_data["image_id"]
+
+        if image_id == None:  # JSON `null` turns into Python `None`
+            image_id = "NULL"  # Change for SQL syntax
+
+        conn, curr = get_db_connection()
+
+        author_query = "SELECT github, username FROM authors WHERE author_id = %s"
+        curr.execute(author_query, (author_id,))
+        author_info = curr.fetchone()
+
+
+        # Package the body according to spec
+        send_data = dict()
+        send_data["type"] = "post"
+        send_data["title"] = title
+        send_data["id"] = request.root_url + "authors/" + author_id + "/posts/" + post_id
+        send_data["source"] = send_data["id"] 
+        send_data["origin"] = send_data["id"]
+        send_data["description"] = ""
+        send_data["contentType"] = content_type
+        send_data["content"] = content
+        send_data["author"] = dict()
+        send_data["author"]["type"] = "author"
+        send_data["author"]["id"] = request.root_url + "authors/" + author_id
+        send_data["author"]["host"] = request.root_url
+        send_data["author"]["displayName"] = author_info["username"]
+        send_data["author"]["url"] = send_data["author"]["id"]
+        if author_info["github"] == None:
+            send_data["author"]["github"] = None
+        else:
+            send_data["author"]["github"] = "https://github.com/" + author_info["github"]
+        send_data["author"]["profileImage"] = None
+        send_data["categories"] = []
+        send_data["comments"] = request.root_url + "authors/" + author_id + "/posts/" + post_id + "/comments"
+        #send_data["commentsSrc"] = {} # `null` for now, will send as needed
+        # Count = number of comments
+        send_data["count"] = 0
+        send_data["published"] = str(datetime.now().astimezone().replace(microsecond=0).isoformat())
+        send_data["visibility"] = visibility
+        send_data["unlisted"] = False
+
+        # Package body into json
+        body = send_data
+
         # If the post visiblity is public, send out to
         # to the inboxes of all authors of remote nodes
         # (i.e. Ctrl+C and Ctrl+V, 21-Average)
@@ -453,7 +532,7 @@ def new_post():
 
         elif visibility == "FRIENDS":
             # check friends of node
-            pass
+            abort(500, "needs fix")
 
         else:
             print("Private or unlisted post detected, not sending to remote node inboxes. \n")
