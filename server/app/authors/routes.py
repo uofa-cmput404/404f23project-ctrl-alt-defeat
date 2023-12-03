@@ -397,7 +397,7 @@ def send(author_id):
                             "(%s, %s, %s, %s, %s, %s, %s)"
             
             inboxItemId = str(uuid.uuid4())
-            curr.execute(inbox_query, (comment_id,  request_data["author"]["host"], request_data["author"]["displayName"], author_id, inboxItemId, comment_id, "comment"))
+            curr.execute(inbox_query, (comment_author_id,  request_data["author"]["host"], request_data["author"]["displayName"], author_id, inboxItemId, comment_id, "comment"))
 
             conn.commit()
             conn.close()

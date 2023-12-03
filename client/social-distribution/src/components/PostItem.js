@@ -210,9 +210,8 @@ function PostItem(props) {
         "id": "http://localhost:5000" + "/api/authors/" + props.item.author_id + "/posts/" + props.item.post_id,
     }
       const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/inbox`;
-      
-      console.log(payload)
-      // await axios.post(apiUrl, payload);
+            
+      await axios.post(apiUrl, payload);
       setComment('');
       fetchComments(); // Refresh comments after posting
     } catch (error) {
