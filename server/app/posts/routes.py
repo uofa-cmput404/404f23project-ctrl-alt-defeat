@@ -246,9 +246,9 @@ def index():
                 "FROM posts " \
                 "INNER JOIN authors ON posts.author_id = authors.author_id " \
                 "WHERE " \
-                    "(posts.visibility = 'public' " \
+                    "(posts.visibility = 'PUBLIC' " \
                     "OR posts.author_id = %s " \
-					 "OR(posts.visibility = 'friends-only' AND posts.author_id IN (SELECT author_followee FROM friends WHERE author_following = %s))) " \
+					 "OR(posts.visibility = 'FRIENDS' AND posts.author_id IN (SELECT author_followee FROM friends WHERE author_following = %s))) " \
                     "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  %s) " \
                 "ORDER BY date_posted DESC; " 
         
@@ -273,7 +273,7 @@ def new_post():
     try:
         # Retrieve post data from the request's JSON body
         # to get author_id, title, content, visibility, type
-        print("NEW POST data")
+        print("Sending a new post:")
         request_data = request.get_json()
         author_id = request_data["author_id"]
         title = request_data["title"]
@@ -281,9 +281,9 @@ def new_post():
         visibility = request_data["visibility"]
         content_type = request_data["content_type"]
 
-        post_id = str(uuid.uuid4()) # Changed it so its a uuid instead
+        post_id = str(uuid.uuid4())
 
-        # validate the content_type is of the following,
+        # validate the content_type is of the following
         try:
             found = ["text/plain", "text/markdown", "application/base64", "image/png;base64",
                      "image/jpeg;base64"].index(content_type)
@@ -292,7 +292,6 @@ def new_post():
             abort(412)
 
         # Check for image OR image post
-        # TODO: add image posting, attaching images to posts
         image_id = request_data["image_id"]
 
         if image_id == None:  # JSON `null` turns into Python `None`
@@ -300,12 +299,100 @@ def new_post():
 
         conn, curr = get_db_connection()
 
+        # Insert post into local db
+
         query = "INSERT INTO posts (post_id, author_id, title, content_type, content, visibility) " \
                 "VALUES (%s, %s, %s, %s, %s, %s)"
 
         # Use a parameterized query to insert values safely
         curr.execute(query,
                      (post_id, author_id, title, content_type, content, visibility))
+
+        author_query = "SELECT github, username FROM authors WHERE author_id = %s"
+        curr.execute(author_query, (author_id,))
+        author_info = curr.fetchone()
+
+        data = "successfully posted in local db"
+
+        # Package the body according to spec
+        send_data = dict()
+        send_data["type"] = "post"
+        send_data["title"] = title
+        send_data["id"] = request.root_url + "authors/" + author_id + "/posts/" + post_id
+        send_data["source"] = send_data["id"] 
+        send_data["origin"] = send_data["id"]
+        send_data["description"] = ""
+        send_data["contentType"] = content_type
+        send_data["content"] = content
+        send_data["author"] = dict()
+        send_data["author"]["type"] = "author"
+        send_data["author"]["id"] = request.root_url + "authors/" + author_id
+        send_data["author"]["host"] = request.root_url
+        send_data["author"]["displayName"] = author_info["username"]
+        send_data["author"]["url"] = send_data["author"]["id"]
+        if author_info["github"] == None:
+            send_data["author"]["github"] = None
+        else:
+            send_data["author"]["github"] = "https://github.com/" + author_info["github"]
+        send_data["author"]["profileImage"] = None
+        send_data["categories"] = []
+        send_data["comments"] = request.root_url + "authors/" + author_id + "/posts/" + post_id + "/comments"
+        #send_data["commentsSrc"] = {} # `null` for now, will send as needed
+        # Count = number of comments
+        send_data["count"] = 0
+        send_data["published"] = str(datetime.now().astimezone().replace(microsecond=0).isoformat())
+        send_data["visibility"] = visibility
+        send_data["unlisted"] = False
+
+        # Package body into json
+        body = send_data
+        #print(json.dumps(body))
+
+        # Depending on visibility, send to specific
+        # authors of local node (i.e. Ctrl+Alt+Defeat)
+        if visibility == "PUBLIC":
+            # Get all authors on local node
+            recipient_query = "SELECT author_id FROM authors"
+            curr.execute(recipient_query)
+            localRecipients = curr.fetchall()
+            localRecipients = [dict(i) for i in localRecipients]
+            column = "author_id"
+
+        elif visibility == "FRIENDS":
+            # Find the local authors who are following the post author
+            recipient_query = "SELECT author_following FROM " \
+                              "friends WHERE author_followee = %s " \
+                              "AND host = %s"
+            curr.execute(recipient_query, (author_id, "local"))
+            localRecipients = curr.fetchall()
+            localRecipients = [dict(i) for i in localRecipients]
+            
+            # Also add post author to list (they should receive their own post!)
+            localRecipients.append({"author_following": author_id})
+            column = "author_following"
+
+        elif visibility == "private" or visibility == "unlisted":
+            # Only send to post author's inbox
+            target = "author_id"
+            localRecipients = [{target: author_id}]
+
+        else:
+            raise Exception("Invalid visibility value was given by NewPost.js: accepts (for remote nodes) 'PUBLIC', 'FRIENDS'; (for local node) 'private', 'unlisted'")
+        
+        for la in localRecipients:
+
+            recipient_id = la[column]
+
+            inbox_item_id = str(uuid.uuid4())
+
+            inbox_query = "INSERT INTO inbox_items " \
+                        "(inbox_item_id, sender_id, " \
+                        "sender_display_name, sender_host, " \
+                        "recipient_id, object_id, type) " \
+                        "VALUES (%s, %s, %s, %s, %s, %s, %s)"
+
+            curr.execute(inbox_query, (inbox_item_id, author_id, send_data["author"]["displayName"], send_data["author"]["host"], recipient_id, post_id, "post"))
+            print("Sent to local author", recipient_id)
 
         conn.commit()
         conn.close()
@@ -316,6 +403,148 @@ def new_post():
 
         print(e)
         data = str(e)
+        abort(500, e)
+
+    return jsonify(data)  # data
+
+@bp.route('/posts/new/remote', methods=['POST'])
+@basic_auth.login_required
+def new_post_to_remote_nodes():
+    data = ""
+    try:
+        # Retrieve post data from the request's JSON body
+        # to get author_id, title, content, visibility, type
+        print("Sending a new post:")
+        request_data = request.get_json()
+        author_id = request_data["author_id"]
+        title = request_data["title"]
+        content = request_data["content"]
+        visibility = request_data["visibility"]
+        content_type = request_data["content_type"]
+
+        post_id = str(uuid.uuid4())
+
+        # validate the content_type is of the following
+        try:
+            found = ["text/plain", "text/markdown", "application/base64", "image/png;base64",
+                     "image/jpeg;base64"].index(content_type)
+        except ValueError:
+            print("Not a valid content type.")
+            abort(412)
+
+        # Check for image OR image post
+        image_id = request_data["image_id"]
+
+        if image_id == None:  # JSON `null` turns into Python `None`
+            image_id = "NULL"  # Change for SQL syntax
+
+        conn, curr = get_db_connection()
+
+        author_query = "SELECT github, username FROM authors WHERE author_id = %s"
+        curr.execute(author_query, (author_id,))
+        author_info = curr.fetchone()
+
+
+        # Package the body according to spec
+        send_data = dict()
+        send_data["type"] = "post"
+        send_data["title"] = title
+        send_data["id"] = request.root_url + "authors/" + author_id + "/posts/" + post_id
+        send_data["source"] = send_data["id"] 
+        send_data["origin"] = send_data["id"]
+        send_data["description"] = ""
+        send_data["contentType"] = content_type
+        send_data["content"] = content
+        send_data["author"] = dict()
+        send_data["author"]["type"] = "author"
+        send_data["author"]["id"] = request.root_url + "authors/" + author_id
+        send_data["author"]["host"] = request.root_url
+        send_data["author"]["displayName"] = author_info["username"]
+        send_data["author"]["url"] = send_data["author"]["id"]
+        if author_info["github"] == None:
+            send_data["author"]["github"] = None
+        else:
+            send_data["author"]["github"] = "https://github.com/" + author_info["github"]
+        send_data["author"]["profileImage"] = None
+        send_data["categories"] = []
+        send_data["comments"] = request.root_url + "authors/" + author_id + "/posts/" + post_id + "/comments"
+        #send_data["commentsSrc"] = {} # `null` for now, will send as needed
+        # Count = number of comments
+        send_data["count"] = 0
+        send_data["published"] = str(datetime.now().astimezone().replace(microsecond=0).isoformat())
+        send_data["visibility"] = visibility
+        send_data["unlisted"] = False
+
+        # Package body into json
+        body = send_data
+
+        # If the post visiblity is public, send out to
+        # to the inboxes of all authors of remote nodes
+        # (i.e. Ctrl+C and Ctrl+V, 21-Average)
+        if visibility == "PUBLIC":
+            # Get all recipients from remote nodes
+
+            # Ctrl+C and Ctrl+V node
+            remoteAuthorsUrl = "https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/"
+            remoteAuthorsResp = requests.get(remoteAuthorsUrl, auth = ('cross-server','password'))
+            remoteAuthors = dict(remoteAuthorsResp.json())["items"]
+
+            for ra in remoteAuthors:
+                recipient_id = ra["id"].split('/')[-1]
+                remoteInboxUrl = "https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/" + recipient_id + "/inbox"
+                remoteInboxResp = requests.post(remoteInboxUrl, json = body, auth = ('cross-server','password'))
+                #print(remoteInboxResp.request.body) # Confirmed that `None` -> `null` 
+                if remoteInboxResp.status_code != 200:
+                    print("ERROR: code", remoteInboxResp, "at", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
+                else:
+                    print("Successfully sent post to", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
+            
+            # 21-Average node
+            specificBody = {"items": body} # specific body for 21-average
+            remoteAuthorsUrl = "https://cmput-average-21-b54788720538.herokuapp.com/api/authors"
+            remoteAuthorsResp = requests.get(remoteAuthorsUrl, auth = ('CtrlAltDefeat', 'string'))
+            remoteAuthors = dict(remoteAuthorsResp.json())["items"]
+
+            for ra in remoteAuthors:
+                recipient_id = ra["id"].split('/')[-2]
+                remoteInboxUrl = "https://cmput-average-21-b54788720538.herokuapp.com/api/authors/" + recipient_id + "/inbox/"
+                remoteInboxResp = requests.post(remoteInboxUrl, json = specificBody, auth = ('CtrlAltDefeat', 'string'))
+                if remoteInboxResp.status_code != 201:
+                    print("ERROR: code", remoteInboxResp, "at", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
+                else:
+                    print("Successfully sent post to", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
+            
+            # Coding-Monkeys node
+            body["commentsSrc"] = {} # added to fit their spec
+            remoteAuthorsUrl = "https://chimp-chat-1e0cca1cc8ce.herokuapp.com/authors/"
+            remoteAuthorsResp = requests.get(remoteAuthorsUrl, auth = ('node-ctrl-alt-defeat','chimpchatapi'))
+            remoteAuthors = dict(remoteAuthorsResp.json())["items"]
+
+            for ra in remoteAuthors:
+                recipient_id = ra["id"].split('/')[-1]
+                remoteInboxUrl = "https://chimp-chat-1e0cca1cc8ce.herokuapp.com/authors/" + recipient_id + "/inbox/"
+                remoteInboxResp = requests.post(remoteInboxUrl, json = body, auth = ('node-ctrl-alt-defeat','chimpchatapi'))
+                #print(remoteInboxResp.request.body) # Confirmed that `None` -> `null` 
+                if remoteInboxResp.status_code != 200:
+                    print("ERROR: code", remoteInboxResp, "at", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
+                else:
+                    print("Successfully sent post to", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
+
+        elif visibility == "FRIENDS":
+            # check friends of node
+            abort(500, "needs fix")
+
+        else:
+            print("Private or unlisted post detected, not sending to remote node inboxes. \n")
+
+
+        data = "success"
+
+    except Exception as e:
+
+        print(e)
+        data = str(e)
+        abort(500, e)
 
     return jsonify(data)  # data
 
@@ -334,7 +563,7 @@ def get_image(author_id, post_id):
 
         if row["content_type"] == "text/plain" or row["content_type"] == "text/markdown":
             abort(404, "This is not an image.")
-        if row["visibility"] != "public":
+        if row["visibility"] != "PUBLIC":
             abort(403, "This post exists, but the image contained is only visible to specific users.")
 
         content_type = row["content_type"]
@@ -428,7 +657,7 @@ def get_post(author_id, post_id):
     try:
         query = "SELECT * FROM posts " \
                 "WHERE post_id = %s " \
-                "AND (visibility = 'public' OR visibility = 'unlisted')"
+                "AND (visibility = 'PUBLIC' OR visibility = 'unlisted')"
                 
         curr.execute(query, (post_id, ))
         row = curr.fetchall()            
@@ -482,7 +711,7 @@ def get_post(author_id, post_id):
         visibility = post["visibility"]
 
         # Either public or friends only. cant be private
-        if visibility == "public" or visibility == "unlisted":
+        if visibility == "PUBLIC" or visibility == "unlisted":
             item["visibility"] = "PUBLIC" # both are technically public?
         else:
             item["visibility"] = "FRIENDS"
@@ -582,7 +811,7 @@ def get_posts(author_id):
             visibility = post["visibility"]
 
             # Either public or friends only. cant be private
-            if visibility == "public" or visibility == "unlisted":
+            if visibility == "PUBLIC" or visibility == "unlisted":
                 item["visibility"] = "PUBLIC" # both are technically public?
             else:
                 item["visibility"] = "FRIENDS"
