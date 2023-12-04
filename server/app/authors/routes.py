@@ -779,30 +779,14 @@ def share_post(post_id):
 
         conn, curr = get_db_connection()
 
-        # Fetch the original post data
-        curr.execute("SELECT * FROM posts WHERE post_id = %s", (post_id,))
-        original_post = curr.fetchone()
-        if not original_post:
-            return jsonify({"error": "Original post not found"}), 404
-
+      
         # Fetch the sender's display name
         curr.execute("SELECT username FROM authors WHERE author_id = %s", (loginUser_id,))
         sender = curr.fetchone()
         if not sender:
             return jsonify({"error": "Sender not found"}), 404
         sender_display_name = sender['username']
-
-        # Determine new post visibility
-        new_visibility = 'PUBLIC' if share_option == 'PUBLIC' else 'FRIENDS'
-
-        # Create a new post with the same content but different visibility
-        new_post_id = str(uuid.uuid4())
-        curr.execute("""
-            INSERT INTO posts (post_id, author_id, title, content_type, content, image_id, visibility) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (new_post_id, loginUser_id, original_post['title'], original_post['content_type'], 
-              original_post['content'], original_post['image_id'], new_visibility))
-
+      
         # Determine recipients based on share_option
         if share_option == 'PUBLIC':
             # Fetch all authors
@@ -820,11 +804,11 @@ def share_post(post_id):
             curr.execute("""
                 INSERT INTO inbox_items (inbox_item_id, sender_id, sender_display_name, sender_host, recipient_id, object_id, type)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (inbox_item_id, loginUser_id, sender_display_name, request.url_root, recipient_id, new_post_id, 'share'))
+            """, (inbox_item_id, loginUser_id, sender_display_name, request.url_root, recipient_id, post_id, 'share'))
 
         conn.commit()
 
-        return jsonify({"message": "Post shared successfully", "new_post_id": new_post_id}), 201
+        return jsonify({"message": "Post shared successfully", "post_id": post_id}), 201
 
     except Exception as e:
         print("Error sharing post: ", e)
