@@ -91,7 +91,7 @@ export default function NewPost(props) {
         })
         .then(response => {
           if (response.data === "success") {            
-            toast.success("Post successfully posted!");
+            toast.success("Post successfully shared with local users!");
             navigate("/homepage");
             try {
               console.log(JSON.stringify({author_id: authorId, content_type: contentType, title: title, content: content, visibility: visibility, image_id: imageId}));
@@ -110,7 +110,7 @@ export default function NewPost(props) {
               })
               .then(response => {
                 if (response.data === "success") {            
-                  toast.success("Post successfully posted!");
+                  toast.success("Post successfully shared with remote users!");
                   navigate("/homepage");
                 }
               })
