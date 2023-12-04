@@ -15,7 +15,7 @@ import requests
 import uuid
 import io,base64
 from .. import basic_auth
-import app.utils.remote_funcs as rf
+from ..utils import remote_funcs as rf
 
 @bp.route("/posts/restricted", methods=["GET"])
 def get_restricted_users():    
