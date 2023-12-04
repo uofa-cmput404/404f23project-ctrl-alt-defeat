@@ -414,15 +414,61 @@ def send(author_id):
             conn.commit()
             conn.close()
 
-        elif message_type == "comment":
-            raise(Exception("comment not implemented"))
+        elif message_type == "comment":     
+            conn, curr = get_db_connection()                               
+            #Check if the authors are friends
+            
+            comment_author_id = request_data["author"]["id"].split("/")[-1]
+            check_friends_query = """
+                SELECT CASE 
+                    WHEN EXISTS (
+                        SELECT 1 FROM friends 
+                        WHERE author_followee = %s AND author_following = %s
+                    ) THEN 'private'
+                    ELSE 'public'
+                END AS status
+            """
+
+            curr.execute(check_friends_query, (author_id, comment_author_id))
+            status = dict(curr.fetchone())['status']
+            
+            if author_id == comment_author_id:
+                status = 'private'
+
+            comment_id = str(uuid.uuid4()) 
+
+            query = "INSERT INTO comments " \
+                "(comment_id, comment_author_id, " \
+                "post_id, author_id, comment_text, status, date_commented) " \
+                "VALUES (%s, %s, %s, %s, %s, %s ,CURRENT_TIMESTAMP)" 
+
+            post_url = request_data["id"].split("/")
+            post_index = post_url.index("posts")
+            post_id = post_url[post_index + 1]
+            print(post_id)
+            curr.execute(query, (comment_id, comment_author_id,  post_id, author_id, request_data["comment"], status))
+            
+            inbox_query = "INSERT INTO inbox_items " \
+                            "(sender_id, sender_host, " \
+                            "sender_display_name, recipient_id, " \
+                            "inbox_item_id, object_id, type) VALUES " \
+                            "(%s, %s, %s, %s, %s, %s, %s)"
+            
+            inboxItemId = str(uuid.uuid4())
+            curr.execute(inbox_query, (comment_author_id,  request_data["author"]["host"], request_data["author"]["displayName"], author_id, inboxItemId, comment_id, "comment"))
+
+            conn.commit()
+            conn.close()
+
+            data = "Successfully added comment."
 
         else:
             raise(Exception("'type' must be 'post', 'comment', 'Like', or 'Follow'"))
 
     except Exception as e:
-        print("send error: ", e)        
         abort(500, e)
+        print("send error: ", e)
+        data = "error"
 
     return jsonify(data)
 
@@ -466,7 +512,7 @@ def get_inbox_items(author_id):
                     data["items"].append(data_item)
             
             if item["type"] == "comment":
-                data_item = dict()                
+                data_item = dict()           z     
                 data_item["type"] = item["type"]
                 data_item["author"] = item["sender_id"]
                 data_item["displayName"] = item["sender_display_name"]

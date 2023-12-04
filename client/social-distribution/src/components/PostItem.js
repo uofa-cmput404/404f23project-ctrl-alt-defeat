@@ -4,6 +4,8 @@ import './PostItem.css';
 import axios from 'axios';
 import notLikedImgUrl from "../notLiked_black_24dp.svg";
 import likedImgUrl from "../liked_black_24dp.svg";
+import { useContext } from 'react';
+import { UserContext } from '../App';
 
 const styles = {
   img: {
@@ -92,6 +94,8 @@ function PostItem(props) {
 
     props.togglePostLike(props.item.post_id, props.item.liked, props.item.author_id);
   }
+
+  const { username } = useContext(UserContext);
 
   const fetchComments = async () => {
     try {
@@ -190,8 +194,24 @@ function PostItem(props) {
     };
   
     try {
-      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
-      await axios.post(apiUrl, commentData);
+      
+      const payload = {
+        "type":"comment",
+        "author":{
+            "type":"author",
+            "id": "http://localhost:5000" + "/api/authors/" + props.loginUser,
+            "url": "http://localhost:5000" + "/api/authors/" + props.loginUser,
+            "host": "http://localhost:5000",            
+            "profileImage": "https://i.imgur.com/k7XVwpB.jpeg",
+            "displayName": username
+        },
+        "comment": commentData.comment_text,
+        "contentType":"text/markdown",
+        "id": "http://localhost:5000" + "/api/authors/" + props.item.author_id + "/posts/" + props.item.post_id,
+    }
+      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/inbox`;
+            
+      await axios.post(apiUrl, payload);
       setComment('');
       fetchComments(); // Refresh comments after posting
     } catch (error) {
