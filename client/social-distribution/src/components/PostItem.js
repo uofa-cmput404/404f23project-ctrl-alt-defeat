@@ -99,7 +99,7 @@ function PostItem(props) {
 
   const fetchLikes = async () => {
     try {
-      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/likes/count`;
+      const apiUrl = rocess.env.REACT_APP_API_HOSTNAME + `/api/authors/${props.item.author_id}/posts/${props.item.post_id}/likes/count`;
       const response = await axios.get(apiUrl);
       // set return to null in routes if not friend only post
       if (response.data && response.data.numLikes !== null) {
@@ -206,7 +206,7 @@ function PostItem(props) {
   const handleShareToPublic = async () => {
     try {
 
-      const shareApiUrl = process.env.REACT_APP_API_HOSTNAME`/api/posts/${props.item.post_id}/share`;
+      const shareApiUrl = process.env.REACT_APP_API_HOSTNAME + `/api/posts/${props.item.post_id}/share`;
       const payload = { share_option: 'PUBLIC' };
       await axios.post(shareApiUrl, payload, {
         headers: {
@@ -226,7 +226,7 @@ function PostItem(props) {
   
   const handleShareToFriends = async () => {
     try {
-      const shareApiUrl = process.env.REACT_APP_API_HOSTNAME `/api/share/post/${props.item.post_id}`;
+      const shareApiUrl = process.env.REACT_APP_API_HOSTNAME + `/api/share/post/${props.item.post_id}`;
       const payload = { share_option: 'FRIENDS' };
       await axios.post(shareApiUrl, payload, {
         headers: {
