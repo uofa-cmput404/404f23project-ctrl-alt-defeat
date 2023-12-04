@@ -472,8 +472,9 @@ def new_post():
         
         print(localRecipients)
         for la in localRecipients:
-      
-            recipient_id = la['author_id']
+            for key in la:
+                key_au = key
+            recipient_id = la[key_au]
    
             inbox_item_id = str(uuid.uuid4())
    
