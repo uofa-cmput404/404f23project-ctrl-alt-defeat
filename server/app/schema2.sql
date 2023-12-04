@@ -79,8 +79,7 @@ CREATE TABLE comments (
     author_id TEXT NOT NULL, --TEXT
     comment_text TEXT NOT NULL, --TEXT
     status TEXT NOT NULL,
-    date_commented TIMESTAMP NOT NULL,
-    FOREIGN KEY (comment_author_id) REFERENCES authors(author_id)  ON DELETE CASCADE,
+    date_commented TIMESTAMP NOT NULL,    
     FOREIGN KEY (post_id) REFERENCES posts(post_id)  ON DELETE CASCADE
 );
 
