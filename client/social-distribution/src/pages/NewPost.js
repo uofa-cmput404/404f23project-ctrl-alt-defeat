@@ -9,6 +9,16 @@ const newPostRemoteUrl = newPostUrl + '/remote'
 
 export default function NewPost(props) {
 
+  const [matches, setMatches] = useState(
+    window.matchMedia("(min-width: 768px)").matches
+  )
+
+  useEffect(() => {
+    window
+    .matchMedia("(min-width: 768px)")
+    .addEventListener('change', e => setMatches( e.matches ));
+  }, []);
+
   // Modified from login.js
   const styles = {
       container: {
@@ -31,7 +41,7 @@ export default function NewPost(props) {
         width: '400px'
       },
       button_post: {
-        width: "30vw",
+        width: matches ? "400px" : "100%",
         padding: 10,
         marginTop: 10
       },
@@ -212,7 +222,7 @@ export default function NewPost(props) {
       </form>
 
       <br></br>
-      <button style={{width: '20vw'}} class="btn btn-warning" onClick={restrictUser}>Set restrictions</button>
+      <button style={styles.button_post} class="btn btn-warning" onClick={restrictUser}>Set restrictions</button>
       <br></br>
 
       <p>How would you like to format your post?</p>
