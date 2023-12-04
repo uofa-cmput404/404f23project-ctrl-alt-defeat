@@ -186,6 +186,16 @@ def get_posts_liked(author_id):
     try:
         conn, curr = get_db_connection()
 
+        query = "SELECT username " \
+                "FROM authors " \
+                "WHERE author_id = %s"         
+        
+        curr.execute(query, (author_id,))
+        author = curr.fetchone()
+
+        if author == None:
+            abort(404, "Author not found")
+
         query = "SELECT l.post_id, p.author_id,  a.username, a.github " \
                 "FROM likes l " \
                 "JOIN posts p " \
@@ -205,7 +215,7 @@ def get_posts_liked(author_id):
 
         for like in likes:
             item = dict()
-            item["context"] = None
+            item["@context"] = None
             item["summary"] = like["username"] + " Likes your post"
             item["type"] = "Like"
             item["author"] = dict()
@@ -222,13 +232,16 @@ def get_posts_liked(author_id):
             payload["items"].append(item)        
 
         data = payload
-        conn.commit()
-        conn.close()
-
 
     except Exception as e:
-        print("Getting likes error: ", e)
-        data = "error"
+        print(f"An error occurred: {str(e)}")
+        # Re-raise the exception to propagate it
+        raise
+
+    finally:
+        # Close database connection in the finally block to ensure it's closed
+        if conn:
+            conn.close()
     
     return jsonify(data)
 
@@ -291,10 +304,14 @@ def get_liked_posts(author_id, post_id):
     
     return jsonify(data)
 
+# (LOCAL/REMOTE)
 @bp.route('/authors/<author_id>/inbox', methods=['POST'])
 @basic_auth.login_required
 def send(author_id):
     request_data = request.get_json()
+    print("payload:")
+    print(request_data)
+    print("sending the inbox item to", author_id)
 
     # In case remote node sends us a payload with `{'items': {'type' : '...', ...}}`
     if 'items' in request_data:
@@ -305,35 +322,91 @@ def send(author_id):
         message_type = request_data["type"]
 
         if message_type == "Like":
+
             likeAuthorId = request_data["author"]["id"].split('/')[-1]
             likeHost = request_data["author"]["host"]
             displayName = request_data["author"]["displayName"]
             likedPost = request_data["object"].split('/')[-1]
 
-            likeId = str(uuid.uuid4()) 
-            inboxItemId = str(uuid.uuid4())
+            # Check what type of like it is, if it has /comments then it is a comment like
+            
+            if "/comments/" in request_data["object"]:
+                inboxItemId = str(uuid.uuid4())
+                likeId = str(uuid.uuid4()) 
 
-            conn, curr = get_db_connection()
+                conn, curr = get_db_connection()
+                post_url = request_data["object"].split("/")
+                post_index = post_url.index("posts")
+                post_id = post_url[post_index + 1]
+                
+                comments_index = post_url.index("comments")
+                comment_id = post_url[comments_index + 1]
 
-            like_query = "INSERT INTO likes " \
-                    "(like_id, like_author_id, " \
-                    "post_id, time_liked) " \
-                    "VALUES (%s, %s, %s, " \
-                    "CURRENT_TIMESTAMP)"
+                # Check if the like already exists
+                print("SELECT * FROM comment_likes WHERE like_comment_author_id = %s AND comment_id = %s", 
+                            (likeAuthorId, comment_id))
+                curr.execute("SELECT * FROM comment_likes WHERE like_comment_author_id = %s AND comment_id = %s", 
+                            (likeAuthorId, comment_id))
+                
+                like = curr.fetchone()
+                print(likeAuthorId, comment_id)
+                print("Resulting:", like)
+                if like:
+                    print("here")
+                    # Like exists, so unlike it
+                    curr.execute("DELETE FROM comment_likes WHERE like_comment_author_id = %s AND comment_id = %s", 
+                                (likeAuthorId, comment_id))
+                    
+                    conn.commit()
+                    conn.close()
+                else:
+                    print("inserting")
+                    # Like doesn't exist, so add it
+                    comment_like_id = str(uuid.uuid4()) 
+                    curr.execute("INSERT INTO comment_likes (comment_like_id, like_comment_author_id, comment_id, time_liked) VALUES (%s, %s, %s, CURRENT_TIMESTAMP)", 
+                                (comment_like_id, likeAuthorId, comment_id))
+                    
+                    inbox_query = "INSERT INTO inbox_items " \
+                                "(sender_id, sender_host, " \
+                                "sender_display_name, recipient_id, " \
+                                "inbox_item_id, object_id, type) VALUES " \
+                                "(%s, %s, %s, %s, %s, %s, %s)"
+                    
+                    
+                    curr.execute(inbox_query, (likeAuthorId, request.root_url, displayName, author_id, inboxItemId, comment_like_id, "comment_like"))
 
-            curr.execute(like_query, (likeId, likeAuthorId, likedPost))
+                    conn.commit()
+                    conn.close()
+                    
+                    data = "Liked comment successfully."
+            
+            else:                
+                likeId = str(uuid.uuid4()) 
+                inboxItemId = str(uuid.uuid4())
 
-            inbox_query = "INSERT INTO inbox_items " \
-                        "(sender_id, sender_host, " \
-                        "sender_display_name, recipient_id, " \
-                        "inbox_item_id, object_id, type) VALUES " \
-                        "(%s, %s, %s, %s, %s, %s, %s)"
-            curr.execute(inbox_query, (likeAuthorId, likeHost, displayName, author_id, inboxItemId, likeId, "Like"))
+                conn, curr = get_db_connection()
 
-            conn.commit()
-            conn.close()
+                like_query = "INSERT INTO likes " \
+                        "(like_id, like_author_id, " \
+                        "post_id, time_liked) " \
+                        "VALUES (%s, %s, %s, " \
+                        "CURRENT_TIMESTAMP)"
 
-            data = "like success"
+                curr.execute(like_query, (likeId, likeAuthorId, likedPost))
+
+                inbox_query = "INSERT INTO inbox_items " \
+                            "(sender_id, sender_host, " \
+                            "sender_display_name, recipient_id, " \
+                            "inbox_item_id, object_id, type) VALUES " \
+                            "(%s, %s, %s, %s, %s, %s, %s)"
+                
+                
+                curr.execute(inbox_query, (likeAuthorId, request.root_url, displayName, author_id, inboxItemId, likeId, "Like"))
+
+                conn.commit()
+                conn.close()
+
+                data = "like success"
 
         elif message_type == "Follow":
             actor_host = request_data["actor"]["host"]
@@ -399,17 +472,169 @@ def send(author_id):
             conn.commit()
             conn.close()
 
-        elif message_type == "comment":
-            raise(Exception("comment not implemented"))
+        elif message_type == "comment":     
+            conn, curr = get_db_connection()                               
+            #Check if the authors are friends
+            
+            comment_author_id = request_data["author"]["id"].split("/")[-1]
+            check_friends_query = """
+                SELECT CASE 
+                    WHEN EXISTS (
+                        SELECT 1 FROM friends 
+                        WHERE author_followee = %s AND author_following = %s
+                    ) THEN 'private'
+                    ELSE 'PUBLIC'
+                END AS status
+            """
+
+            curr.execute(check_friends_query, (author_id, comment_author_id))
+            status = dict(curr.fetchone())['status']
+            
+            if author_id == comment_author_id:
+                status = 'private'
+
+            comment_id = str(uuid.uuid4()) 
+
+            query = "INSERT INTO comments " \
+                "(comment_id, comment_author_id, " \
+                "post_id, author_id, comment_text, status, date_commented) " \
+                "VALUES (%s, %s, %s, %s, %s, %s ,CURRENT_TIMESTAMP)" 
+
+            post_url = request_data["id"].split("/")
+            post_index = post_url.index("posts")
+            post_id = post_url[post_index + 1]
+            print(post_id)
+            curr.execute(query, (comment_id, comment_author_id,  post_id, author_id, request_data["comment"], 'PUBLIC'))
+            
+            inbox_query = "INSERT INTO inbox_items " \
+                            "(sender_id, sender_host, " \
+                            "sender_display_name, recipient_id, " \
+                            "inbox_item_id, object_id, type) VALUES " \
+                            "(%s, %s, %s, %s, %s, %s, %s)"
+            
+            inboxItemId = str(uuid.uuid4())
+            curr.execute(inbox_query, (comment_author_id,  request_data["author"]["host"], request_data["author"]["displayName"], author_id, inboxItemId, comment_id, "comment"))
+
+            conn.commit()
+            conn.close()
+
+            data = "Successfully added comment."        
 
         else:
+            print("Type not recognized")
             raise(Exception("'type' must be 'post', 'comment', 'Like', or 'Follow'"))
 
     except Exception as e:
         print("send error: ", e)
-        data = "error"
+        abort(500, e)
+        
 
     return jsonify(data)
+
+# MAKE POSTS
+@bp.route('/authors/<author_id>/inbox', methods=['GET'])
+def get_inbox_items(author_id):
+    data = {}
+
+    conn, cur = get_db_connection()
+    data["type"] = "inbox"
+    data["author"] = request.root_url + "api/authors/" + author_id
+    data["items"] = []
+    
+    try:
+        query = "SELECT * FROM inbox_items "\
+                "WHERE recipient_id = %s " \
+                "AND sender_id != %s"
+        
+        cur.execute(query, (author_id, author_id))
+        row = cur.fetchall()
+        inbox_items = [dict(i) for i in row]        
+
+        for item in inbox_items: 
+            print(item["type"])           
+            if item["type"] == "Like":
+                data_item = dict()                
+                data_item["type"] = item["type"]
+                data_item["author"] = item["sender_id"]
+                data_item["displayName"] = item["sender_display_name"]
+                data_item["summary"] =  item["sender_display_name"] + " liked your post."
+                data_item["date_received"] =  item["date_received"]
+
+                query = "SELECT * FROM likes " \
+                        "WHERE like_id = %s "
+                
+                cur.execute(query, (item["object_id"],))
+                row = cur.fetchone()
+
+                if row is not None:
+                    row = dict(row)
+                
+                    data_item["post_id"] = row["post_id"]
+                    data["items"].append(data_item)
+            
+            if item["type"] == "comment":
+                data_item = dict()              
+                data_item["type"] = item["type"]
+                data_item["author"] = item["sender_id"]
+                data_item["displayName"] = item["sender_display_name"]
+                data_item["summary"] =  item["sender_display_name"] + " commented on your post: "
+                data_item["date_received"] =  item["date_received"]
+
+                query = "SELECT * FROM comments " \
+                        "WHERE comment_id = %s "
+                # print("comment", item["object_id"])
+                
+                cur.execute(query, (item["object_id"],))
+                row = cur.fetchone()
+                                
+                if row is not None:
+                    row = dict(row)
+                
+                    data_item["post_id"] = row["post_id"]
+                    data_item["comment"] = row["comment_text"]
+                    data["items"].append(data_item)
+
+            if item["type"] == "comment_like":
+                print("comment_like")
+                data_item = dict()                
+                data_item["type"] = item["type"]
+                data_item["author"] = item["sender_id"]
+                data_item["displayName"] = item["sender_display_name"]
+                data_item["summary"] =  item["sender_display_name"] + " liked your comment."
+                data_item["date_received"] =  item["date_received"]
+
+                query = "SELECT * FROM comment_likes " \
+                        "WHERE comment_like_id = %s "
+                
+                cur.execute(query, (item["object_id"],))
+                row = cur.fetchone()
+
+                if row is not None:
+                    row = dict(row)
+                    
+                    # Grab the original post
+                    query = """SELECT * FROM comments
+                            JOIN posts
+                            ON posts.post_id = comments.post_id
+                            WHERE comment_id = %s"""
+                    
+                    cur.execute(query, (row["comment_id"],))
+                    row = cur.fetchone()
+
+                    if row is not None:
+                        row = dict(row)
+                        data_item["post_id"] = row["post_id"]
+                        data["items"].append(data_item)
+
+            # TODO: comment likes
+            # print(data)
+            data["items"] = sorted(data["items"], key=lambda x: x['date_received'], reverse=True)            
+
+    except Exception as e:
+        print(e)
+        abort(500, e)        
+
+    return jsonify(data)  # data
 
 @bp.route('/authors/<author_id>/inbox/unlike', methods=['DELETE'])
 # DELETE LIKE ON A POST
@@ -453,9 +678,9 @@ def delete_like(author_id):
 
 
 
-
+# REMOTE
 @bp.route('/authors/<author_id>/posts/<post_id>/comments', methods=['GET'])
-def get_post_comments(author_id, post_id):
+def get_post_comments(author_id, post_id):    
     comment_author_id = request.args.get('comment_author_id')
     page = request.args.get('page')
     size = request.args.get('size')
@@ -466,7 +691,7 @@ def get_post_comments(author_id, post_id):
     try:
         
         conn, cursor = get_db_connection()
-        
+        print("author:", comment_author_id)
         query = """
             SELECT a.username, c.comment_text,c.comment_author_id, c.comment_id, c.date_commented, a.github,
                 EXISTS (
@@ -496,6 +721,7 @@ def get_post_comments(author_id, post_id):
         offset = (page - 1) * size
         cursor.execute(query, (comment_author_id, post_id, author_id, comment_author_id, comment_author_id, size, offset))
         comment_info = cursor.fetchall()
+        
         comment_info = [dict(i) for i in comment_info]
         conn.close()
 
@@ -524,7 +750,7 @@ def get_post_comments(author_id, post_id):
             } for comment in comment_info
         ]
         comments_total = {"type":"comments","page":page, "size":size, "post":request.url_root+'api/authors/' + author_id+'/posts/' + post_id, "id": post_id, 'items': comments_list}
-        print(comments_total)
+        # print(comments_total)
         return jsonify(comments_total)
 
     except Exception as e:
@@ -563,9 +789,8 @@ def send_comments(author_id, post_id):
 
         cur.execute(check_friends_query, (author_id, comment_author_id))
         status = dict(cur.fetchone())['status']
-        if author_id == comment_author_id:
-            status = 'private'
-        print(status)
+        
+        # print(status)
         query = "INSERT INTO comments " \
                 "(comment_id, comment_author_id, " \
                 "post_id, author_id, comment_text, status, date_commented) " \
