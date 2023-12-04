@@ -258,7 +258,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
                         setPostsLists={setPostsLists} 
                         authorId={authorId}
                         username={username}
-                        github={github} /> : <div>There are no posts</div>)
+                        github={github} /> : <div>Your inbox is empty</div>)
                     }
                 </div>
             </div>
