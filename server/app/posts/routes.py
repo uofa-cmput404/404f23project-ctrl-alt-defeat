@@ -259,6 +259,7 @@ def index():
             if post['sender_host'] == 'https://cmput-average-21-b54788720538.herokuapp.com/api':
                 try:                    
                     new_item = rf.get_post('https://cmput-average-21-b54788720538.herokuapp.com/api/', post['sender_id'], post['object_id'], 'CtrlAltDefeat', 'string')
+                    new_item["date_posted"] = post["date_received"]
                     payload.append(new_item)
 
                 except Exception as e:
@@ -269,6 +270,7 @@ def index():
             elif post['sender_host'] == 'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/':
                 try:                    
                     new_item = rf.get_post('https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/', post['sender_id'], post['object_id'], 'cross-server', 'password')                    
+                    new_item["date_posted"] = post["date_received"]
                     payload.append(new_item)
 
                 except Exception as e:
@@ -279,6 +281,7 @@ def index():
             elif post['sender_host'] == 'https://chimp-chat-1e0cca1cc8ce.herokuapp.com/':
                 try:                    
                     new_item = rf.get_post('https://chimp-chat-1e0cca1cc8ce.herokuapp.com/api/', post['sender_id'], post['object_id'], 'cross-server', 'password')                    
+                    new_item["date_posted"] = post["date_received"]
                     payload.append(new_item)
 
                 except Exception as e:
@@ -309,7 +312,7 @@ def index():
         #     item['date_posted'] = datetime.strptime(item['date_posted'], '%Y-%m-%d')
 
         # # Sort the list of dicts by the 'date' key
-        # payload = sorted(payload, key=lambda x: x['date_posted'], reverse=True)
+        payload = sorted(payload, key=lambda x: x['date_posted'], reverse=True)
         data = payload        
 
     except Exception as e:
