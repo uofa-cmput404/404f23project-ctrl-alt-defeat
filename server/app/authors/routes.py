@@ -693,15 +693,17 @@ def get_post_comments(author_id, post_id):
         
         conn, cursor = get_db_connection()
         print("author:", comment_author_id)
+
         query = """
-            SELECT a.username, c.comment_text,c.comment_author_id, c.comment_id, c.date_commented, a.github,
+            SELECT i.sender_display_name, c.comment_text,c.comment_author_id, c.comment_id, c.date_commented, a.github,
                 EXISTS (
                     SELECT 1 FROM comment_likes cl 
                     WHERE cl.comment_id = c.comment_id 
                     AND cl.like_comment_author_id = %s
                 ) AS isLikedByCurrentUser
             FROM comments c
-            INNER JOIN authors a ON c.comment_author_id = a.author_id
+            INNER JOIN inbox_items i ON c.comment_author_id = i.sender_id
+            LEFT JOIN authors a ON c.comment_author_id = a.author_id
             WHERE c.post_id = %s
             AND c.author_id = %s
             AND (
@@ -711,6 +713,7 @@ def get_post_comments(author_id, post_id):
             )
             LIMIT %s OFFSET %s
         """
+
         if page is not None:
             page = int(page)
         else: page = 1 # Set default 1
@@ -724,6 +727,7 @@ def get_post_comments(author_id, post_id):
         comment_info = cursor.fetchall()
         
         comment_info = [dict(i) for i in comment_info]
+        print(comment_info)
         conn.close()
 
 
@@ -737,7 +741,7 @@ def get_post_comments(author_id, post_id):
                     # url to the authors information
                     "url":request.url_root + 'api/authors/' + author_id,
                     "host":request.url_root,
-                    "displayName":comment['username'],
+                    "displayName":comment['sender_display_name'],
                     # HATEOS url for Github API
                     "github": comment['github'],
                     #set profileImage to None
