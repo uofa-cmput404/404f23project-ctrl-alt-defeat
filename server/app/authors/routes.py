@@ -695,7 +695,7 @@ def get_post_comments(author_id, post_id):
         print("author:", comment_author_id)
 
         query = """
-            SELECT i.sender_display_name, c.comment_text,c.comment_author_id, c.comment_id, c.date_commented, a.github,
+            SELECT DISTINCT i.sender_display_name, c.comment_text,c.comment_author_id, c.comment_id, c.date_commented, a.github,
                 EXISTS (
                     SELECT 1 FROM comment_likes cl 
                     WHERE cl.comment_id = c.comment_id 
