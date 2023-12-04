@@ -394,7 +394,7 @@
     },
     "/api/authors/{author_id}/inbox": {
       "post": {
-        "summary": "Send an follow/like/comment to an author (REMOTE)",
+        "summary": "Send like, follow request or post to an author (REMOTE)",
         "parameters": [
           {
             "name": "author_id",
