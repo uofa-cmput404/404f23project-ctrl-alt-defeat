@@ -474,9 +474,9 @@ def send(author_id):
         elif message_type == "comment":     
             conn, curr = get_db_connection()                               
             #Check if the authors are friends
-            print("1")
+      
             comment_author_id = request_data["author"]["id"].split("/")[-1]
-            print("2")
+          
             check_friends_query = """
                 SELECT CASE 
                     WHEN EXISTS (
@@ -500,20 +500,26 @@ def send(author_id):
                 "post_id, author_id, comment_text, status, date_commented) " \
                 "VALUES (%s, %s, %s, %s, %s, %s ,CURRENT_TIMESTAMP)" 
 
-            print("1")
-            post_url = request_data["object"]["id"].split("/")
+     
+            print(request_data)
+      
+            post_url = request_data["id"].split("/")
+      
             post_index = post_url.index("posts")
+      
             post_id = post_url[post_index + 1]
-            print(post_id)
-            curr.execute(query, (comment_id, comment_author_id,  post_id, author_id, request_data["object"]["comment"], 'PUBLIC'))
-            
+      
+            #print(post_id)
+            curr.execute(query, (comment_id, comment_author_id,  post_id, author_id, request_data["comment"], 'PUBLIC'))
+  
             inbox_query = "INSERT INTO inbox_items " \
                             "(sender_id, sender_host, " \
                             "sender_display_name, recipient_id, " \
                             "inbox_item_id, object_id, type) VALUES " \
                             "(%s, %s, %s, %s, %s, %s, %s)"
-            
+         
             inboxItemId = str(uuid.uuid4())
+  
             curr.execute(inbox_query, (comment_author_id,  request_data["author"]["host"], request_data["author"]["displayName"], author_id, inboxItemId, comment_id, "comment"))
 
             conn.commit()
@@ -550,7 +556,7 @@ def get_inbox_items(author_id):
         cur.execute(query, (author_id, author_id))
         row = cur.fetchall()
         inbox_items = [dict(i) for i in row]        
-
+        print(inbox_items)
         for item in inbox_items: 
             print(item["type"])           
             if item["type"] == "Like":
@@ -594,7 +600,7 @@ def get_inbox_items(author_id):
                     data_item["post_id"] = row["post_id"]
                     data_item["comment"] = row["comment_text"]
                     data["items"].append(data_item)
-
+      
             if item["type"] == "comment_like":
                 print("comment_like")
                 data_item = dict()                
@@ -627,8 +633,27 @@ def get_inbox_items(author_id):
                         data_item["post_id"] = row["post_id"]
                         data["items"].append(data_item)
 
-            # TODO: comment likes
-            # print(data)
+            if item["type"] == "share":
+                print("share")
+                data_item = dict()   
+              
+                data_item["type"] = item["type"]
+          
+                data_item["author"] = item["sender_id"]
+        
+                data_item["displayName"] = item["sender_display_name"]
+          
+                data_item["summary"] =  item["sender_display_name"] + " share a post to you."
+          
+                data_item["date_received"] =  item["date_received"]
+                
+
+                data_item["post_id"] = item["object_id"]
+          
+                data["items"].append(data_item)
+           
+                
+      
             data["items"] = sorted(data["items"], key=lambda x: x['date_received'], reverse=True)            
 
     except Exception as e:
