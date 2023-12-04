@@ -235,7 +235,7 @@ def check_follower(author_id, foreign_author_id):
         if existing_friendship:
             return jsonify({'is_follower': True}), 200
         else:
-            return jsonify({'is_follower': False}), 200
+            return jsonify({'is_follower': False}), 404
 
     finally:
         cursor.close()
