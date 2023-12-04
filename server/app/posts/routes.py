@@ -314,39 +314,8 @@ def new_post():
 
         data = "successfully posted in local db"
 
-        # Package the body according to spec
-        send_data = dict()
-        send_data["type"] = "post"
-        send_data["title"] = title
-        send_data["id"] = request.root_url + "authors/" + author_id + "/posts/" + post_id
-        send_data["source"] = send_data["id"] 
-        send_data["origin"] = send_data["id"]
-        send_data["description"] = ""
-        send_data["contentType"] = content_type
-        send_data["content"] = content
-        send_data["author"] = dict()
-        send_data["author"]["type"] = "author"
-        send_data["author"]["id"] = request.root_url + "authors/" + author_id
-        send_data["author"]["host"] = request.root_url
-        send_data["author"]["displayName"] = author_info["username"]
-        send_data["author"]["url"] = send_data["author"]["id"]
-        if author_info["github"] == None:
-            send_data["author"]["github"] = None
-        else:
-            send_data["author"]["github"] = "https://github.com/" + author_info["github"]
-        send_data["author"]["profileImage"] = None
-        send_data["categories"] = []
-        send_data["comments"] = request.root_url + "authors/" + author_id + "/posts/" + post_id + "/comments"
-        #send_data["commentsSrc"] = {} # `null` for now, will send as needed
-        # Count = number of comments
-        send_data["count"] = 0
-        send_data["published"] = str(datetime.now().astimezone().replace(microsecond=0).isoformat())
-        send_data["visibility"] = visibility
-        send_data["unlisted"] = False
-
-        # Package body into json
-        body = send_data
-        #print(json.dumps(body))
+        author_host = request.root_url
+        author_display_name = author_info["username"]
 
         # Depending on visibility, send to specific
         # authors of local node (i.e. Ctrl+Alt+Defeat)
@@ -391,7 +360,7 @@ def new_post():
                         "recipient_id, object_id, type) " \
                         "VALUES (%s, %s, %s, %s, %s, %s, %s)"
 
-            curr.execute(inbox_query, (inbox_item_id, author_id, send_data["author"]["displayName"], send_data["author"]["host"], recipient_id, post_id, "post"))
+            curr.execute(inbox_query, (inbox_item_id, author_id, author_display_name, author_host, recipient_id, post_id, "post"))
             print("Sent to local author", recipient_id)
 
         conn.commit()
@@ -440,6 +409,7 @@ def new_post_to_remote_nodes():
 
         conn, curr = get_db_connection()
 
+        # Get `github` and `displayName`
         author_query = "SELECT github, username FROM authors WHERE author_id = %s"
         curr.execute(author_query, (author_id,))
         author_info = curr.fetchone()
@@ -482,14 +452,25 @@ def new_post_to_remote_nodes():
         # to the inboxes of all authors of remote nodes
         # (i.e. Ctrl+C and Ctrl+V, 21-Average)
         if visibility == "PUBLIC":
-            # Get all recipients from remote nodes
-
-            # Ctrl+C and Ctrl+V node
+            # Get all authors from remote nodes
+            ## Ctrl+C and Ctrl+V
             remoteAuthorsUrl = "https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/"
             remoteAuthorsResp = requests.get(remoteAuthorsUrl, auth = ('cross-server','password'))
-            remoteAuthors = dict(remoteAuthorsResp.json())["items"]
+            remoteAuthorsCtrlCCtrlV = dict(remoteAuthorsResp.json())["items"]
 
-            for ra in remoteAuthors:
+            ## 21-Average
+            remoteAuthorsUrl = "https://cmput-average-21-b54788720538.herokuapp.com/api/authors"
+            remoteAuthorsResp = requests.get(remoteAuthorsUrl, auth = ('CtrlAltDefeat', 'string'))
+            remoteAuthors21avg = dict(remoteAuthorsResp.json())["items"]
+
+            ## Coding Monkeys
+            remoteAuthorsUrl = "https://chimp-chat-1e0cca1cc8ce.herokuapp.com/authors/"
+            remoteAuthorsResp = requests.get(remoteAuthorsUrl, auth = ('node-ctrl-alt-defeat','chimpchatapi'))
+            remoteAuthorsCodingMonkeys = dict(remoteAuthorsResp.json())["items"]
+
+            # Send to all authors
+            ## Ctrl+C and Ctrl+V node
+            for ra in remoteAuthorsCtrlCCtrlV:
                 recipient_id = ra["id"].split('/')[-1]
                 remoteInboxUrl = "https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/" + recipient_id + "/inbox"
                 remoteInboxResp = requests.post(remoteInboxUrl, json = body, auth = ('cross-server','password'))
@@ -499,13 +480,9 @@ def new_post_to_remote_nodes():
                 else:
                     print("Successfully sent post to", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
             
-            # 21-Average node
+            ## 21-Average node
             specificBody = {"items": body} # specific body for 21-average
-            remoteAuthorsUrl = "https://cmput-average-21-b54788720538.herokuapp.com/api/authors"
-            remoteAuthorsResp = requests.get(remoteAuthorsUrl, auth = ('CtrlAltDefeat', 'string'))
-            remoteAuthors = dict(remoteAuthorsResp.json())["items"]
-
-            for ra in remoteAuthors:
+            for ra in remoteAuthors21avg:
                 recipient_id = ra["id"].split('/')[-2]
                 remoteInboxUrl = "https://cmput-average-21-b54788720538.herokuapp.com/api/authors/" + recipient_id + "/inbox/"
                 remoteInboxResp = requests.post(remoteInboxUrl, json = specificBody, auth = ('CtrlAltDefeat', 'string'))
@@ -514,13 +491,9 @@ def new_post_to_remote_nodes():
                 else:
                     print("Successfully sent post to", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
             
-            # Coding-Monkeys node
+            ## Coding-Monkeys node
             body["commentsSrc"] = {} # added to fit their spec
-            remoteAuthorsUrl = "https://chimp-chat-1e0cca1cc8ce.herokuapp.com/authors/"
-            remoteAuthorsResp = requests.get(remoteAuthorsUrl, auth = ('node-ctrl-alt-defeat','chimpchatapi'))
-            remoteAuthors = dict(remoteAuthorsResp.json())["items"]
-
-            for ra in remoteAuthors:
+            for ra in remoteAuthorsCodingMonkeys:
                 recipient_id = ra["id"].split('/')[-1]
                 remoteInboxUrl = "https://chimp-chat-1e0cca1cc8ce.herokuapp.com/authors/" + recipient_id + "/inbox/"
                 remoteInboxResp = requests.post(remoteInboxUrl, json = body, auth = ('node-ctrl-alt-defeat','chimpchatapi'))
@@ -529,15 +502,60 @@ def new_post_to_remote_nodes():
                     print("ERROR: code", remoteInboxResp, "at", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
                 else:
                     print("Successfully sent post to", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
-
+            
         elif visibility == "FRIENDS":
-            # check friends of node
-            abort(500, "needs fix")
+            # If friends-only post, check remote followers
+            # and send to node
 
+            # CHECK friends TABLE FOR REMOTE 
+            # AUTHORS WHO FOLLOW THE POST AUTHOR
+            friends_query = "SELECT author_following, host FROM " \
+                            "friends WHERE author_followee = %s " \
+                            "AND NOT host = %s"
+            curr.execute(friends_query, (author_id, "local"))
+
+            recipients = curr.fetchall()
+            recipients = [dict(i) for i in recipients]
+
+            # For each remote follower of the post author, 
+            # send to the respective follower's inbox (depending on host)
+            for recipient in recipients:
+                recipient_host = recipient["host"]
+                recipient_id = recipient["author_following"]
+
+                if recipient_host == "https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/":
+                    remoteInboxUrl = "https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/authors/" + recipient_id + "/inbox"
+                    remoteInboxResp = requests.post(remoteInboxUrl, json = body, auth = ('cross-server','password'))
+                    #print(remoteInboxResp.request.body) # Confirmed that `None` -> `null` 
+                    if remoteInboxResp.status_code != 200:
+                        print("ERROR: code", remoteInboxResp, "at", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
+                    else:
+                        print("Successfully sent post to", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
+                
+                elif recipient_host == "https://cmput-average-21-b54788720538.herokuapp.com/api": 
+                    specificBody = {"items": body} # specific body for 21-average
+                    recipient_id = ra["id"].split('/')[-2]
+                    remoteInboxUrl = "https://cmput-average-21-b54788720538.herokuapp.com/api/authors/" + recipient_id + "/inbox/"
+                    remoteInboxResp = requests.post(remoteInboxUrl, json = specificBody, auth = ('CtrlAltDefeat', 'string'))
+                    if remoteInboxResp.status_code != 201:
+                        print("ERROR: code", remoteInboxResp, "at", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
+                    else:
+                        print("Successfully sent post to", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
+                    
+                elif recipient_host == "https://cmput404-ctrl-alt-defeat-api-12dfa609f364.herokuapp.com/":
+                    body["commentsSrc"] = {} # added to fit their spec
+                    remoteInboxUrl = "https://chimp-chat-1e0cca1cc8ce.herokuapp.com/authors/" + recipient_id + "/inbox/"
+                    remoteInboxResp = requests.post(remoteInboxUrl, json = body, auth = ('node-ctrl-alt-defeat','chimpchatapi'))
+                    #print(remoteInboxResp.request.body) # Confirmed that `None` -> `null` 
+                    if remoteInboxResp.status_code != 200:
+                        print("ERROR: code", remoteInboxResp, "at", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
+                    else:
+                        print("Successfully sent post to", remoteInboxUrl, " response:", remoteInboxResp.content, "\n")
         else:
             print("Private or unlisted post detected, not sending to remote node inboxes. \n")
 
-
+        conn.commit()
+        conn.close()
         data = "success"
 
     except Exception as e:
