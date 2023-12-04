@@ -54,7 +54,7 @@ export default function IndividualPost() {;
         fetchData();        
     }, []);
 
-    function get_content_as_elements(content_type, content){        
+    function getContentAsElements(content_type, content){
         if (content_type === "text/plain"){
             return(<p>{content}</p>);
         }
@@ -65,8 +65,8 @@ export default function IndividualPost() {;
         {
             //var image = new Image();
             //let decodedString = atob(content);
-            let tag = 'data:' + content_type + "," + content;
-            return (<img width={500} src={tag}/>) // Set to have width of 500 for now
+            //let tag = 'data:' + content_type + "," + content;
+            return (<img width={500} src={process.env.REACT_APP_API_HOSTNAME + '/api/authors/' + author_id + '/posts/' +post_id + '/image' }/>) // Set to have width of 500 for now
         }
         else if (content_type === "image/png;url" || content_type === "image/jpeg;url"){
             //change width property or remove it, resizing will be done at the style level.
@@ -88,7 +88,7 @@ export default function IndividualPost() {;
                     <h3>{postSelected.title}</h3>
                     <div>Posted by: {username}</div>
                     <div>{postSelected.published}</div>
-                    <div>{get_content_as_elements(postSelected.contentType,postSelected.content)}</div>                
+                    <div>{getContentAsElements(postSelected.contentType,postSelected.content)}</div>
                 </div>
                 : <h1>Post not found</h1> )
              }

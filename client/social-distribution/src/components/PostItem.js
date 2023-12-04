@@ -62,7 +62,7 @@ const buttonStyle = {
 
 
 
-function get_content_as_elements(content_type, content){
+function getContentAsElements(content_type, content, author_id, post_id){
     if (content_type === "text/plain"){
         return(<p>{content}</p>);
     }
@@ -73,8 +73,8 @@ function get_content_as_elements(content_type, content){
     {
         //var image = new Image();
         //let decodedString = atob(content);
-        let tag = 'data:' + content_type + "," + content;
-        return (<img width={500} src={tag}/>) // Set to have width of 500 for now
+        //let tag = 'data:' + content_type + "," + content;
+        return (<img width={500} src={process.env.REACT_APP_API_HOSTNAME + '/api/authors/' + author_id + '/posts/' + post_id + '/image'}/>) // Set to have width of 500 for now
     }
     else if (content_type === "image/png;url" || content_type === "image/jpeg;url"){
         //change width property or remove it, resizing will be done at the style level.
@@ -207,7 +207,7 @@ function PostItem(props) {
         <small class="text-muted">Posted by: {props.item.username}</small>        
         <small class="text-muted">{props.item.date_posted}</small>        
         <hr/>
-        <div>{get_content_as_elements(props.item.content_type,props.item.content)}</div>
+        <div>{getContentAsElements(props.item.content_type,props.item.content,props.item.author_id,props.item.post_id)}</div>
         
         <div onClick={handleToggleLike}>
         {// Show like icon as liked or not based on if logged in author has liked the post
