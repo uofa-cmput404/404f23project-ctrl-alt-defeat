@@ -510,7 +510,7 @@ def send(author_id):
             post_id = post_url[post_index + 1]
       
             #print(post_id)
-            curr.execute(query, (comment_id, comment_author_id,  post_id, author_id, request_data["comment"], 'PUBLIC'))
+            curr.execute(query, (comment_id, comment_author_id,  post_id, author_id, request_data["object"]["comment"], 'PUBLIC'))
   
             inbox_query = "INSERT INTO inbox_items " \
                             "(sender_id, sender_host, " \
