@@ -225,9 +225,11 @@ function PostItem(props) {
             "profileImage": "https://i.imgur.com/k7XVwpB.jpeg",
             "displayName": username
         },
-        "comment": commentData.comment_text,
-        "contentType":"text/markdown",
-        "id": process.env.REACT_APP_API_HOSTNAME + "/api/authors/" + props.item.author_id + "/posts/" + props.item.post_id,
+        "object": {
+          "comment": commentData.comment_text,
+          "contentType":"text/markdown",
+          "id": process.env.REACT_APP_API_HOSTNAME + "/api/authors/" + props.item.author_id + "/posts/" + props.item.post_id,
+        }
     }
       const apiUrl = `${process.env.REACT_APP_API_HOSTNAME}/api/authors/${props.item.author_id}/inbox`;
             
