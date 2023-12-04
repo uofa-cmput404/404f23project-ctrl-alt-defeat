@@ -409,8 +409,12 @@ def send(author_id):
 
         elif message_type == "Follow":
             actor_host = request_data["actor"]["host"]
-            receiver = request_data["object"]["id"].split("/")[-1]
-            #receiver = author_id
+            receiver = request_data["object"]["id"].split("/")
+
+            if receiver[-1] == "":
+                receiver.pop()
+            receiver = receiver[-1]
+
             sender = request_data["actor"]["id"].split("/")[-1]
 
             conn, curr = get_db_connection()
@@ -474,9 +478,9 @@ def send(author_id):
         elif message_type == "comment":     
             conn, curr = get_db_connection()                               
             #Check if the authors are friends
-            print("1")
+      
             comment_author_id = request_data["author"]["id"].split("/")[-1]
-            print("2")
+          
             check_friends_query = """
                 SELECT CASE 
                     WHEN EXISTS (
@@ -500,20 +504,26 @@ def send(author_id):
                 "post_id, author_id, comment_text, status, date_commented) " \
                 "VALUES (%s, %s, %s, %s, %s, %s ,CURRENT_TIMESTAMP)" 
 
-            print("1")
+     
+            print(request_data)
+      
             post_url = request_data["object"]["id"].split("/")
+      
             post_index = post_url.index("posts")
+      
             post_id = post_url[post_index + 1]
-            print(post_id)
+      
+            #print(post_id)
             curr.execute(query, (comment_id, comment_author_id,  post_id, author_id, request_data["object"]["comment"], 'PUBLIC'))
-            
+  
             inbox_query = "INSERT INTO inbox_items " \
                             "(sender_id, sender_host, " \
                             "sender_display_name, recipient_id, " \
                             "inbox_item_id, object_id, type) VALUES " \
                             "(%s, %s, %s, %s, %s, %s, %s)"
-            
+         
             inboxItemId = str(uuid.uuid4())
+  
             curr.execute(inbox_query, (comment_author_id,  request_data["author"]["host"], request_data["author"]["displayName"], author_id, inboxItemId, comment_id, "comment"))
 
             conn.commit()
@@ -550,7 +560,7 @@ def get_inbox_items(author_id):
         cur.execute(query, (author_id, author_id))
         row = cur.fetchall()
         inbox_items = [dict(i) for i in row]        
-
+        print(inbox_items)
         for item in inbox_items: 
             print(item["type"])           
             if item["type"] == "Like":
@@ -594,7 +604,7 @@ def get_inbox_items(author_id):
                     data_item["post_id"] = row["post_id"]
                     data_item["comment"] = row["comment_text"]
                     data["items"].append(data_item)
-
+      
             if item["type"] == "comment_like":
                 print("comment_like")
                 data_item = dict()                
@@ -627,8 +637,27 @@ def get_inbox_items(author_id):
                         data_item["post_id"] = row["post_id"]
                         data["items"].append(data_item)
 
-            # TODO: comment likes
-            # print(data)
+            if item["type"] == "share":
+                print("share")
+                data_item = dict()   
+              
+                data_item["type"] = item["type"]
+          
+                data_item["author"] = item["sender_id"]
+        
+                data_item["displayName"] = item["sender_display_name"]
+          
+                data_item["summary"] =  item["sender_display_name"] + " share a post to you."
+          
+                data_item["date_received"] =  item["date_received"]
+                
+
+                data_item["post_id"] = item["object_id"]
+          
+                data["items"].append(data_item)
+           
+                
+      
             data["items"] = sorted(data["items"], key=lambda x: x['date_received'], reverse=True)            
 
     except Exception as e:
@@ -693,15 +722,18 @@ def get_post_comments(author_id, post_id):
         
         conn, cursor = get_db_connection()
         print("author:", comment_author_id)
+
         query = """
-            SELECT a.username, c.comment_text,c.comment_author_id, c.comment_id, c.date_commented, a.github,
+
+            SELECT DISTINCT i.sender_display_name, c.comment_text,c.comment_author_id, c.comment_id, c.date_commented, a.github,
                 EXISTS (
                     SELECT 1 FROM comment_likes cl 
                     WHERE cl.comment_id = c.comment_id 
                     AND cl.like_comment_author_id = %s
                 ) AS isLikedByCurrentUser
             FROM comments c
-            INNER JOIN authors a ON c.comment_author_id = a.author_id
+            INNER JOIN inbox_items i ON c.comment_author_id = i.sender_id
+            LEFT JOIN authors a ON c.comment_author_id = a.author_id
             WHERE c.post_id = %s
             AND c.author_id = %s
             AND (
@@ -711,6 +743,7 @@ def get_post_comments(author_id, post_id):
             )
             LIMIT %s OFFSET %s
         """
+
         if page is not None:
             page = int(page)
         else: page = 1 # Set default 1
@@ -724,6 +757,7 @@ def get_post_comments(author_id, post_id):
         comment_info = cursor.fetchall()
         
         comment_info = [dict(i) for i in comment_info]
+        print(comment_info)
         conn.close()
 
 
@@ -737,7 +771,7 @@ def get_post_comments(author_id, post_id):
                     # url to the authors information
                     "url":request.url_root + 'api/authors/' + author_id,
                     "host":request.url_root,
-                    "displayName":comment['username'],
+                    "displayName":comment['sender_display_name'],
                     # HATEOS url for Github API
                     "github": comment['github'],
                     #set profileImage to None
@@ -751,7 +785,6 @@ def get_post_comments(author_id, post_id):
             } for comment in comment_info
         ]
         comments_total = {"type":"comments","page":page, "size":size, "post":request.url_root+'api/authors/' + author_id+'/posts/' + post_id, "id": post_id, 'items': comments_list}
-        # print(comments_total)
         return jsonify(comments_total)
 
     except Exception as e:
@@ -959,5 +992,86 @@ def get_comments_likes(comment_id):
     except Exception as e:
         print("Getting comments error: ", e)
         return jsonify({'error': str(e)}), 500
+    
+@bp.route('/authors/<author_id>/posts/<post_id>/likes/count', methods=['GET'])
+def get_post_likes_count(author_id, post_id):
+    try:
+        conn, curr = get_db_connection()
+
+        # First, check the visibility of the post
+        visibility_query = "SELECT visibility FROM posts WHERE post_id = %s"
+        curr.execute(visibility_query, (post_id,))
+        visibility_result = curr.fetchone()
+        print("this is visibility_result")
+        print(visibility_result)
+        if not visibility_result:
+            return jsonify({"error": "Post not found"}), 404
+
+        if visibility_result['visibility'] == 'FRIENDS':
+            # If visibility is 'FRIENDS', count the likes
+            likes_query = "SELECT COUNT(*) as count FROM likes WHERE post_id = %s"
+            curr.execute(likes_query, (post_id,))
+            likes_count = curr.fetchone()['count']
+
+            return jsonify({"numLikes": likes_count})
+        else:
+            # If visibility is not 'FRIENDS', return null
+            return jsonify({"numLikes": None})
+
+    except Exception as e:
+        print("Error getting post likes count: ", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
 
 
+@bp.route('/posts/<post_id>/share', methods=['POST'])
+def share_post(post_id):
+    try:
+        loginUser_id = request.args.get('loginUser_id')
+        request_data = request.get_json()
+        share_option = request_data.get('share_option')  # 'PUBLIC' or 'FRIENDS'
+
+        if not loginUser_id:
+            return jsonify({"error": "Login user ID is required"}), 400
+
+        conn, curr = get_db_connection()
+
+      
+        # Fetch the sender's display name
+        curr.execute("SELECT username FROM authors WHERE author_id = %s", (loginUser_id,))
+        sender = curr.fetchone()
+        if not sender:
+            return jsonify({"error": "Sender not found"}), 404
+        sender_display_name = sender['username']
+      
+        # Determine recipients based on share_option
+        if share_option == 'PUBLIC':
+            # Fetch all authors
+            curr.execute("SELECT author_id FROM authors")
+            recipients = curr.fetchall()
+        else:
+            # Fetch only friends
+            curr.execute("SELECT author_following FROM friends WHERE author_followee = %s AND host = 'local'", (loginUser_id,))
+            recipients = curr.fetchall()
+
+        # Insert into inbox_items for each recipient
+        for recipient in recipients:
+            recipient_id = recipient['author_following'] if share_option == 'FRIENDS' else recipient['author_id']
+            inbox_item_id = str(uuid.uuid4())
+            curr.execute("""
+                INSERT INTO inbox_items (inbox_item_id, sender_id, sender_display_name, sender_host, recipient_id, object_id, type)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (inbox_item_id, loginUser_id, sender_display_name, request.url_root, recipient_id, post_id, 'share'))
+
+        conn.commit()
+
+        return jsonify({"message": "Post shared successfully", "post_id": post_id}), 201
+
+    except Exception as e:
+        print("Error sharing post: ", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn:
+            conn.close()

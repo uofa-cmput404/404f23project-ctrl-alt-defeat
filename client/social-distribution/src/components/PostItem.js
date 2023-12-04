@@ -85,6 +85,7 @@ function getContentAsElements(content_type, content){
 }
 
 function PostItem(props) {
+  const [numLikes, setNumLikes] = useState(0); // State for storing the number of likes
 
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
@@ -95,7 +96,24 @@ function PostItem(props) {
     props.togglePostLike(props.item.post_id, props.item.liked, props.item.author_id);
   }
 
+
+  const fetchLikes = async () => {
+    try {
+      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/likes/count`;
+      const response = await axios.get(apiUrl);
+      // set return to null in routes if not friend only post
+      if (response.data && response.data.numLikes !== null) {
+        setNumLikes(response.data.numLikes);
+      } else {
+        setNumLikes('not show');
+      }
+    } catch (error) {
+      console.error('Error fetching number of likes:', error);
+    }
+  };
+
   const { username } = useContext(UserContext);
+
 
   const fetchComments = async () => {
     try {
@@ -177,31 +195,52 @@ function PostItem(props) {
   };
 
   useEffect(() => {
+    fetchLikes();
     fetchComments();
   }, [props.item, props.loginUser]); // Refetch comments when item or loginUser changes
   
   const handleCommentChange = (e) => {
     setComment(e.target.value);
   };
-  const handleSharePost = async () => {
-    if (props.item.author_id === props.loginUser) return;
 
+  const handleShareToPublic = async () => {
     try {
 
-      // not right for now, wait for inbox
-      const shareApiUrl = process.env.REACT_APP_API_HOSTNAME `/api/share/post/${props.item.post_id}`;
-      await axios.post(shareApiUrl, { shared_by: props.loginUser }, {
-          headers: {
-              'Authorization' : process.env.REACT_APP_AUTHORIZATION
-          }
+      const shareApiUrl = process.env.REACT_APP_API_HOSTNAME`/api/posts/${props.item.post_id}/share`;
+      const payload = { share_option: 'PUBLIC' };
+      await axios.post(shareApiUrl, payload, {
+        headers: {
+          'Authorization': process.env.REACT_APP_AUTHORIZATION
+        },
+        params: {
+          loginUser_id: props.loginUser
+        }
       });
+  
+      alert('Post shared publicly');
 
-      // Display notification
-      alert('Share Success');
     } catch (error) {
-      console.error('Error sharing post:', error);
+      console.error('Error sharing post to public:', error);
     }
   };
+  
+  const handleShareToFriends = async () => {
+    try {
+      const shareApiUrl = process.env.REACT_APP_API_HOSTNAME `/api/share/post/${props.item.post_id}`;
+      const payload = { share_option: 'FRIENDS' };
+      await axios.post(shareApiUrl, payload, {
+        headers: {
+          'Authorization' : process.env.REACT_APP_AUTHORIZATION
+      },
+        params: { loginUser_id: props.loginUser }
+      });
+  
+      alert('Post shared with friends');
+    } catch (error) {
+      console.error('Error sharing post to friends:', error);
+    }
+  };
+  
 
   //send comment to database
   const handleSendComment = async () => {
@@ -228,7 +267,9 @@ function PostItem(props) {
         "object": {
           "comment": commentData.comment_text,
           "contentType":"text/markdown",
-          "id": process.env.REACT_APP_API_HOSTNAME + "/api/authors/" + props.item.author_id + "/posts/" + props.item.post_id,
+          "id": process.env.REACT_APP_API_HOSTNAME  + "/api/authors/" + props.item.author_id + "/posts/" + props.item.post_id,
+
+
         }
     }
       const apiUrl = `${process.env.REACT_APP_API_HOSTNAME}/api/authors/${props.item.author_id}/inbox`;
@@ -260,13 +301,32 @@ function PostItem(props) {
             : <img style={styles.img} src={notLikedImgUrl} /> 
           
         }
+         {/* Conditionally display number of likes for friends only posts */}
+       {numLikes != 'not show' && (
+        <div>
+          <span>{numLikes} Likes</span>
         </div>
-        {/* Share Button - Visible only if the post is made by another author */}
-        {props.item.author_id !== props.loginUser && (<div style={buttonContainerStyle}>
-        <button style={buttonStyle} onClick={handleSharePost}>
-          share
-        </button>
-        </div>)}
+
+      )}
+        </div>
+      {/* Share Button - Visible only if the post is made by another author */}
+      {props.item.author_id !== props.loginUser && (
+          <div style={buttonContainerStyle}>
+              {props.item.visibility === 'FRIENDS' ? (
+                  // If the post is friends only, show only the "Share to Friends" button
+                  <button style={buttonStyle} onClick={handleShareToFriends}>Share to Friends</button>
+              ) : (
+                  // If the post is public, show both "Share to Public" and "Share to Friends" buttons
+                  <>
+                      <button style={buttonStyle} onClick={handleShareToPublic}>Share to Public</button>
+                      <button style={{ ...buttonStyle, marginLeft: '10px' }} onClick={handleShareToFriends}>Share to Friends</button>
+                  </>
+              )}
+          </div>
+      )}
+
+
+       
 
 
         <div style={styles.commentBox}>

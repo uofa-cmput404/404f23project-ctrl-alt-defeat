@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
 import LikeSymbol from '../components/LikeSymbol';
 import CommentIcon from '../components/CommentIcon';
+import ShareIcon from '../components/ShareIcon'; 
+
 
 const inboxUrl = process.env.REACT_APP_API_HOSTNAME + '/api/';
 
@@ -77,6 +79,7 @@ function Inbox() {
                                         {(e.type === "comment_like" && <><LikeSymbol/><a style={{marginLeft: "20px"}} href={e.url}>{e.summary}</a></>)}                                        
                                         {(e.type === "comment" && <div><CommentIcon/><a style={{marginLeft: "20px"}} href={e.url}>{e.summary}</a> 
                                                     <div class="card" style={{marginTop: "10px", padding: "20px", marginLeft: "50px"}}>"{e.comment}"</div></div>)}   
+                                        {e.type === "share" && <div><ShareIcon/><a style={{marginLeft: "20px"}} href={e.url}>{e.summary}</a></div>}   
                                     </div></li>
                             })
                         }                
