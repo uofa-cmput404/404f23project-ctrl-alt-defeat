@@ -430,8 +430,12 @@ def new_post():
         # Count = number of comments
         send_data["count"] = 0
         send_data["published"] = str(datetime.now().astimezone().replace(microsecond=0).isoformat())
-        send_data["visibility"] = visibility
-        send_data["unlisted"] = False
+        if visibility == "unlisted":
+            send_data["visibility"] = "PUBLIC" # make unlisted post public but unlisted
+            send_data["unlisted"] = True
+        else:
+            send_data["visibility"] = visibility   
+            send_data["unlisted"] = False
 
         # Package body into json
         body = send_data
@@ -462,8 +466,8 @@ def new_post():
 
         elif visibility == "private" or visibility == "unlisted":
             # Only send to post author's inbox
-            target = "author_id"
-            localRecipients = [{target: author_id}]
+            column = "author_id"
+            localRecipients = [{column: author_id}]
 
         else:
             raise Exception("Invalid visibility value was given by NewPost.js: accepts (for remote nodes) 'PUBLIC', 'FRIENDS'; (for local node) 'private', 'unlisted'")
@@ -561,8 +565,12 @@ def new_post_to_remote_nodes():
         # Count = number of comments
         send_data["count"] = 0
         send_data["published"] = str(datetime.now().astimezone().replace(microsecond=0).isoformat())
-        send_data["visibility"] = visibility
-        send_data["unlisted"] = False
+        if visibility == "unlisted":
+            send_data["visibility"] = "PUBLIC" # make unlisted post public but unlisted
+            send_data["unlisted"] = True
+        else:
+            send_data["visibility"] = visibility   
+            send_data["unlisted"] = False
 
         # Package body into json
         body = send_data

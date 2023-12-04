@@ -91,35 +91,35 @@ export default function NewPost(props) {
         })
         .then(response => {
           if (response.data === "success") {            
-            toast.success("Post successfully posted!");
+            toast.success("Post successfully posted to local node!");
             navigate("/homepage");
             try {
               console.log(JSON.stringify({author_id: authorId, content_type: contentType, title: title, content: content, visibility: visibility, image_id: imageId}));
       
-              // axios.post(newPostRemoteUrl, {
-              //   author_id: authorId,
-              //   content_type: contentType,
-              //   title: title,
-              //   content: content,
-              //   visibility: visibility,
-              //   image_id: imageId
-              // }, {
-              //   headers: {
-              //     'Authorization': 'Basic Q3RybEFsdERlZmVhdDpmcm9udGVuZA=='
-              //   }
-              // })
-              // .then(response => {
-              //   if (response.data === "success") {            
-              //     toast.success("Post successfully posted!");
-              //     navigate("/homepage");
-              //   }
-              // })
-              // .catch(error => {
-              //   console.error('Error:', error);
-              // })
+              axios.post(newPostRemoteUrl, {
+                author_id: authorId,
+                content_type: contentType,
+                title: title,
+                content: content,
+                visibility: visibility,
+                image_id: imageId
+              }, {
+                headers: {
+                  'Authorization': 'Basic Q3RybEFsdERlZmVhdDpmcm9udGVuZA=='
+                }
+              })
+              .then(response => {
+                if (response.data === "success") {            
+                  toast.success("Post successfully posted to remote nodes!");
+                  navigate("/homepage");
+                }
+              })
+              .catch(error => {
+                console.error('Error posting remote:', error);
+              })
             
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error posting remote:', error);
             }
           }
         })
@@ -151,6 +151,10 @@ export default function NewPost(props) {
   const restrictUser = () => { // TODO: Check restrictUser.js 
     alert("This is a WIP. You can restrict authors from this post after you post it. Click on 'Manage my posts' on the stream.");
   }
+  // TODO: add restrictions
+  //<br></br>
+  //<button style={{width: '20vw'}} class="btn btn-warning" onClick={restrictUser}>Set restrictions</button>
+  //<br></br>
 
   // Functions encodeImageToBase64, handleImageChange 
   // are from ManagePosts.js
@@ -211,8 +215,6 @@ export default function NewPost(props) {
         </select>
       </form>
 
-      <br></br>
-      <button style={{width: '20vw'}} class="btn btn-warning" onClick={restrictUser}>Set restrictions</button>
       <br></br>
 
       <p>How would you like to format your post?</p>
