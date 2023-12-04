@@ -465,6 +465,7 @@ def new_post():
             column = "author_following"
 
         elif visibility == "private" or visibility == "unlisted":
+  
             # Only send to post author's inbox
             column = "author_id"
             localRecipients = [{column: author_id}]
@@ -472,18 +473,20 @@ def new_post():
         else:
             raise Exception("Invalid visibility value was given by NewPost.js: accepts (for remote nodes) 'PUBLIC', 'FRIENDS'; (for local node) 'private', 'unlisted'")
         
+        print(localRecipients)
         for la in localRecipients:
-
-            recipient_id = la[column]
-
+            for key in la:
+                key_au = key
+            recipient_id = la[key_au]
+   
             inbox_item_id = str(uuid.uuid4())
-
+   
             inbox_query = "INSERT INTO inbox_items " \
                         "(inbox_item_id, sender_id, " \
                         "sender_display_name, sender_host, " \
                         "recipient_id, object_id, type) " \
                         "VALUES (%s, %s, %s, %s, %s, %s, %s)"
-
+     
             curr.execute(inbox_query, (inbox_item_id, author_id, send_data["author"]["displayName"], send_data["author"]["host"], recipient_id, post_id, "post"))
             print("Sent to local author", recipient_id)
 
