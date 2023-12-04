@@ -394,7 +394,7 @@
     },
     "/api/authors/{author_id}/inbox": {
       "post": {
-        "summary": "Send Follow Request (REMOTE)",
+        "summary": "Send like, follow request or post to an author (REMOTE)",
         "parameters": [
           {
             "name": "author_id",
@@ -441,7 +441,7 @@
             }
           }
         },
-        "tags": ["Author"]
+        "tags": ["Inbox"]
       }
     },
     "/api/authors/{author_id}/inbox/unlike": {

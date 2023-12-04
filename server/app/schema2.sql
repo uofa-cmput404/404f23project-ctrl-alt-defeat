@@ -2,7 +2,7 @@
 DROP TABLE IF EXISTS post_restrictions;
 DROP TABLE IF EXISTS shares;
 DROP TABLE IF EXISTS comment_likes;
-DROP TABLE IF EXISTS comments;
+DROP TABLE IF EXISTS comments CASCADE;
 DROP TABLE IF EXISTS likes;
 DROP TABLE IF EXISTS follow_requests;
 DROP TABLE IF EXISTS friends;
@@ -79,17 +79,17 @@ CREATE TABLE comments (
     author_id TEXT NOT NULL, --TEXT
     comment_text TEXT NOT NULL, --TEXT
     status TEXT NOT NULL,
-    date_commented TIMESTAMP NOT NULL,
-    FOREIGN KEY (comment_author_id) REFERENCES authors(author_id),
-    FOREIGN KEY (post_id) REFERENCES posts(post_id)
+    date_commented TIMESTAMP NOT NULL,    
+    FOREIGN KEY (post_id) REFERENCES posts(post_id)  ON DELETE CASCADE
 );
 
 CREATE TABLE comment_likes (
+    comment_like_id TEXT PRIMARY KEY, --TEXT
     like_comment_author_id TEXT NOT NULL, --TEXT
     comment_id TEXT NOT NULL,
     time_liked TIMESTAMP NOT NULL,
     FOREIGN KEY (like_comment_author_id) REFERENCES authors(author_id),
-    FOREIGN KEY (comment_id) REFERENCES comments(comment_id)
+    FOREIGN KEY (comment_id) REFERENCES comments(comment_id) ON DELETE CASCADE
 );
 
 

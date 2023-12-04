@@ -4,6 +4,8 @@ import './PostItem.css';
 import axios from 'axios';
 import notLikedImgUrl from "../notLiked_black_24dp.svg";
 import likedImgUrl from "../liked_black_24dp.svg";
+import { useContext } from 'react';
+import { UserContext } from '../App';
 
 const styles = {
   img: {
@@ -83,6 +85,7 @@ function get_content_as_elements(content_type, content){
 }
 
 function PostItem(props) {
+  const [numLikes, setNumLikes] = useState(0); // State for storing the number of likes
 
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
@@ -93,6 +96,25 @@ function PostItem(props) {
     props.togglePostLike(props.item.post_id, props.item.liked, props.item.author_id);
   }
 
+
+  const fetchLikes = async () => {
+    try {
+      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/likes/count`;
+      const response = await axios.get(apiUrl);
+      // set return to null in routes if not friend only post
+      if (response.data && response.data.numLikes !== null) {
+        setNumLikes(response.data.numLikes);
+      } else {
+        setNumLikes('not show');
+      }
+    } catch (error) {
+      console.error('Error fetching number of likes:', error);
+    }
+  };
+
+  const { username } = useContext(UserContext);
+
+
   const fetchComments = async () => {
     try {
       const params = {
@@ -102,6 +124,7 @@ function PostItem(props) {
   
       const response = await axios.get(apiUrl, { params });
       if (response.data && response.data.items) {
+        console.log("comments: ", response.data);
         // Map through each comment and add a 'liked' property based on the user's like status
         const updatedComments = response.data.items.map(comment => ({
           ...comment,
@@ -117,13 +140,27 @@ function PostItem(props) {
   };
   
 
-  const toggleLikeComment = async (commentId) => {
+  const toggleLikeComment = async (commentId, commentAuthorId) => {
     try {
       // Construct the URL for the POST request
-      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}/toggle-like`;
-  
+      const apiUrl = `http://127.0.0.1:5000/api/authors/${commentAuthorId}/inbox`;
+      
+      const payload = {        
+        "summary": username + " Likes your comment",         
+        "type": "Like",
+        "author":{
+          "type":"author",
+          "id": "http://localhost:5000" + "/api/authors/" + props.loginUser,
+          "url": "http://localhost:5000" + "/api/authors/" + props.loginUser,
+          "host": "http://localhost:5000",            
+          "profileImage": "https://i.imgur.com/k7XVwpB.jpeg",
+          "displayName": username
+        },
+        "object": "http://localhost:5000" + "/api/authors/" + props.item.author_id + "/posts/" + props.item.post_id + "/comments/" + commentId,
+      }      
+      
       // Send the POST request
-      await axios.post(apiUrl, { like_comment_author_id: props.loginUser });
+      await axios.post(apiUrl, payload, {headers: {'Authorization': 'Basic Q3RybEFsdERlZmVhdDpmcm9udGVuZA=='}});
   
       // Update the like status in the local state
       const updatedComments = comments.map(comment => {
@@ -157,27 +194,42 @@ function PostItem(props) {
   };
 
   useEffect(() => {
+    fetchLikes();
     fetchComments();
   }, [props.item, props.loginUser]); // Refetch comments when item or loginUser changes
   
   const handleCommentChange = (e) => {
     setComment(e.target.value);
   };
-  const handleSharePost = async () => {
-    if (props.item.author_id === props.loginUser) return;
 
+  const handleShareToPublic = async () => {
     try {
-
-      // not right for now, wait for inbox
-      const shareApiUrl = `http://127.0.0.1:5000/api/share/post/${props.item.post_id}`;
-      await axios.post(shareApiUrl, { shared_by: props.loginUser });
-
-      // Display notification 
-      alert('Share Success');
+      const shareApiUrl = `http://127.0.0.1:5000/api/posts/${props.item.post_id}/share`;
+      const payload = { share_option: 'PUBLIC' };
+      await axios.post(shareApiUrl, payload, {
+        params: { loginUser_id: props.loginUser }
+      });
+  
+      alert('Post shared publicly');
     } catch (error) {
-      console.error('Error sharing post:', error);
+      console.error('Error sharing post to public:', error);
     }
   };
+  
+  const handleShareToFriends = async () => {
+    try {
+      const shareApiUrl = `http://127.0.0.1:5000/api/posts/${props.item.post_id}/share`;
+      const payload = { share_option: 'FRIENDS' };
+      await axios.post(shareApiUrl, payload, {
+        params: { loginUser_id: props.loginUser }
+      });
+  
+      alert('Post shared with friends');
+    } catch (error) {
+      console.error('Error sharing post to friends:', error);
+    }
+  };
+  
 
   //send comment to database
   const handleSendComment = async () => {
@@ -190,8 +242,27 @@ function PostItem(props) {
     };
   
     try {
-      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments`;
-      await axios.post(apiUrl, commentData);
+      
+      const payload = {
+        "type":"comment",
+        "author":{
+            "type":"author",
+            "id": "http://localhost:5000" + "/api/authors/" + props.loginUser,
+            "url": "http://localhost:5000" + "/api/authors/" + props.loginUser,
+            "host": "http://localhost:5000",            
+            "profileImage": "https://i.imgur.com/k7XVwpB.jpeg",
+            "displayName": username
+        },
+        "object": {
+          "comment": commentData.comment_text,
+          "contentType":"text/markdown",
+          "id": "http://localhost:5000" + "/api/authors/" + props.item.author_id + "/posts/" + props.item.post_id,
+
+        }
+    }
+      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/inbox`;
+            
+      await axios.post(apiUrl, payload, {headers: {'Authorization': 'Basic Q3RybEFsdERlZmVhdDpmcm9udGVuZA=='}});
       setComment('');
       fetchComments(); // Refresh comments after posting
     } catch (error) {
@@ -218,13 +289,30 @@ function PostItem(props) {
             : <img style={styles.img} src={notLikedImgUrl} /> 
           
         }
+         {/* Conditionally display number of likes for friends only posts */}
+       {numLikes != 'not show' && (
+        <div>
+          <span>{numLikes} Likes</span>
         </div>
-        {/* Share Button - Visible only if the post is made by another author */}
-        {props.item.author_id !== props.loginUser && (<div style={buttonContainerStyle}>
-        <button style={buttonStyle} onClick={handleSharePost}>
-          share
-        </button>
-        </div>)}
+      )}
+        </div>
+      {/* Share Button - Visible only if the post is made by another author */}
+      {props.item.author_id !== props.loginUser && (
+          <div style={buttonContainerStyle}>
+              {props.item.visibility === 'FRIENDS' ? (
+                  // If the post is friends only, show only the "Share to Friends" button
+                  <button style={buttonStyle} onClick={handleShareToFriends}>Share to Friends</button>
+              ) : (
+                  // If the post is public, show both "Share to Public" and "Share to Friends" buttons
+                  <>
+                      <button style={buttonStyle} onClick={handleShareToPublic}>Share to Public</button>
+                      <button style={{ ...buttonStyle, marginLeft: '10px' }} onClick={handleShareToFriends}>Share to Friends</button>
+                  </>
+              )}
+          </div>
+      )}
+
+
        
 
         <div style={styles.commentBox}>
@@ -249,7 +337,7 @@ function PostItem(props) {
             </div>
             <div>
               <button 
-                onClick={() => toggleLikeComment(comment.id)}
+                onClick={() => toggleLikeComment(comment.id, comment.author.id)}
                 style={{ border: 'none', background: 'none', cursor: 'pointer', marginRight: '10px' }}
               >
                 {comment.author.id === props.loginUser && (

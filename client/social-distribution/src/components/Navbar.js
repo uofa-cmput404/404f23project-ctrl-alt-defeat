@@ -136,6 +136,9 @@ function Navbar() {
                     <li>
                     <a class="nav-link" href="/edit">Edit Profile</a>
                     </li>
+                    <li>
+                    <a class="nav-link" href={"/inbox/" + authorId}>Inbox</a>
+                    </li>
                 </ul>
                 <form class="d-flex">
                     <input class="form-control me-2" type="search" placeholder="Search Users" aria-label="Search" value={searchQuery}

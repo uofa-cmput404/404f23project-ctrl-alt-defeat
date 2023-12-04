@@ -13,6 +13,7 @@ import Navbar from './components/Navbar';
 import SearchPage from './pages/SearchPage';
 import EditProfilePage from './pages/EditProfilePage';
 import Register from './pages/RegistrationPage';
+import Inbox from './pages/Inbox';
 
 export const UserContext = createContext();
 
@@ -80,6 +81,7 @@ function App() {
           <Route path="/newpost" element={<NewPost/>}/> 
           <Route path="/search" element={<SearchPage/>}/>
           <Route path="/edit" element={<EditProfilePage/>}/>
+          <Route path="/inbox/:author_id" element={<Inbox/>}/>
           
         </Routes>
         <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
