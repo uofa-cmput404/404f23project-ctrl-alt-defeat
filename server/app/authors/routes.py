@@ -425,7 +425,7 @@ def send(author_id):
                         SELECT 1 FROM friends 
                         WHERE author_followee = %s AND author_following = %s
                     ) THEN 'private'
-                    ELSE 'public'
+                    ELSE 'PUBLIC'
                 END AS status
             """
 
@@ -512,7 +512,7 @@ def get_inbox_items(author_id):
                     data["items"].append(data_item)
             
             if item["type"] == "comment":
-                data_item = dict()           z     
+                data_item = dict()              
                 data_item["type"] = item["type"]
                 data_item["author"] = item["sender_id"]
                 data_item["displayName"] = item["sender_display_name"]

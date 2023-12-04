@@ -106,6 +106,7 @@ function PostItem(props) {
   
       const response = await axios.get(apiUrl, { params });
       if (response.data && response.data.items) {
+        console.log(response.data);
         // Map through each comment and add a 'liked' property based on the user's like status
         const updatedComments = response.data.items.map(comment => ({
           ...comment,
@@ -211,7 +212,7 @@ function PostItem(props) {
     }
       const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/inbox`;
             
-      await axios.post(apiUrl, payload);
+      await axios.post(apiUrl, payload, {headers: {'Authorization': 'Basic Q3RybEFsdERlZmVhdDpmcm9udGVuZA=='}});
       setComment('');
       fetchComments(); // Refresh comments after posting
     } catch (error) {
