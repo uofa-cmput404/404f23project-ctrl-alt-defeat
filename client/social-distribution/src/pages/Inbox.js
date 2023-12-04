@@ -23,7 +23,8 @@ function Inbox() {
         },
         subContainer: {
             display: "flex",
-            justifyContent: "center"
+            justifyContent: "center",
+            paddingBottom: "20px"
         }
     }
     
@@ -72,7 +73,8 @@ function Inbox() {
                             inboxItems.map((e) => {                        
                                 return <li style={{padding: "10px"}} class="list-group-item">
                                     <div style={{display: "flex"}}>
-                                        {(e.type === "Like" && <><LikeSymbol/><a style={{marginLeft: "20px"}} href={e.url}>{e.summary}</a></>)}                                        
+                                        {(e.type === "Like" && <><LikeSymbol/><a style={{marginLeft: "20px"}} href={e.url}>{e.summary}</a></>)}                      
+                                        {(e.type === "comment_like" && <><LikeSymbol/><a style={{marginLeft: "20px"}} href={e.url}>{e.summary}</a></>)}                                        
                                         {(e.type === "comment" && <div><CommentIcon/><a style={{marginLeft: "20px"}} href={e.url}>{e.summary}</a> 
                                                     <div class="card" style={{marginTop: "10px", padding: "20px", marginLeft: "50px"}}>"{e.comment}"</div></div>)}   
                                     </div></li>

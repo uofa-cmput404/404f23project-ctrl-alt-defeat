@@ -304,6 +304,12 @@ def index():
                     local_result = dict(row)                    
                     payload.append(local_result)
 
+        # # Convert 'date' strings to datetime objects
+        # for item in payload:
+        #     item['date_posted'] = datetime.strptime(item['date_posted'], '%Y-%m-%d')
+
+        # # Sort the list of dicts by the 'date' key
+        payload = sorted(payload, key=lambda x: x['date_posted'], reverse=True)
         data = payload        
 
     except Exception as e:
@@ -765,7 +771,7 @@ def get_post(author_id, post_id):
     try:
         query = "SELECT * FROM posts " \
                 "WHERE post_id = %s " \
-                "AND (visibility = 'PUBLIC' OR visibility = 'unlisted')"
+                # "AND (visibility = 'PUBLIC' OR visibility = 'unlisted')"
                 
         curr.execute(query, (post_id, ))
         row = curr.fetchall()            

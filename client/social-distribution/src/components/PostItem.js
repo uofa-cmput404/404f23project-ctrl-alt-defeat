@@ -106,7 +106,7 @@ function PostItem(props) {
   
       const response = await axios.get(apiUrl, { params });
       if (response.data && response.data.items) {
-        console.log(response.data);
+        console.log("comments: ", response.data);
         // Map through each comment and add a 'liked' property based on the user's like status
         const updatedComments = response.data.items.map(comment => ({
           ...comment,
@@ -122,13 +122,27 @@ function PostItem(props) {
   };
   
 
-  const toggleLikeComment = async (commentId) => {
+  const toggleLikeComment = async (commentId, commentAuthorId) => {
     try {
       // Construct the URL for the POST request
-      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}/toggle-like`;
-  
+      const apiUrl = `http://127.0.0.1:5000/api/authors/${commentAuthorId}/inbox`;
+      
+      const payload = {        
+        "summary": username + " Likes your comment",         
+        "type": "Like",
+        "author":{
+          "type":"author",
+          "id": "http://localhost:5000" + "/api/authors/" + props.loginUser,
+          "url": "http://localhost:5000" + "/api/authors/" + props.loginUser,
+          "host": "http://localhost:5000",            
+          "profileImage": "https://i.imgur.com/k7XVwpB.jpeg",
+          "displayName": username
+        },
+        "object": "http://localhost:5000" + "/api/authors/" + props.item.author_id + "/posts/" + props.item.post_id + "/comments/" + commentId,
+      }      
+      
       // Send the POST request
-      await axios.post(apiUrl, { like_comment_author_id: props.loginUser });
+      await axios.post(apiUrl, payload, {headers: {'Authorization': 'Basic Q3RybEFsdERlZmVhdDpmcm9udGVuZA=='}});
   
       // Update the like status in the local state
       const updatedComments = comments.map(comment => {
@@ -270,7 +284,7 @@ function PostItem(props) {
             </div>
             <div>
               <button 
-                onClick={() => toggleLikeComment(comment.id)}
+                onClick={() => toggleLikeComment(comment.id, comment.author.id)}
                 style={{ border: 'none', background: 'none', cursor: 'pointer', marginRight: '10px' }}
               >
                 {comment.author.id === props.loginUser && (
