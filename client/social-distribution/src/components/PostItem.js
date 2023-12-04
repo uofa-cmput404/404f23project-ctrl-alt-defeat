@@ -99,7 +99,7 @@ function PostItem(props) {
 
   const fetchLikes = async () => {
     try {
-      const apiUrl = rocess.env.REACT_APP_API_HOSTNAME + `/api/authors/${props.item.author_id}/posts/${props.item.post_id}/likes/count`;
+      const apiUrl = process.env.REACT_APP_API_HOSTNAME + `/api/authors/${props.item.author_id}/posts/${props.item.post_id}/likes/count`;
       const response = await axios.get(apiUrl);
       // set return to null in routes if not friend only post
       if (response.data && response.data.numLikes !== null) {
