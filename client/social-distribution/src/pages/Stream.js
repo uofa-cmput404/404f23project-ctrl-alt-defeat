@@ -265,7 +265,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
                     {
                         !fetchDone ?
                         <div class="spinner-border" role="status">
-                            <span class="sr-only">Loading...</span>
+                            <span class="sr-only"></span>
                         </div> :  (postsLists.length !== 0 ? <PostsList postsLists={postsLists} 
                         setPostsLists={setPostsLists} 
                         authorId={authorId}
