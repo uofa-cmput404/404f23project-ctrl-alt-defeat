@@ -291,10 +291,10 @@ def index():
                         "JOIN authors " \
                         "on posts.author_id = authors.author_id " \
                         "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  %s) " \
-                        "WHERE post_id = %s AND (VISIBILITY = 'PUBLIC' OR ((VISIBILITY = 'FRIENDS') AND (posts.author_id IN (SELECT author_followee FROM friends WHERE author_following = %s) OR posts.author_id = %s)))"
+                        "WHERE post_id = %s AND ((VISIBILITY = 'PUBLIC' OR ((VISIBILITY = 'FRIENDS') AND (posts.author_id IN (SELECT author_followee FROM friends WHERE author_following = %s) OR posts.author_id = %s))) OR (VISIBILITY = 'private' and posts.author_id = %s))"
 
                 print("checking", post["object_id"])
-                curr.execute(query, (post["recipient_id"], post["object_id"], post["recipient_id"], post["recipient_id"]))
+                curr.execute(query, (post["recipient_id"], post["object_id"], post["recipient_id"], post["recipient_id"], post["recipient_id"]))
 
                 row = curr.fetchone()        
                 print(row)        

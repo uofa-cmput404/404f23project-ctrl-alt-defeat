@@ -2,7 +2,7 @@
 DROP TABLE IF EXISTS post_restrictions;
 DROP TABLE IF EXISTS shares;
 DROP TABLE IF EXISTS comment_likes;
-DROP TABLE IF EXISTS comments;
+DROP TABLE IF EXISTS comments CASCADE;
 DROP TABLE IF EXISTS likes;
 DROP TABLE IF EXISTS follow_requests;
 DROP TABLE IF EXISTS friends;
@@ -90,7 +90,7 @@ CREATE TABLE comment_likes (
     comment_id TEXT NOT NULL,
     time_liked TIMESTAMP NOT NULL,
     FOREIGN KEY (like_comment_author_id) REFERENCES authors(author_id),
-    FOREIGN KEY (comment_id) REFERENCES comments(comment_id)
+    FOREIGN KEY (comment_id) REFERENCES comments(comment_id) ON DELETE CASCADE
 );
 
 
