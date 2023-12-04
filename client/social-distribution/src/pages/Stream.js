@@ -18,7 +18,17 @@ const postsUrl = 'http://127.0.0.1:5000/api/posts';
 export default function Stream({ username, authorId, setUsername, updateAuthStatus, updateUserAndAuthorId }) {;
     const navigate = useNavigate();
     const likedPostsUrl = 'http://127.0.0.1:5000/api/authors/' + authorId + '/liked';
-    const githubIdLink = 'http://127.0.0.1:5000/api/authors/github/' + authorId;     
+    const githubIdLink = 'http://127.0.0.1:5000/api/authors/github/' + authorId;    
+    
+    const [matches, setMatches] = useState(
+        window.matchMedia("(min-width: 768px)").matches
+      )
+    
+      useEffect(() => {
+        window
+        .matchMedia("(min-width: 768px)")
+        .addEventListener('change', e => setMatches( e.matches ));
+      }, []);
     
     const [likedPostIds, setLikedPostIds] = useState({});
     const [responseData, setResponseData] = useState([]);
@@ -75,7 +85,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
         container: {
             margin: 20,
             display: "flex",
-            marginLeft: 300,
+            marginLeft: matches ? 300 : 0,
             padding: 10   
         },
         followContainer: {            
@@ -218,6 +228,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
 
             {showProfile && <Profile username={username} authorId={authorId} setUsername={setUsername} onClose={closeProfile} />}          
         <div style={styles.container}> 
+        {matches && (
             <div style={styles.sidebar}>                
                 <div class="card" style={styles.card}>                                  
                         <div style={{display: "flex", alignItems: "center"}}><GithubIcon/><h3 style={{marginLeft: 10, paddingTop: 10, alignSelf: "center" }}>Activity</h3></div>
@@ -243,6 +254,7 @@ export default function Stream({ username, authorId, setUsername, updateAuthStat
                     <FollowRequests authorId={authorId} />
                 </div>
             </div>        
+        )}
             <div style={styles.posts}>                
                 <b>Hi {username}! 😎</b>
                 <h1>Streams</h1>
