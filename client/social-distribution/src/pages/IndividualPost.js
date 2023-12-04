@@ -43,8 +43,9 @@ export default function IndividualPost() {;
                 
                 setPostSelected(response.data);                                   
                 setUsername(response.data.author.displayName);
-                
-                fetchComments();
+                                
+                const url = response.data.author.id.split("/")                
+                fetchComments(url[url.length - 1]);
 
                 })
                 .catch(error => {
@@ -59,10 +60,10 @@ export default function IndividualPost() {;
           }
     }
 
-    const fetchComments = async () => {
+    const fetchComments = async (post_author_id) => {
         try {
             // Make the GET request using Axios
-                axios.get(postsUrl + "authors/" + author_id + "/posts/" + post_id + "/comments")
+                axios.get(postsUrl + "authors/" + post_author_id + "/posts/" + post_id + "/comments")
                 .then(response => {
                 // Handle the successful response here
                 
