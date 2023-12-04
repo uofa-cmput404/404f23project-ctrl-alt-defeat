@@ -85,6 +85,7 @@ CREATE TABLE comments (
 );
 
 CREATE TABLE comment_likes (
+    comment_like_id TEXT PRIMARY KEY, --TEXT
     like_comment_author_id TEXT NOT NULL, --TEXT
     comment_id TEXT NOT NULL,
     time_liked TIMESTAMP NOT NULL,
