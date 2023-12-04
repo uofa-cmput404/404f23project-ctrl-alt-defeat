@@ -309,7 +309,7 @@ def index():
         #     item['date_posted'] = datetime.strptime(item['date_posted'], '%Y-%m-%d')
 
         # # Sort the list of dicts by the 'date' key
-        payload = sorted(payload, key=lambda x: x['date_posted'], reverse=True)
+        # payload = sorted(payload, key=lambda x: x['date_posted'], reverse=True)
         data = payload        
 
     except Exception as e:
