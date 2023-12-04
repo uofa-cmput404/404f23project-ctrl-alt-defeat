@@ -306,7 +306,6 @@ def get_liked_posts(author_id, post_id):
 
 # (LOCAL/REMOTE)
 @bp.route('/authors/<author_id>/inbox', methods=['POST'])
-@basic_auth.login_required
 def send(author_id):
     request_data = request.get_json()
     print("payload:")
