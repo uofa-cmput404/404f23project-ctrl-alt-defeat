@@ -147,7 +147,7 @@ function PostItem(props) {
   const deleteComment = async (commentId) => {
     try {
       // API URL to delete the comment
-      const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}`;
+      const apiUrl = `${process.env.REACT_APP_API_HOSTNAME}/api/authors/${props.item.author_id}/posts/${props.item.post_id}/comments/${commentId}`;
       
       // Send the DELETE request
       await axios.delete(apiUrl);
@@ -265,21 +265,21 @@ function PostItem(props) {
                 onClick={() => toggleLikeComment(comment.id)}
                 style={{ border: 'none', background: 'none', cursor: 'pointer', marginRight: '10px' }}
               >
+                {comment.author.id === props.loginUser && (
+                  <button 
+                    onClick={() => deleteComment(comment.id)}
+                    style={{ border: 'none', background: 'none', cursor: 'pointer' }}
+                  >
+                    Delete
+                  </button>
+                )}
                 <img 
                   src={comment.liked ? likedImgUrl : notLikedImgUrl} 
                   alt="Like" 
                   style={{ width: '24px', height: '24px' }}
                 />
               </button>
-              {comment.author.id === props.loginUser && (
-                <button
-                  onClick={() => deleteComment(comment.id)}
-                  style={{ border: 'none', background: 'none', cursor: 'pointer' }}
-                >
-                  Delete
-                </button>
-              )}
-
+              
             </div>
           </div>
         ))}

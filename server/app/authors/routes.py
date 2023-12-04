@@ -1,6 +1,6 @@
 from . import bp
 import json
-from flask import request, g, jsonify
+from flask import request, g, jsonify, abort
 import sqlite3
 from ..dbase import get_db_connection
 from random import randrange
@@ -9,6 +9,9 @@ from flask_bcrypt import Bcrypt
 from flask_bcrypt import check_password_hash
 from flask_bcrypt import generate_password_hash
 import uuid
+import requests
+import datetime
+from .. import basic_auth
 
 
 
@@ -61,6 +64,7 @@ def get_authors():
     except Exception as e:
         print("Error getting authors: ", e)
         data = "error"
+        abort(500, e)
     
     print("data here")
     return jsonify(data)
@@ -95,6 +99,7 @@ def get_author(author_id):
     except Exception as e:
         print("Error getting authors: ", e)
         data = "error"
+        abort(500, e)
     
     return jsonify(data)
 
@@ -282,13 +287,21 @@ def get_liked_posts(author_id, post_id):
     except Exception as e:
         print("Getting likes error: ", e)
         data = "error"
+        abort(500, e)
     
     return jsonify(data)
 
 @bp.route('/authors/<author_id>/inbox', methods=['POST'])
+@basic_auth.login_required
 def send(author_id):
+    request_data = request.get_json()
+
+    # In case remote node sends us a payload with `{'items': {'type' : '...', ...}}`
+    if 'items' in request_data:
+        request_data = request_data["items"]
+    
     try:
-        request_data = request.get_json()
+        data = ""
         message_type = request_data["type"]
 
         if message_type == "Like":
@@ -358,10 +371,39 @@ def send(author_id):
             data = "follow sent"
 
         elif message_type == "post":
-            pass
+            conn, curr = get_db_connection()
+
+            sender_host = request_data["author"]["host"]
+
+            postUrlComponents = request_data["origin"].split('/')
+            # Remove extra slash if there is a slash at end of url
+            if postUrlComponents[-1] == "":
+                postUrlComponents.pop()
+
+            post_id = postUrlComponents[-1]
+            sender_id = postUrlComponents[-3]
+            sender_display_name = request_data["author"]["displayName"]
+
+            inbox_item_id = str(uuid.uuid4())
+
+            # Store host, sender, recipient, post url to inbox table
+            # (note we are not storing post content)
+
+            inbox_query = "INSERT INTO inbox_items " \
+                        "(inbox_item_id, sender_id, " \
+                        "sender_display_name, sender_host, " \
+                        "recipient_id, object_id, type) " \
+                        "VALUES (%s, %s, %s, %s, %s, %s, %s)"
+            curr.execute(inbox_query, (inbox_item_id, sender_id, sender_display_name, sender_host, author_id, post_id, message_type))
+
+            conn.commit()
+            conn.close()
 
         elif message_type == "comment":
-            pass
+            raise(Exception("comment not implemented"))
+
+        else:
+            raise(Exception("'type' must be 'post', 'comment', 'Like', or 'Follow'"))
 
     except Exception as e:
         print("send error: ", e)
@@ -418,6 +460,9 @@ def get_post_comments(author_id, post_id):
     page = request.args.get('page')
     size = request.args.get('size')
 
+    if not comment_author_id:
+        comment_author_id = author_id
+
     try:
         
         conn, cursor = get_db_connection()
@@ -434,7 +479,7 @@ def get_post_comments(author_id, post_id):
             WHERE c.post_id = %s
             AND c.author_id = %s
             AND (
-                (c.status = 'public') OR
+                (c.status = 'PUBLIC') OR
                 (c.status = 'private' AND c.comment_author_id = %s) OR
                 (c.status = 'private' AND c.author_id = %s)
             )
@@ -512,7 +557,7 @@ def send_comments(author_id, post_id):
                     SELECT 1 FROM friends 
                     WHERE author_followee = %s AND author_following = %s
                 ) THEN 'private'
-                ELSE 'public'
+                ELSE 'PUBLIC'
             END AS status
         """
 

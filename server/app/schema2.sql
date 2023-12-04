@@ -41,7 +41,7 @@ CREATE TABLE posts (
     content_type TEXT NOT NULL DEFAULT 'text/plain',
     content TEXT NOT NULL,
     image_id TEXT,
-    visibility TEXT NOT NULL DEFAULT 'public',
+    visibility TEXT NOT NULL DEFAULT 'PUBLIC',
     FOREIGN KEY (author_id) REFERENCES authors(author_id) ON DELETE CASCADE
 );
 
@@ -68,8 +68,7 @@ CREATE TABLE likes (
     like_id TEXT PRIMARY KEY,
     like_author_id TEXT NOT NULL,
     post_id TEXT NOT NULL,
-    time_liked TIMESTAMP NOT NULL,
-    FOREIGN KEY (like_author_id) REFERENCES authors(author_id) ON DELETE CASCADE,
+    time_liked TIMESTAMP NOT NULL,    
     FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE
 );
 

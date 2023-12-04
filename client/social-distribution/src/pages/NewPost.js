@@ -5,6 +5,7 @@ import { UserContext } from '../App';
 import { toast } from 'react-toastify';
 
 const newPostUrl = process.env.REACT_APP_API_HOSTNAME + '/api/posts/new'
+const newPostRemoteUrl = newPostUrl + '/remote'
 
 export default function NewPost(props) {
 
@@ -61,7 +62,7 @@ export default function NewPost(props) {
   const [imageId, setImageId] = useState(null);
   // TODO: Add private, unlisted settings (public for now)
   // TODO: Add restrictions option (for unlisted)
-  const [visibility, setVisibility] = useState("public");
+  const [visibility, setVisibility] = useState("PUBLIC");
 
   const jpegDataURL = 'data:image/jpeg;base64,';
   const pngDataURL = 'data:image/png;base64,';
@@ -91,6 +92,34 @@ export default function NewPost(props) {
           if (response.data === "success") {
             toast.success("Post successfully posted!");
             navigate("/homepage");
+            try {
+              console.log(JSON.stringify({author_id: authorId, content_type: contentType, title: title, content: content, visibility: visibility, image_id: imageId}));
+      
+              axios.post(newPostRemoteUrl, {
+                author_id: authorId,
+                content_type: contentType,
+                title: title,
+                content: content,
+                visibility: visibility,
+                image_id: imageId
+              }, {
+                headers: {
+                  'Authorization': 'Basic Q3RybEFsdERlZmVhdDpmcm9udGVuZA=='
+                }
+              })
+              .then(response => {
+                if (response.data === "success") {            
+                  toast.success("Post successfully posted!");
+                  navigate("/homepage");
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+              })
+            
+            } catch (error) {
+                console.error('Error:', error);
+            }
           }
         })
         .catch(error => {
@@ -174,9 +203,9 @@ export default function NewPost(props) {
       <p>Visibility</p>
       <form method="dialog">
         <select id="visibility" name="visibility" onChange={handleSelectVisibility}>
-          <option value="public">Public</option>
+          <option value="PUBLIC">Public</option>
           <option value="private">Private</option>
-          <option value="friends-only">Friends-Only</option>
+          <option value="FRIENDS">Friends-Only</option>
           <option value="unlisted">Unlisted</option>
         </select>
       </form>
