@@ -337,8 +337,12 @@ def send(author_id):
 
         elif message_type == "Follow":
             actor_host = request_data["actor"]["host"]
-            receiver = request_data["object"]["id"].split("/")[-1]
-            #receiver = author_id
+            receiver = request_data["object"]["id"].split("/")
+
+            if receiver[-1] == "":
+                receiver.pop()
+            receiver = receiver[-1]
+
             sender = request_data["actor"]["id"].split("/")[-1]
 
             conn, curr = get_db_connection()
