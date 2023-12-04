@@ -123,7 +123,7 @@ export default function IndividualPost() {;
                         <hr/>
                         <div>Posted by: {username}</div>
                         <div>{postSelected.published}</div>
-                        <div>{getContentAsElements(postSelected.contentType,postSelected.content)}</div>                
+                        <div>{getContentAsElements(postSelected.contentType,postSelected.content)}</div>
                         <hr/>
                         
                         <h5>Comments:</h5>                        
