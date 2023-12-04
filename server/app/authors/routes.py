@@ -321,9 +321,8 @@ def send(author_id):
         data = ""
         message_type = request_data["type"]
 
-        if message_type == "Like":
-
-            likeAuthorId = request_data["author"]["id"].split('/')[-1]
+        if message_type == "Like":            
+            likeAuthorId = request_data["author"]["id"].split('/')[-1]            
             likeHost = request_data["author"]["host"]
             displayName = request_data["author"]["displayName"]
             likedPost = request_data["object"].split('/')[-1]
@@ -475,8 +474,9 @@ def send(author_id):
         elif message_type == "comment":     
             conn, curr = get_db_connection()                               
             #Check if the authors are friends
-            
+            print("1")
             comment_author_id = request_data["author"]["id"].split("/")[-1]
+            print("2")
             check_friends_query = """
                 SELECT CASE 
                     WHEN EXISTS (
@@ -500,11 +500,12 @@ def send(author_id):
                 "post_id, author_id, comment_text, status, date_commented) " \
                 "VALUES (%s, %s, %s, %s, %s, %s ,CURRENT_TIMESTAMP)" 
 
-            post_url = request_data["id"].split("/")
+            print("1")
+            post_url = request_data["object"]["id"].split("/")
             post_index = post_url.index("posts")
             post_id = post_url[post_index + 1]
             print(post_id)
-            curr.execute(query, (comment_id, comment_author_id,  post_id, author_id, request_data["comment"], 'PUBLIC'))
+            curr.execute(query, (comment_id, comment_author_id,  post_id, author_id, request_data["object"]["comment"], 'PUBLIC'))
             
             inbox_query = "INSERT INTO inbox_items " \
                             "(sender_id, sender_host, " \
