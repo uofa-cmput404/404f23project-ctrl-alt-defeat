@@ -503,7 +503,7 @@ def send(author_id):
      
             print(request_data)
       
-            post_url = request_data["id"].split("/")
+            post_url = request_data["object"]["id"].split("/")
       
             post_index = post_url.index("posts")
       
