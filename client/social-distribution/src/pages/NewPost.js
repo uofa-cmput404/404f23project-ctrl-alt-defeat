@@ -95,27 +95,27 @@ export default function NewPost(props) {
             try {
               console.log(JSON.stringify({author_id: authorId, content_type: contentType, title: title, content: content, visibility: visibility, image_id: imageId}));
       
-              // axios.post(newPostRemoteUrl, {
-              //   author_id: authorId,
-              //   content_type: contentType,
-              //   title: title,
-              //   content: content,
-              //   visibility: visibility,
-              //   image_id: imageId
-              // }, {
-              //   headers: {
-              //     'Authorization': 'Basic Q3RybEFsdERlZmVhdDpmcm9udGVuZA=='
-              //   }
-              // })
-              // .then(response => {
-              //   if (response.data === "success") {            
-              //     toast.success("Post successfully posted!");
-              //     navigate("/homepage");
-              //   }
-              // })
-              // .catch(error => {
-              //   console.error('Error:', error);
-              // })
+              axios.post(newPostRemoteUrl, {
+                author_id: authorId,
+                content_type: contentType,
+                title: title,
+                content: content,
+                visibility: visibility,
+                image_id: imageId
+              }, {
+                headers: {
+                  'Authorization': process.env.REACT_APP_AUTHORIZATION
+                }
+              })
+              .then(response => {
+                if (response.data === "success") {            
+                  toast.success("Post successfully posted!");
+                  navigate("/homepage");
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+              })
             
             } catch (error) {
                 console.error('Error:', error);

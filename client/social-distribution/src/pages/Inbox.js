@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import LikeSymbol from '../components/LikeSymbol';
 import CommentIcon from '../components/CommentIcon';
 
-const inboxUrl = 'http://127.0.0.1:5000/api/';
+const inboxUrl = process.env.REACT_APP_API_HOSTNAME + '/api/';
 
 function Inbox() {
     let { post_id, author_id } = useParams();
@@ -37,7 +37,7 @@ function Inbox() {
                 let responseData = response.data.items
                 for (let i = 0; i < responseData.length; i++) {
 
-                    responseData[i]["url"] = "http://localhost:3000" + "/authors/" + author_id + "/posts/" + responseData[i]["post_id"] 
+                    responseData[i]["url"] = window.location.href + "/authors/" + author_id + "/posts/" + responseData[i]["post_id"] 
                 }
                 console.log(response.data.items);
                 setInboxItems(response.data.items);
