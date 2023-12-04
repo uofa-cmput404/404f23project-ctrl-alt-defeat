@@ -718,8 +718,10 @@ def get_post_comments(author_id, post_id):
         
         conn, cursor = get_db_connection()
         print("author:", comment_author_id)
+
         query = """
-            SELECT i.sender_display_name, c.comment_text,c.comment_author_id, c.comment_id, c.date_commented, a.github,
+
+            SELECT DISTINCT i.sender_display_name, c.comment_text,c.comment_author_id, c.comment_id, c.date_commented, a.github,
                 EXISTS (
                     SELECT 1 FROM comment_likes cl 
                     WHERE cl.comment_id = c.comment_id 
@@ -737,6 +739,7 @@ def get_post_comments(author_id, post_id):
             )
             LIMIT %s OFFSET %s
         """
+
         if page is not None:
             page = int(page)
         else: page = 1 # Set default 1
@@ -750,6 +753,7 @@ def get_post_comments(author_id, post_id):
         comment_info = cursor.fetchall()
         
         comment_info = [dict(i) for i in comment_info]
+        print(comment_info)
         conn.close()
 
 

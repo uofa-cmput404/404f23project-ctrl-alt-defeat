@@ -253,9 +253,12 @@ function PostItem(props) {
             "profileImage": "https://i.imgur.com/k7XVwpB.jpeg",
             "displayName": username
         },
-        "comment": commentData.comment_text,
-        "contentType":"text/markdown",
-        "id": "http://localhost:5000" + "/api/authors/" + props.item.author_id + "/posts/" + props.item.post_id,
+        "object": {
+          "comment": commentData.comment_text,
+          "contentType":"text/markdown",
+          "id": "http://localhost:5000" + "/api/authors/" + props.item.author_id + "/posts/" + props.item.post_id,
+
+        }
     }
       const apiUrl = `http://127.0.0.1:5000/api/authors/${props.item.author_id}/inbox`;
             
