@@ -450,7 +450,7 @@ def send(author_id):
 
             sender_host = request_data["author"]["host"]
 
-            postUrlComponents = request_data["origin"].split('/')
+            postUrlComponents = request_data["id"].split('/')
             # Remove extra slash if there is a slash at end of url
             if postUrlComponents[-1] == "":
                 postUrlComponents.pop()

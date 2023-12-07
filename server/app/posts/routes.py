@@ -258,6 +258,7 @@ def index():
         for post in posts:
             if post['sender_host'] == 'https://cmput-average-21-b54788720538.herokuapp.com/api':
                 try:                    
+                    # print("checking")
                     new_item = rf.get_post('https://cmput-average-21-b54788720538.herokuapp.com/api/', post['sender_id'], post['object_id'], 'CtrlAltDefeat', 'string')
                     new_item["date_posted"] = post["date_received"]
                     payload.append(new_item)
@@ -268,7 +269,7 @@ def index():
                     pass # Skip if it somehow does not work
 
             elif post['sender_host'] == 'https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/':
-                try:                    
+                try:                
                     new_item = rf.get_post('https://cmput404-project-backend-tian-aaf1fa9b20e8.herokuapp.com/', post['sender_id'], post['object_id'], 'cross-server', 'password')                    
                     new_item["date_posted"] = post["date_received"]
                     payload.append(new_item)
@@ -296,11 +297,11 @@ def index():
                         "AND post_id NOT IN (SELECT post_id FROM post_restrictions WHERE restricted_author_id =  %s) " \
                         "WHERE post_id = %s AND ((VISIBILITY = 'PUBLIC' OR ((VISIBILITY = 'FRIENDS') AND (posts.author_id IN (SELECT author_followee FROM friends WHERE author_following = %s) OR posts.author_id = %s))) OR (VISIBILITY = 'private' and posts.author_id = %s))"
 
-                print("checking", post["object_id"])
+                # print("checking", post["object_id"])
                 curr.execute(query, (post["recipient_id"], post["object_id"], post["recipient_id"], post["recipient_id"], post["recipient_id"]))
 
                 row = curr.fetchone()        
-                print(row)        
+                # print(row)        
 
                 # If we can't find it anywhere else then the post has been deleted
                 if row is not None:
