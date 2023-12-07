@@ -472,7 +472,9 @@ def send(author_id):
             curr.execute(inbox_query, (inbox_item_id, sender_id, sender_display_name, sender_host, author_id, post_id, message_type))
 
             conn.commit()
-            conn.close()
+            conn.close()            
+
+            data = "Successfully added post"
 
         elif message_type == "comment":     
             conn, curr = get_db_connection()                               
