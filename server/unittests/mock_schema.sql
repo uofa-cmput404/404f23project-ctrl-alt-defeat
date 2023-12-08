@@ -179,3 +179,11 @@ inbox_item_id, sender_id, sender_display_name, sender_host, recipient_id, object
 comment_id, comment_author_id, post_id, author_id, comment_text, status, date_commented) VALUES (
 'ecc5476a-957f-11ee-b9d1-0242ac120002'::text, '0d3aa4cb-b17d-4090-923f-8ac14185fae6'::text, '5f3be750-957a-11ee-b9d1-0242ac120002'::text, '0ca265e4-9572-11ee-b9d1-0242ac120002'::text, 'Sensational'::text, 'private'::text, '2023-12-07 20:33:42.197728'::timestamp)
  returning comment_id;
+
+ INSERT INTO public.friends (
+author_followee, author_following, host) VALUES (
+'f2d79922-9571-11ee-b9d1-0242ac120002'::text, '2179aff4-9572-11ee-b9d1-0242ac120002'::text, 'local'::text);
+
+INSERT INTO public.follow_requests (
+author_send, author_receive, host) VALUES (
+'f2d79922-9571-11ee-b9d1-0242ac120002'::text, '0d3aa4cb-b17d-4090-923f-8ac14185fae6'::text, 'local'::text);
