@@ -876,9 +876,20 @@
             ],
             "responses": {
               "200": {
-                "description": "Successful response",
-                "schema": {
-                  "type": "object"
+                "description": "An encoded image",
+                "content" : {
+                  "image/png" : {
+                    "schema": {
+                      "type": "file",
+                      "format" : "binary"
+                    }
+                  },
+                  "image/jpeg": {
+                    "schema": {
+                      "type": "file",
+                      "format": "binary"
+                    }
+                  }
                 }
               }
             },
