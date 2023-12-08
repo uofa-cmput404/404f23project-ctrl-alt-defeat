@@ -66,31 +66,7 @@ class TestFlaskRoutes(unittest.TestCase):
         # Add more assertions based on your expected response
     
     def test_get_post(self):
-
-        expected =  {'author': 
-                        {'displayName': 'maven', 
-                        'github': None, 
-                        'host': 'http://localhost/', 
-                        'id': 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002', 
-                        'profileImage': None, 
-                        'type': 'author', 
-                        'url': 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002'},                         
-                      'categories': [], 
-                      'comments': 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002/posts/5f3be750-957a-11ee-b9d1-0242ac120002/comments',
-                      'commentsSrc': None, 
-                      'content': 'hello world', 
-                      'contentType': 'text/plain', 
-                      'count': 0, 
-                      'description': None, 
-                      'id': 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002/posts/5f3be750-957a-11ee-b9d1-0242ac120002', 
-                      'origin': 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002/posts/5f3be750-957a-11ee-b9d1-0242ac120002', 
-                      'published': '2023-12-07 20:49:00', 
-                      'source': 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002/posts/5f3be750-957a-11ee-b9d1-0242ac120002', 
-                      'title': 'New post', 
-                      'type': 'post', 
-                      'unlisted': False, 
-                      'visibility': 'PUBLIC'}
-        
+    
         # Make a request to the endpoint
         response = self.app.get('/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002/posts/5f3be750-957a-11ee-b9d1-0242ac120002')
 
