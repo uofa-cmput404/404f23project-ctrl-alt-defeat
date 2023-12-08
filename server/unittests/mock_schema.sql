@@ -150,3 +150,32 @@ author_id, username, github, password) VALUES (
 author_id, username, password) VALUES (
 '0d3aa4cb-b17d-4090-923f-8ac14185fae6'::text, 'coolguy456'::text, '$2b$12$Z/Tdtse3smqlTWPKv5KHfOt36SVZMPnGexmvOifTtVD5xXU06Ku7.'::text)
  returning author_id;
+
+ INSERT INTO public.posts (
+post_id, author_id, title, content_type, content, visibility) VALUES (
+'77f8c164-957a-11ee-b9d1-0242ac120002'::text, '0ca265e4-9572-11ee-b9d1-0242ac120002'::text, 'Sentence'::text, 'text/plain'::text, 'The quick brown fox jumps over the lazy dog'::text, 'PUBLIC'::text)
+ returning post_id;
+
+ INSERT INTO public.posts (
+post_id, author_id, title, content_type, content, visibility) VALUES (
+'5f3be750-957a-11ee-b9d1-0242ac120002'::text, '0ca265e4-9572-11ee-b9d1-0242ac120002'::text, 'New post'::text, 'text/plain'::text, 'hello world'::text, 'PUBLIC'::text)
+ returning post_id;
+
+ INSERT INTO public.likes (
+like_id, like_author_id, post_id, time_liked) VALUES (
+'b77a8afc-957a-11ee-b9d1-0242ac120002'::text, '0ca265e4-9572-11ee-b9d1-0242ac120002'::text, '77f8c164-957a-11ee-b9d1-0242ac120002'::text, '2023-12-07 20:33:42.197728'::timestamp without time zone)
+ returning like_id;
+
+ INSERT INTO public.likes (
+like_id, like_author_id, post_id, time_liked) VALUES (
+'b96fdbf0-957a-11ee-b9d1-0242ac120002'::text, '0ca265e4-9572-11ee-b9d1-0242ac120002'::text, '5f3be750-957a-11ee-b9d1-0242ac120002'::text, '2023-12-07 20:33:42.197728'::timestamp without time zone)
+ returning like_id;
+
+INSERT INTO public.inbox_items (
+inbox_item_id, sender_id, sender_display_name, sender_host, recipient_id, object_id, type) VALUES (
+'ad4f22ac-9581-11ee-b9d1-0242ac120002'::text, '0d3aa4cb-b17d-4090-923f-8ac14185fae6'::text, 'coolguy456'::text, 'http://localhost:5000'::text, '0ca265e4-9572-11ee-b9d1-0242ac120002'::text, 'ecc5476a-957f-11ee-b9d1-0242ac120002'::text, 'comment'::text);
+
+ INSERT INTO public.comments (
+comment_id, comment_author_id, post_id, author_id, comment_text, status, date_commented) VALUES (
+'ecc5476a-957f-11ee-b9d1-0242ac120002'::text, '0d3aa4cb-b17d-4090-923f-8ac14185fae6'::text, '5f3be750-957a-11ee-b9d1-0242ac120002'::text, '0ca265e4-9572-11ee-b9d1-0242ac120002'::text, 'Sensational'::text, 'private'::text, '2023-12-07 20:33:42.197728'::timestamp)
+ returning comment_id;
