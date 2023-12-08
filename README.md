@@ -45,6 +45,24 @@ npm install --save react-markdown
     - visibility
   - Images, at the moment, are not changed. So it doesn't work.
 
-**Unit Tests**
-- You can run unit tests by accessing the server/unittests folder and running each script individually
-- Ex) ```python3 test_posts.py```
+**Unit Tests**<br>
+How to run unit tests
+
+1.) Install all packages in requirements.txt
+
+2.) Initialize a postgres database in your local machine
+
+3.) Create a .env file under the /server directory
+
+4.) Add these two variables inside them
+- DATABASE_URL
+    - The URL of the database you've initialized
+        - Sample: "http://hueygonzales:password@localhost:5432/test_db"
+- URL
+    - URL of flask server
+        - Sample: "http://localhost:5000"
+
+5.) Run unit tests by switching to the /server/unittests/ directory
+
+sample run:
+```python3 test_authors.py```
