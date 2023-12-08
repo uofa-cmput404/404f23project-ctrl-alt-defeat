@@ -451,6 +451,10 @@ def send(author_id):
             sender_host = request_data["author"]["host"]
 
             postUrlComponents = request_data["id"].split('/')
+            # If `id` key is ONLY post id and NOT url, use `origin` instead
+            if len(postUrlComponents) == 1:
+                postUrlComponents = request_data["origin"].split('/')
+
             # Remove extra slash if there is a slash at end of url
             if postUrlComponents[-1] == "":
                 postUrlComponents.pop()
