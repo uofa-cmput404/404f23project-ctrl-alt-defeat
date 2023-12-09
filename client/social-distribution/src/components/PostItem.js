@@ -64,23 +64,23 @@ const buttonStyle = {
 
 
 
-function getContentAsElements(content_type, content){
-    if (content_type === "text/plain"){
-        return(<p>{content}</p>);
+function getContentAsElements(props){
+    if (props.item.content_type === "text/plain"){
+        return(<p>{props.item.content}</p>);
     }
-    else if (content_type === "text/markdown"){
-        return(<Markdown>{content}</Markdown>);
+    else if (props.item.content_type === "text/markdown"){
+        return(<Markdown>{props.item.content}</Markdown>);
     }
-    else if (content_type === "image/png;base64" || content_type === "image/jpeg;base64")
+    else if (props.item.content_type === "image/png;base64" || props.item.content_type === "image/jpeg;base64")
     {
         //var image = new Image();
         //let decodedString = atob(content);
-        let tag = 'data:' + content_type + "," + content;
-        return (<img width={500} src={tag}/>) // Set to have width of 500 for now
+        //let tag = 'data:' + content_type + "," + content;
+        return (<img width={500} src={process.env.REACT_APP_API_HOSTNAME + "/api/authors/" + props.item.author_id + "/posts/" + props.item.post_id + "/image"}/>) // Set to have width of 500 for now
     }
-    else if (content_type === "image/png;url" || content_type === "image/jpeg;url"){
+    else if (props.item.content_type === "image/png;url" || props.item.content_type === "image/jpeg;url"){
         //change width property or remove it, resizing will be done at the style level.
-        return(<img src={content} width="100px"/>);
+        return(<img src={props.item.content} width="100px"/>);
     }
 }
 
@@ -290,7 +290,7 @@ function PostItem(props) {
         <small class="text-muted">Posted by: {props.item.username}</small>        
         <small class="text-muted">{props.item.date_posted}</small>        
         <hr/>
-        <div>{getContentAsElements(props.item.content_type,props.item.content)}</div>
+        <div>{getContentAsElements(props)}</div>
         
         <div onClick={handleToggleLike}>
         {// Show like icon as liked or not based on if logged in author has liked the post

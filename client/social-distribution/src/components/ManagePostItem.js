@@ -76,25 +76,25 @@ function ManagePostItem(props) {
     }
 
 
-function getContentAsElements(content_type, content){
-    if (content_type === "text/plain"){
-        return(<p>{content}</p>);
+    function getContentAsElements(content_type, content){
+        if (content_type === "text/plain"){
+            return(<p>{content}</p>);
+        }
+        else if (content_type === "text/markdown"){
+            return(<Markdown>{content}</Markdown>);
+        }
+        else if (content_type === "image/png;base64" || content_type === "image/jpeg;base64")
+        {
+            //var image = new Image();
+            //let decodedString = atob(content);
+            //let tag = 'data:' + content_type + "," + content;
+            return (<img width={500} src={process.env.REACT_APP_API_HOSTNAME + "/api/authors/" + props.item.author_id + "/posts/" + props.item.post_id + "/image"}/>) // Set to have width of 500 for now
+        }
+        else if (content_type === "image/png;url" || content_type === "image/jpeg;url"){
+            //change width property or remove it, resizing will be done at the style level.
+            return(<img src={content} width="100px"/>);
+        }
     }
-    else if (content_type === "text/markdown"){
-        return(<Markdown>{content}</Markdown>);
-    }
-    else if (content_type === "image/png;base64" || content_type === "image/jpeg;base64")
-    {
-        //var image = new Image();
-        //let decodedString = atob(content);
-        let tag = 'data:' + content_type + "," + content;
-        return (<img width={500} src={tag}/>) // Set to have width of 500 for now
-    }
-    else if (content_type === "image/png;url" || content_type === "image/jpeg;url"){
-        //change width property or remove it, resizing will be done at the style level.
-        return(<img src={content} width="100px"/>);
-    }
-}
     
 
     return (

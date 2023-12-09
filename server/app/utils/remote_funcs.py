@@ -4,7 +4,7 @@ def get_post(url, author_id, post_id, username, password):
     
     print('requesting', url + "authors/" + author_id + "/posts/" + post_id)
     data = requests.get(url + "authors/" + author_id + "/posts/" + post_id, auth=(username, password))
-    print('response:', data)
+    # print('response:', data)
     data = data.json()
     print('api data:', data)
     
