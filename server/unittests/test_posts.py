@@ -1,99 +1,119 @@
 import unittest
-import json
+from flask import Flask, request, json
 import sys
-sys.path.append("..")
-import sqlite3
+from init_mock_db import init_mock_db
 
-# setting path
+sys.path.append("..")
+
 from app.__init__ import create_app
 
+class TestFlaskRoutes(unittest.TestCase):
 
-class PostsTestcase(unittest.TestCase):
     def setUp(self):
-        self.app = create_app()  # Create a Flask test app
-        self.client = self.app.test_client()  # Create a test client
+        app = create_app()
+        app.config['TESTING'] = True
+        self.maxDiff = None
 
-        connection = sqlite3.connect("database.db") # Populate test data
-        with open('mock_schema.sql') as f:
-            connection.executescript(f.read())
+        init_mock_db()
 
-    def test_get_restricted_users(self):
-        response = self.client.get('/posts/restricted?post_id=post2')
-        data = json.loads(response.get_data(as_text=True))
+        self.app = app.test_client()
+
+    def tearDown(self):
+        # Clean up resources if needed
+        pass
+
+    # Get all the liked posts that the author has liked
+    def test_get_posts_author_liked(self):
+
+        # Mock execute method on the cursor
+        expected = {'items': 
+                    [{'@context': None, 
+                      'author': 
+                        {'displayName': 'maven', 
+                         'github': None, 
+                         'host': 'http://localhost/', 
+                         'id': 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002', 
+                         'profileImage': None, 
+                         'type': 'author', 
+                         'url': 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002'}, 
+                        'object': 'http://localhost/authors/0ca265e4-9572-11ee-b9d1-0242ac120002/posts/77f8c164-957a-11ee-b9d1-0242ac120002', 
+                        'summary': 'maven Likes your post', 
+                        'type': 'Like'}, 
+                        {'@context': None, 
+                         'author': 
+                            {'displayName': 'maven', 
+                             'github': None, 
+                             'host': 'http://localhost/', 
+                             'id': 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002', 
+                             'profileImage': None, 
+                             'type': 'author', 
+                             'url': 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002'}, 
+                            'object': 'http://localhost/authors/0ca265e4-9572-11ee-b9d1-0242ac120002/posts/5f3be750-957a-11ee-b9d1-0242ac120002', 
+                            'summary': 'maven Likes your post', 
+                            'type': 'Like'}
+                        ], 'type': 'liked'}
+
+        # Make a request to the endpoint
+        response = self.app.get('/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002/liked')
+
+        # Assertions
+        data = response.get_json()
+        
         self.assertEqual(response.status_code, 200)
-        # Add more assertions based on the expected behavior of this route
+        self.assertEqual(data["type"], "liked")
+        self.assertEqual(len(data["items"]), 2)
+        self.assertEqual(data, expected)
+        # Add more assertions based on your expected response
+    
+    def test_get_post(self):
+    
+        # Make a request to the endpoint
+        response = self.app.get('/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002/posts/5f3be750-957a-11ee-b9d1-0242ac120002')
 
-    def test_restrict_user(self):
-        data = {
-            'post_id': 'post2',
-            'username': 'techgeek5000'
-        }
-        response = self.client.post('posts/restrict', json=data)
+        # Assertions
         self.assertEqual(response.status_code, 200)
-        # Add more assertions based on the expected behavior of this route
+        data = response.get_json()        
+        
+        self.assertEqual(data["type"], "post")
+        self.assertEqual(data["id"], 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002/posts/5f3be750-957a-11ee-b9d1-0242ac120002')
+        self.assertEqual(data["author"]["id"], 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002')
+        self.assertEqual(data["id"], "http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002/posts/5f3be750-957a-11ee-b9d1-0242ac120002")        
+        self.assertEqual(data["title"], 'New post')        
+        self.assertEqual(data["content"], 'hello world')        
+        self.assertEqual(data["visibility"], 'PUBLIC')
+   
+    def test_get_recent_post(self):        
+        # Make a request to the endpoint
+        response = self.app.get('/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002/posts/')
+        # Assertions
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()        
+        
+        # Check first item
+        self.assertEqual(data["type"], "posts")
+        self.assertEqual(data["items"][0]["id"], 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002/posts/77f8c164-957a-11ee-b9d1-0242ac120002')
+        self.assertEqual(data["items"][0]["author"]["id"], 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002')
+        self.assertEqual(data["items"][0]["title"], "Sentence")
+        self.assertEqual(data["items"][0]["content"], 'The quick brown fox jumps over the lazy dog')
 
-    def test_unrestrict_user(self):
-        response = self.client.delete('posts/unrestrict/post2/techgeek5000')
-        self.assertEqual(response.status_code, 200)
-        # Add more assertions based on the expected behavior of this route
+        # Check second item
+        self.assertEqual(data["type"], "posts")
+        self.assertEqual(data["items"][1]["id"], 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002/posts/5f3be750-957a-11ee-b9d1-0242ac120002')        
+        self.assertEqual(data["items"][1]["author"]["id"], 'http://localhost/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002')
+        self.assertEqual(data["items"][1]["title"], "New post")
+        self.assertEqual(data["items"][1]["content"], 'hello world')
 
-    def test_change_visibility(self):
-        data = {
-            'post_id': 'post1',
-            'visibility': 'public'
-        }
-        response = self.client.post('posts/visibility', json=data)
-        self.assertEqual(response.status_code, 200)
-        # Add more assertions based on the expected behavior of this route
+    def test_get_comments(self):        
+        # Make a request to the endpoint
+        response = self.app.get('/api/authors/0ca265e4-9572-11ee-b9d1-0242ac120002/posts/5f3be750-957a-11ee-b9d1-0242ac120002/comments')
 
-    def test_delete_post(self):
-        data = {
-            'post_id': 'post2'
-        }
-        response = self.client.post('posts/delete', json=data)
+        # Assertions
         self.assertEqual(response.status_code, 200)
-        # Add more assertions based on the expected behavior of this route
-
-    def test_get_my_posts(self):
-        data = {
-            'author_id': 1
-        }
-        response = self.client.post('posts/manage', json=data)
-        self.assertEqual(response.status_code, 200)
-        # Add more assertions based on the expected behavior of this route
-
-    def test_index(self):
-        data = {
-            'author_id': 1
-        }
-        response = self.client.post('posts/', json=data)
-        self.assertEqual(response.status_code, 200)
-        # Add more assertions based on the expected behavior of this route
-
-    def test_new_post(self):
-        data = {
-            'author_id': 1,
-            'title': 'Test Post',
-            'content_type': 'text/plain',
-            'content': 'This is a test post',
-            'visibility': 'public',
-            'image_id': None
-        }
-        response = self.client.post('posts/new/', json=data)
-        self.assertEqual(response.status_code, 200)
-        # Add more assertions based on the expected behavior of this route
-
-    def test_edit_post(self):
-        data = {
-            'title': 'Updated Test Post',
-            'content_type': 'text/plain',
-            'content': 'This is an updated test post',
-            'img_id': None,
-            'visibility': 'public'
-        }
-        response = self.client.post('posts/authors/2/post2/edit/', json=data)
-        self.assertEqual(response.status_code, 200)
-        # Add more assertions based on the expected behavior of this route
+        data = response.get_json()   
+        
+        self.assertEqual(data["items"][0]["author"]["displayName"], "coolguy456")
+        self.assertEqual(data["type"], "comments")
+        self.assertEqual(data["items"][0]["comment"], "Sensational")
 
 if __name__ == '__main__':
     unittest.main()
