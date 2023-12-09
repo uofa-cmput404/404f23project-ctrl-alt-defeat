@@ -162,13 +162,13 @@ pip3 install -r requirements.txt
 ## Unit Tests
 How to run unit tests
 
-1.) Install all packages in requirements.txt
+1. Install all packages in requirements.txt
 
-2.) Initialize a postgres database in your local machine
+2. Initialize a postgres database in your local machine
 
-3.) Create a .env file under the /server directory
+3. Create a .env file under the /server directory
 
-4.) Add these two variables inside them
+4. Add these two variables inside them
 - DATABASE_URL
     - The URL of the database you've initialized
         - Sample: "http://hueygonzales:password@localhost:5432/test_db"
@@ -176,7 +176,7 @@ How to run unit tests
     - URL of flask server
         - Sample: "http://localhost:5000"
 
-5.) Run unit tests by switching to the /server/unittests/ directory
+5. Run unit tests by switching to the /server/unittests/ directory
 
 sample run:
 ```python3 test_authors.py```
