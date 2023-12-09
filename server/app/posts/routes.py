@@ -690,7 +690,7 @@ def get_image(author_id, post_id):
 
         image_bytes = io.BytesIO(base64.b64decode(content))
         #final_message = f"data:{content_type},{content}"
-        final_message = send_file(image_bytes, mimetype=content_type[:-7], max_age=3600)
+        final_message = send_file(image_bytes, mimetype=content_type[:-7], max_age=0)
     except HTTPException as e:
         final_message = str(e)
         print(final_message)
