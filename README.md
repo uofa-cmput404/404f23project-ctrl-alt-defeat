@@ -4,7 +4,7 @@ CMPUT 404 Project: Social Distribution
 
 Demonstration video:
 
-[![IMAGE ALT TEXT](https://img.youtube.com/vi/sPBAbwMJKl8/0.jpg)]([https://www.youtube.com/watch?v=sPBAbwMJKl8])
+[![IMAGE ALT TEXT](https://img.youtube.com/vi/sPBAbwMJKl8/0.jpg)](https://www.youtube.com/watch?v=sPBAbwMJKl8)
 
 [Project requirements](https://github.com/uofa-cmput404/project-socialdistribution/blob/master/project.org) 
 
